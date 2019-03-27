@@ -7,7 +7,7 @@ defmodule Sweetroll2.Application do
 
   def start(_type, _args) do
     children = [
-      # {Sweetroll2.Worker, arg},
+      {Sweetroll2.Repo, []}
     ]
 
     opts = [strategy: :one_for_one, name: Sweetroll2.Supervisor]
