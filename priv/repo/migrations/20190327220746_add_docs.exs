@@ -7,6 +7,7 @@ defmodule Sweetroll2.Repo.Migrations.AddDocs do
       add :type, :text, null: false
       add :deleted, :boolean, null: false, default: false
       add :published, :utc_datetime
+      add :updated, :utc_datetime
       add :acl, {:array, :text}, null: false, default: "{*}"
       add :props, :map, null: false
       add :children, {:array, :map}
@@ -18,6 +19,7 @@ defmodule Sweetroll2.Repo.Migrations.AddDocs do
 
     create index("docs", ["url text_pattern_ops"], where: "ascii(url) = 47")
     create index("docs", [:published], where: "ascii(url) = 47")
+    create index("docs", [:updated], where: "ascii(url) = 47")
     create index("docs", [:tsv], using: "GIN")
 
     execute "
