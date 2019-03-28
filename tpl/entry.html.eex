@@ -1,0 +1,8 @@
+<h1 class="p-name">
+	<%= content_tag :a, [href: @entry.url, class: "u-url"], do: @entry.props["name"] %>
+</h1>
+<div class="e-content">
+	<%= content_rendered @entry.props["content"] %>
+</div>
+<%= time_permalink @entry, rel: "bookmark" %>
+<%= icon name: "star", class: [:meme] %>

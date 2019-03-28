@@ -24,6 +24,7 @@ defmodule Sweetroll2.MixProject do
       {:jason, "~> 1.1"},
       {:earmark, "~> 1.3"},
       {:phoenix_html, "~> 2.13"},
+      {:taggart, "~> 0.1.5"},
       {:microformats2, "~> 0.2"},
 
       # DB

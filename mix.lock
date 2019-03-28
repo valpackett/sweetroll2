@@ -25,5 +25,6 @@
   "postgrex": {:hex, :postgrex, "0.14.1", "63247d4a5ad6b9de57a0bac5d807e1c32d41e39c04b8a4156a26c63bcd8a2e49", [:mix], [{:connection, "~> 1.0", [hex: :connection, repo: "hexpm", optional: false]}, {:db_connection, "~> 2.0", [hex: :db_connection, repo: "hexpm", optional: false]}, {:decimal, "~> 1.5", [hex: :decimal, repo: "hexpm", optional: false]}, {:jason, "~> 1.0", [hex: :jason, repo: "hexpm", optional: true]}], "hexpm"},
   "ranch": {:hex, :ranch, "1.7.1", "6b1fab51b49196860b733a49c07604465a47bdb78aa10c1c16a3d199f7f8c881", [:rebar3], [], "hexpm"},
   "sse": {:hex, :sse, "0.4.0", "f17affacbc4618bac07590eec7bff849aa27d1f71bb3d41da3fd3cb255d16910", [:mix], [{:event_bus, ">= 1.6.0", [hex: :event_bus, repo: "hexpm", optional: false]}, {:plug, ">= 1.4.5", [hex: :plug, repo: "hexpm", optional: false]}], "hexpm"},
+  "taggart": {:hex, :taggart, "0.1.5", "c0e2a86a08ccebccae7a7d6ae4db1aba89689d1bf1f61d07e88d4f36839cfc44", [:mix], [{:floki, "~> 0.17", [hex: :floki, repo: "hexpm", optional: true]}, {:phoenix_html, "~> 2.10", [hex: :phoenix_html, repo: "hexpm", optional: false]}], "hexpm"},
   "telemetry": {:hex, :telemetry, "0.3.0", "099a7f3ce31e4780f971b4630a3c22ec66d22208bc090fe33a2a3a6a67754a73", [:rebar3], [], "hexpm"},
 }

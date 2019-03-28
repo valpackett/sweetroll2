@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html lang="en">
+	<%= head title: "entry" %>
+	<body class="h-entry">
+		<article>
+			<%= entry entry: @entry %>
+		</article>
+	</body>
+</html>
