@@ -24,9 +24,11 @@ defmodule Sweetroll2.Repo.Migrations.AddDocs do
       CREATE FUNCTION docs_set_tsv() RETURNS trigger AS $$
       BEGIN
         NEW.tsv :=
-           setweight(props->'name', 'A')
-        || setweight(coalesce(props->'summary'->>'markdown', props->'summary'->>'text', props->'summary'->>'html', props->>'summary'), 'B')
-        || setweight(coalesce(props->'content'->>'markdown', props->'content'->>'text', props->'content'->>'html', props->>'content'), 'B')
+           setweight(to_tsvector(NEW.props->>'name'), 'A')
+        || setweight(to_tsvector(coalesce(NEW.props->'summary'->>'markdown',
+            NEW.props->'summary'->>'text', NEW.props->'summary'->>'html', NEW.props->>'summary')), 'B')
+        || setweight(to_tsvector(coalesce(NEW.props->'content'->>'markdown',
+            NEW.props->'content'->>'text', NEW.props->'content'->>'html', NEW.props->>'content')), 'B')
         ;
         RETURN NEW;
       END

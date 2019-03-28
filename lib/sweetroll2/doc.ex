@@ -8,7 +8,7 @@ defmodule Sweetroll2.Doc do
     field :type, :string
     field :deleted, :boolean
     field :published, :utc_datetime
-    field :acl, {:array, :text}
+    field :acl, {:array, :string}
     field :props, :map
     field :children, {:array, :map}
   end
@@ -21,6 +21,7 @@ defmodule Sweetroll2.Doc do
 
     struct
     |> cast(params, [:props | @real_fields])
+    |> validate_required([:url, :type, :published])
   end
 
   def to_map(%Sweetroll2.Doc{
