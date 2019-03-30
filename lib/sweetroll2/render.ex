@@ -58,4 +58,11 @@ defmodule Sweetroll2.Render do
       t -> Phoenix.HTML.Format.text_to_html(to_string(t))
     end
   end
+
+  def as_one(x) when is_list(x), do: List.first(x)
+  def as_one(x), do: x
+
+  def as_many(xs) when is_list(xs), do: xs
+  def as_many(x), do: [x]
+
 end
