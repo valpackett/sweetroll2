@@ -6,7 +6,7 @@ defmodule Sweetroll2.Serve do
   use Plug.Router
 
   if Mix.env() == :dev do
-    use Plug.Debugger, otp_app: :my_app
+    use Plug.Debugger, otp_app: :sweetroll2
   end
 
   use Plug.ErrorHandler

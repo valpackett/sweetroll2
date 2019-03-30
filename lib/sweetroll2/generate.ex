@@ -2,7 +2,7 @@ defmodule Sweetroll2.Generate do
   @concurrency 5
   @default_dir "out"
 
-  alias Sweetroll2.Render
+  alias Sweetroll2.{Repo, Render}
 
   def dir(), do: System.get_env("OUT_DIR") || @default_dir
 
@@ -35,5 +35,13 @@ defmodule Sweetroll2.Generate do
 
   def gen_all_allowed_pages(preload) do
     gen_allowed_pages(Map.keys(preload), preload)
+  end
+
+  def perform(multi = %Ecto.Multi{}, data = %{"type" => "generate", "urls" => urls}) do
+    preload = Repo.docs_all()
+    gen_allowed_pages(urls, preload)
+
+    multi
+    |> Repo.transaction()
   end
 end
