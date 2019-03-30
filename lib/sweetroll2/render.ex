@@ -18,6 +18,13 @@ defmodule Sweetroll2.Render do
   deftpl :entry, "tpl/entry.html.eex"
   deftpl :page_entry, "tpl/page_entry.html.eex"
 
+  def render_doc(doc: doc, preload: preload) do
+    cond do
+      doc.type == "entry" || doc.type == "review" -> page_entry(entry: doc, preload: preload)
+      true -> {:unknown_type, doc.type}
+    end
+  end
+
   def asset(url) do
     "/dist/#{url}"
   end
@@ -64,5 +71,4 @@ defmodule Sweetroll2.Render do
 
   def as_many(xs) when is_list(xs), do: xs
   def as_many(x), do: [x]
-
 end

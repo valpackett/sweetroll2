@@ -24,3 +24,6 @@ sweetroll2-*.tar
 
 # Lang server
 .elixir_ls
+
+# Default static generator output folder
+/out/

@@ -1,5 +1,6 @@
 defmodule Sweetroll2.Repo do
   import Ecto.Query
+
   use Ecto.Repo,
     otp_app: :sweetroll2,
     adapter: Ecto.Adapters.Postgres
