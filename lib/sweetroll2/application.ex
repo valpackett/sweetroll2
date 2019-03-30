@@ -6,8 +6,16 @@ defmodule Sweetroll2.Application do
   use Application
 
   def start(_type, _args) do
+    server_opts =
+      case {System.get_env("SERVER_SOCKET"), System.get_env("SERVER_PORT")} do
+        {nil, nil} -> [port: 6969]
+        {nil, port} -> [port: String.to_integer(port)]
+        {sock, _} -> [ip: {:local, sock}, port: 0]
+      end
+
     children = [
-      {Sweetroll2.Repo, []}
+      {Sweetroll2.Repo, []},
+      Plug.Cowboy.child_spec(scheme: :http, plug: Sweetroll2.Serve, options: server_opts)
     ]
 
     opts = [strategy: :one_for_one, name: Sweetroll2.Supervisor]
