@@ -5,7 +5,7 @@ defmodule Conv do
     props
     |> Enum.map(&simplify/1)
     |> Enum.into(%{})
-    |> Map.merge(%{type: List.first(type || [])})
+    |> Map.merge(%{type: String.replace_prefix(List.first(type || []), "h-", "")})
   end
   def simplify(map) when is_map(map) do
     map
@@ -27,7 +27,7 @@ defmodule Conv do
               |> Enum.map(&simplify/1)
               |> Enum.into(%{})
               |> Map.merge(%{
-                type: List.first(type),
+                type: String.replace_prefix(List.first(type), "h-", ""),
                 url: String.replace_leading(List.first(props["url"]), host, ""),
                 acl: acl,
                 deleted: deleted,
