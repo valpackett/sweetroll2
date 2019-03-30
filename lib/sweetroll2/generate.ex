@@ -14,26 +14,19 @@ defmodule Sweetroll2.Generate do
   end
 
   def gen_page(url, preload) do
-    {:safe, data} = Sweetroll2.Render.render_doc(doc: preload[url], preload: preload)
     path_dir = Path.join(dir(), url)
-    File.mkdir_p!(path_dir)
-    File.write!(Path.join(path_dir, "index.html"), data)
+
+    with {:safe, data} <- Sweetroll2.Render.render_doc(doc: preload[url], preload: preload),
+         :ok <- File.mkdir_p(path_dir),
+         :ok <- File.write(Path.join(path_dir, "index.html"), data),
+         do: {:ok, url},
+         else: (e -> {:error, url, e})
   end
 
   def gen_allowed_pages(urls, preload) do
     urls
     |> Stream.filter(fn url -> can_generate(url, preload) == :ok end)
-    |> Task.async_stream(
-      fn url ->
-        try do
-          gen_page(url, preload)
-          {:ok, url}
-        rescue
-          e -> {:err, url, e}
-        end
-      end,
-      max_concurrency: @concurrency
-    )
+    |> Task.async_stream(fn url -> gen_page(url, preload) end, max_concurrency: @concurrency)
     |> Stream.map(fn {:ok, x} -> x end)
     |> Enum.group_by(fn x -> elem(x, 0) end)
   end

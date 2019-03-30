@@ -34,7 +34,7 @@ defmodule Sweetroll2.Doc do
     |> validate_required([:url, :type, :published])
   end
 
-  def to_map(%Sweetroll2.Doc{
+  def to_map(%__MODULE__{
         props: props,
         type: type,
         deleted: deleted,

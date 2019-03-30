@@ -21,8 +21,10 @@ defmodule Sweetroll2.Render do
   def render_doc(doc: doc, preload: preload) do
     cond do
       doc.type == "entry" || doc.type == "review" -> page_entry(entry: doc, preload: preload)
-      true -> {:unknown_type, doc.type}
+      true -> {:error, :unknown_type, doc.type}
     end
+  rescue
+    e -> {:error, e}
   end
 
   def asset(url) do
