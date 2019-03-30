@@ -9,6 +9,7 @@ defmodule Sweetroll2.Render.Tpl do
 end
 
 defmodule Sweetroll2.Render do
+  alias Sweetroll2.Doc
   import Sweetroll2.Render.Tpl
   import Phoenix.HTML.Tag
   import Phoenix.HTML
@@ -47,7 +48,7 @@ defmodule Sweetroll2.Render do
     end
   end
 
-  def time_permalink(%Sweetroll2.Doc{published: published, url: url}, rel: rel) do
+  def time_permalink(%Doc{published: published, url: url}, rel: rel) do
     use Taggart.HTML
 
     if published do
