@@ -15,6 +15,7 @@ defmodule Sweetroll2.Application do
 
     children = [
       {Sweetroll2.Repo, []},
+      {Sweetroll2.Queue, repo: Sweetroll2.Repo, max_demand: 69},
       Plug.Cowboy.child_spec(scheme: :http, plug: Sweetroll2.Serve, options: server_opts)
     ]
 

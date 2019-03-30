@@ -13,7 +13,7 @@ defmodule Sweetroll2.MixProject do
 
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:logger, :httpotion],
       mod: {Sweetroll2.Application, []}
     ]
   end
@@ -25,7 +25,10 @@ defmodule Sweetroll2.MixProject do
       {:earmark, "~> 1.3"},
       {:phoenix_html, "~> 2.13"},
       {:taggart, "~> 0.1.5"},
-      {:microformats2, "~> 0.2"},
+      {:html5ever, "~> 0.7.0"},
+      # {:microformats2, "~> 0.2"},
+      {:floki, git: "https://github.com/myfreeweb/floki", override: true},
+      {:microformats2, git: "https://github.com/myfreeweb/microformats2-elixir"},
 
       # DB
       {:ecto_sql, "~> 3.0"},
