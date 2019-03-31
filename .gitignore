@@ -27,3 +27,7 @@ sweetroll2-*.tar
 
 # Default static generator output folder
 /out/
+
+# Compressed assets
+/priv/static/*.br
+/priv/static/*.gz

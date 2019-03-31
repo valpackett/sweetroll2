@@ -14,6 +14,14 @@ defmodule Sweetroll2.Serve do
   plug Plug.Logger
   plug Plug.RequestId
   plug Plug.Head
+
+  plug Plug.Static,
+    at: "/as",
+    from: :sweetroll2,
+    cache_control_for_vsn_requests: "public, max-age=31536000, immutable",
+    gzip: true,
+    brotli: true
+
   plug Plug.MethodOverride
   plug :match
   plug Plug.Parsers, parsers: @parsers, json_decoder: Jason

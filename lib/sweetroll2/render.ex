@@ -29,7 +29,7 @@ defmodule Sweetroll2.Render do
   end
 
   def asset(url) do
-    "/dist/#{url}"
+    "/as/#{url}"
   end
 
   def icon(data) do
