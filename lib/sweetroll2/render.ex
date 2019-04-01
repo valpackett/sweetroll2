@@ -16,6 +16,7 @@ defmodule Sweetroll2.Render do
   require EEx
 
   deftpl :head, "tpl/head.html.eex"
+  deftpl :header, "tpl/header.html.eex"
   deftpl :entry, "tpl/entry.html.eex"
   deftpl :page_entry, "tpl/page_entry.html.eex"
 
@@ -60,6 +61,10 @@ defmodule Sweetroll2.Render do
     end
   end
 
+  def doc_title(doc) do
+    doc.props["name"] || DateTime.to_iso8601(doc.published)
+  end
+
   def content_rendered(cont) do
     case cont do
       %{"markdown" => md} -> raw(Earmark.as_html!(md))
@@ -67,6 +72,22 @@ defmodule Sweetroll2.Render do
       %{"text" => t} -> Phoenix.HTML.Format.text_to_html(t)
       t -> Phoenix.HTML.Format.text_to_html(to_string(t))
     end
+  end
+
+  def feeds(preload) do
+    Map.keys(preload)
+    |> Stream.filter(fn url ->
+      String.starts_with?(url, "/") && preload[url].type == "x-dynamic-feed"
+    end)
+    |> Enum.map(fn url -> preload[url] end)
+  end
+
+  def home(preload) do
+    preload["/"] ||
+      %Doc{
+        url: "/",
+        props: %{"name" => "Create an entry at the root URL (/)!"}
+      }
   end
 
   def as_one(x) when is_list(x), do: List.first(x)

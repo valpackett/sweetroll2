@@ -1,9 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-	<%= head title: "entry" %>
+	<%= head title: "#{doc_title(@entry)} / #{home(@preload).props["name"]}" %>
 	<body class="h-entry">
-		<article>
-			<%= entry entry: @entry %>
-		</article>
+		<%= header preload: @preload, cur_url: @entry.url %>
+		<main>
+			<article>
+				<%= entry entry: @entry %>
+			</article>
+		</main>
+		<footer>
+			<div class="h-card p-author">
+				<a href="https://github.com/myfreeweb" rel="me" title="myfreeweb on GitHub"><%= icon name: "octoface" %>myfreeweb</a>
+			</div>
+		</footer>
 	</body>
 </html>
