@@ -1,8 +1,42 @@
-<h1 class="p-name">
-	<%= content_tag :a, [href: @entry.url, class: "u-url"], do: @entry.props["name"] %>
-</h1>
+<%= if @entry.props["name"] do %>
+	<h1 class="p-name">
+		<%= content_tag :a, [href: @entry.url, class: "u-url"], do: @entry.props["name"] %>
+	</h1>
+<% end %>
+
 <div class="e-content">
 	<%= content_rendered @entry.props["content"] %>
 </div>
-<%= time_permalink @entry, rel: "bookmark" %>
-<%= icon name: "star", class: [:meme] %>
+
+<div class="post-info">
+	posted
+	<%= time_permalink @entry, rel: "bookmark" %>
+
+	in
+	<%= for feed <- Enum.filter(Doc.feeds(@preload), fn f -> Doc.in_feed?(@entry, f) end) do %>
+		<%= content_tag :a, href: feed.url, rel: "feed", type: "text/html", class: (if feed.url == @cur_url, do: "current", else: "") do %>
+			<%= as_one feed.props["name"] %>
+		<% end %>
+	<% end %>
+
+	<%= if @entry.props["client-id"] do %>
+		using
+		<%= client_id @entry.props["client-id"] %>
+	<% end %>
+
+	<%= if @entry.updated do %>
+		and updated
+		<%= content_tag :time, datetime: DateTime.to_iso8601(@entry.updated), class: "dt-updated" do %>
+			<%= DateTime.to_iso8601 @entry.updated %>
+		<% end %>
+	<% end %>
+
+	<%= if @entry.props["syndication"] do %>
+		/ also on:
+		<%= for synd <- as_many(@entry.props["syndication"]) do %>
+			<%= content_tag :a, href: synd, class: "u-syndication" do %>
+				<%= syndication_name synd %>
+			<% end %>
+		<% end %>
+	<% end %>
+</div>

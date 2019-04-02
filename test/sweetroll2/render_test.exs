@@ -5,7 +5,7 @@ defmodule Sweetroll2.RenderTest do
   doctest Sweetroll2.Render
 
   describe "page_entry" do
-    test "outputs a microformatted page" do
+    test "outputs entries" do
       pubdate = DateTime.utc_now()
 
       %{props: props, html: html} =

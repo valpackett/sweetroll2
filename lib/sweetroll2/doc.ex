@@ -1,6 +1,7 @@
 defmodule Sweetroll2.Doc do
   use Ecto.Schema
   import Ecto.Changeset
+  alias Sweetroll2.Convert
 
   @primary_key {:url, :string, []}
 
@@ -50,5 +51,28 @@ defmodule Sweetroll2.Doc do
     |> Map.put("updated", updated)
     |> Map.put("acl", acl)
     |> Map.put("children", children)
+  end
+
+  def matches_filter?(doc = %__MODULE__{}, filter) do
+    Enum.all?(filter, fn {k, v} ->
+      docv = Convert.as_many(doc.props[k])
+      Enum.all?(Convert.as_many(v), fn x -> Enum.member?(docv, x) end)
+    end)
+  end
+
+  def matches_filters?(doc = %__MODULE__{}, filters) do
+    Enum.any?(filters, fn f -> matches_filter?(doc, f) end)
+  end
+
+  def in_feed?(doc = %__MODULE__{}, feed = %__MODULE__{}) do
+    matches_filters?(doc, Convert.as_many(feed.props["filter"]))
+  end
+
+  def feeds(preload) do
+    Map.keys(preload)
+    |> Stream.filter(fn url ->
+      String.starts_with?(url, "/") && preload[url].type == "x-dynamic-feed"
+    end)
+    |> Enum.map(fn url -> preload[url] end)
   end
 end

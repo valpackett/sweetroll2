@@ -5,7 +5,7 @@
 		<%= header preload: @preload, cur_url: @entry.url %>
 		<main>
 			<article>
-				<%= entry entry: @entry %>
+				<%= entry preload: @preload, cur_url: @entry.url, entry: @entry %>
 			</article>
 		</main>
 		<footer>

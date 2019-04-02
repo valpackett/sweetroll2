@@ -10,6 +10,7 @@ end
 
 defmodule Sweetroll2.Render do
   alias Sweetroll2.Doc
+  import Sweetroll2.Convert
   import Sweetroll2.Render.Tpl
   import Phoenix.HTML.Tag
   import Phoenix.HTML
@@ -61,6 +62,38 @@ defmodule Sweetroll2.Render do
     end
   end
 
+  def trim_url_stuff(url) do
+    url
+    |> String.replace_leading("http://", "")
+    |> String.replace_leading("https://", "")
+    |> String.replace_trailing("/", "")
+  end
+
+  def client_id(clid) do
+    use Taggart.HTML
+
+    lnk = as_one(clid)
+
+    a href: lnk, class: "u-client-id" do
+      trim_url_stuff(lnk)
+    end
+  end
+
+  def syndication_name(url) do
+    cond do
+      String.contains?(url, "indieweb.xyz") -> "Indieweb.xyz"
+      String.contains?(url, "news.indieweb.org") -> "IndieNews"
+      String.contains?(url, "lobste.rs") -> "lobste.rs"
+      String.contains?(url, "news.ycombinator.com") -> "HN"
+      String.contains?(url, "twitter.com") -> "Twitter"
+      String.contains?(url, "tumblr.com") -> "Tumblr"
+      String.contains?(url, "facebook.com") -> "Facebook"
+      String.contains?(url, "instagram.com") -> "Instagram"
+      String.contains?(url, "swarmapp.com") -> "Swarm"
+      true -> trim_url_stuff(url)
+    end
+  end
+
   def doc_title(doc) do
     doc.props["name"] || DateTime.to_iso8601(doc.published)
   end
@@ -74,14 +107,6 @@ defmodule Sweetroll2.Render do
     end
   end
 
-  def feeds(preload) do
-    Map.keys(preload)
-    |> Stream.filter(fn url ->
-      String.starts_with?(url, "/") && preload[url].type == "x-dynamic-feed"
-    end)
-    |> Enum.map(fn url -> preload[url] end)
-  end
-
   def home(preload) do
     preload["/"] ||
       %Doc{
@@ -89,10 +114,4 @@ defmodule Sweetroll2.Render do
         props: %{"name" => "Create an entry at the root URL (/)!"}
       }
   end
-
-  def as_one(x) when is_list(x), do: List.first(x)
-  def as_one(x), do: x
-
-  def as_many(xs) when is_list(xs), do: xs
-  def as_many(x), do: [x]
 end
