@@ -4,8 +4,14 @@
 	</h1>
 <% end %>
 
+<% content_tree = safe_to_string content_rendered @entry.props["content"] %>
+
+<%= for photo <- exclude_inlined_media(content_tree, "photo", as_many(@entry.props["photo"])) do %>
+	<%= photo_rendered photo %>
+<% end %>
+
 <div class="e-content">
-	<%= content_rendered @entry.props["content"] %>
+	<%= {:safe, inline_media_into_content(content_tree, photo: as_many(@entry.props["photo"]), video: as_many(@entry.props["video"]), audio: as_many(@entry.props["audio"])) } %>
 </div>
 
 <div class="post-info">

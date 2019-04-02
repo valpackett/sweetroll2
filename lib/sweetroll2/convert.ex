@@ -2,6 +2,7 @@ defmodule Sweetroll2.Convert do
   def as_one(x) when is_list(x), do: List.first(x)
   def as_one(x), do: x
 
+  def as_many(nil), do: []
   def as_many(xs) when is_list(xs), do: xs
   def as_many(x), do: [x]
 

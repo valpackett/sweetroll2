@@ -107,6 +107,124 @@ defmodule Sweetroll2.Render do
     end
   end
 
+  def responsive_container(media, do: body) when is_map(media) do
+    use Taggart.HTML
+
+    is_resp = is_integer(media["width"]) && is_integer(media["height"])
+    cls = if is_resp, do: "responsive-container", else: ""
+
+    col =
+      case as_one(
+             Enum.sort_by(media["palette"] || [], fn {k, v} ->
+               if is_map(v), do: v["population"], else: 0
+             end)
+           ) do
+        {_, %{"color" => c}} -> c
+        _ -> nil
+      end
+
+    prv = media["tiny_preview"]
+
+    bcg =
+      if col || prv,
+        do: "background:#{col || ""} #{if prv, do: "url('#{prv}')", else: ""};",
+        else: ""
+
+    pad =
+      if is_resp,
+        do: "padding-bottom:#{media["height"] / media["width"] * 100}%",
+        else: ""
+
+    div(class: cls, style: "#{bcg}#{pad}", do: body)
+  end
+
+  def responsive_container(_, do: body), do: body
+
+  def photo_rendered(photo) do
+    use Taggart.HTML
+
+    figure class: "entry-photo" do
+      responsive_container(photo) do
+        cond do
+          is_bitstring(photo) ->
+            img(class: "u-photo", src: photo, alt: "")
+
+          is_map(photo) && photo["source"] ->
+            srcs = as_many(photo["source"])
+
+            default =
+              srcs
+              |> Stream.filter(&is_map/1)
+              |> Enum.sort_by(fn x -> {x["default"] || false, x["type"] != "image/jpeg"} end)
+              |> as_one
+
+            content_tag :picture do
+              taggart do
+                srcs
+                |> Stream.filter(fn src -> src != default && !src["original"] end)
+                |> Enum.map(fn src ->
+                  source(
+                    srcset: src["srcset"] || src["src"],
+                    media: src["media"],
+                    sizes: src["sizes"],
+                    type: src["type"]
+                  )
+                end)
+
+                img(class: "u-photo", src: default["src"], alt: photo["alt"] || "")
+              end
+            end
+
+          is_map(photo) && is_bitstring(photo["value"]) ->
+            img(class: "u-photo", src: photo["value"], alt: photo["alt"] || "")
+
+          true ->
+            {:safe, "<!-- no img -->"}
+        end
+      end
+    end
+  end
+
+  defp inline_media_into_tag({"photo-here", attrs, _}, photo: photos, video: _, audio: _) do
+    {_, id} = Enum.find(attrs, fn {k, v} -> k == "id" end)
+    Floki.parse(safe_to_string(photo_rendered(Enum.find(photos, fn p -> p["id"] == id end))))
+  end
+
+  defp inline_media_into_tag({t, a, c}, photo: photos, video: videos, audio: audios)
+       when is_list(c) do
+    {t, a,
+     Enum.map(c, fn child ->
+       inline_media_into_tag(child, photo: photos, video: videos, audio: audios)
+     end)}
+  end
+
+  defp inline_media_into_tag(non_tag, photo: _, video: _, audio: _), do: non_tag
+
+  def inline_media_into_content(html, media) when is_bitstring(html),
+    do: inline_media_into_content(Floki.parse(html), media)
+
+  def inline_media_into_content(tree, photo: photos, video: videos, audio: audios) do
+    as_many(tree)
+    |> Enum.map(fn t ->
+      inline_media_into_tag(t, photo: photos, video: videos, audio: audios)
+    end)
+    |> Floki.raw_html()
+  end
+
+  def exclude_inlined_media(html, media_name, media_items) when is_bitstring(html),
+    do: exclude_inlined_media(Floki.parse(html), media_name, media_items)
+
+  def exclude_inlined_media(tree, media_name, media_items) do
+    used_ids =
+      Floki.find(tree, "#{media_name}-here")
+      |> Enum.map(fn {t, a, c} ->
+        {_, id} = Enum.find(a, fn {k, v} -> k == "id" end)
+        id
+      end)
+
+    Enum.filter(media_items, fn i -> not Enum.member?(used_ids, i["id"]) end)
+  end
+
   def home(preload) do
     preload["/"] ||
       %Doc{
