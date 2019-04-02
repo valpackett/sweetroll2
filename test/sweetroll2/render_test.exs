@@ -17,14 +17,15 @@ defmodule Sweetroll2.RenderTest do
               "name" => "Hello World!",
               "content" => %{"markdown" => "*hi* <em>hello</em>"}
             }
-          }
+          },
+          preload: %{}
         )
 
       IO.puts(html)
-      assert Enum.uniq(props[:url]) == ["http://localhost/hello"]
-      assert props[:name] == ["Hello World!"]
-      assert props[:content] == [%{html: "<p><em>hi</em><em>hello</em></p>", text: "hihello"}]
-      assert props[:published] == [DateTime.to_iso8601(pubdate)]
+      assert Enum.uniq(props["url"]) == ["http://localhost/hello"]
+      assert props["name"] == ["Hello World!"]
+      assert props["content"] == [%{html: "<p><em>hi</em><em>hello</em></p>", text: "hihello"}]
+      assert props["published"] == [DateTime.to_iso8601(pubdate)]
     end
   end
 
@@ -55,7 +56,7 @@ defmodule Sweetroll2.RenderTest do
   end
 
   defp parse_rendered_entry(args) do
-    {:safe, html} = page_entry(args)
+    html = Phoenix.HTML.safe_to_string(page_entry(args))
 
     %{items: [%{type: ["h-entry"], properties: props}], rels: rels} =
       Microformats2.parse(html, "http://localhost")
