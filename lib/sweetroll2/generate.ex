@@ -15,10 +15,16 @@ defmodule Sweetroll2.Generate do
     end
   end
 
+  defp render_doc(opts) do
+    Render.render_doc(opts)
+  rescue
+    e -> {:error, e}
+  end
+
   def gen_page(url, preload) do
     path_dir = Path.join(dir(), url)
 
-    with {:safe, data} <- Render.render_doc(doc: preload[url], preload: preload),
+    with {:safe, data} <- render_doc(doc: preload[url], preload: preload),
          :ok <- File.mkdir_p(path_dir),
          :ok <- File.write(Path.join(path_dir, "index.html"), data),
          do: {:ok, url},
