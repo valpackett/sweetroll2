@@ -115,7 +115,7 @@ defmodule Sweetroll2.Render do
 
     col =
       case as_one(
-             Enum.sort_by(media["palette"] || [], fn {k, v} ->
+             Enum.sort_by(media["palette"] || [], fn {_, v} ->
                if is_map(v), do: v["population"], else: 0
              end)
            ) do
@@ -186,7 +186,7 @@ defmodule Sweetroll2.Render do
   end
 
   defp inline_media_into_tag({"photo-here", attrs, _}, photo: photos, video: _, audio: _) do
-    {_, id} = Enum.find(attrs, fn {k, v} -> k == "id" end)
+    {_, id} = Enum.find(attrs, fn {k, _} -> k == "id" end)
     Floki.parse(safe_to_string(photo_rendered(Enum.find(photos, fn p -> p["id"] == id end))))
   end
 
@@ -217,8 +217,8 @@ defmodule Sweetroll2.Render do
   def exclude_inlined_media(tree, media_name, media_items) do
     used_ids =
       Floki.find(tree, "#{media_name}-here")
-      |> Enum.map(fn {t, a, c} ->
-        {_, id} = Enum.find(a, fn {k, v} -> k == "id" end)
+      |> Enum.map(fn {_, a, _} ->
+        {_, id} = Enum.find(a, fn {k, _} -> k == "id" end)
         id
       end)
 
