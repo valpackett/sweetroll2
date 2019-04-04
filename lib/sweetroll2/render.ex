@@ -19,6 +19,7 @@ defmodule Sweetroll2.Render do
   deftpl :head, "tpl/head.html.eex"
   deftpl :header, "tpl/header.html.eex"
   deftpl :entry, "tpl/entry.html.eex"
+  deftpl :cite, "tpl/cite.html.eex"
   deftpl :page_entry, "tpl/page_entry.html.eex"
 
   def render_doc(doc: doc, preload: preload) do
@@ -222,6 +223,26 @@ defmodule Sweetroll2.Render do
 
     Enum.filter(media_items, fn i -> not Enum.member?(used_ids, i["id"]) end)
   end
+
+  def to_cite(url, preload: preload) when is_bitstring(url) do
+    if preload[url] do
+      preload[url] |> Doc.to_map() |> simplify
+    else
+      url
+    end
+  end
+
+  def to_cite(entry, preload: _) when is_map(entry), do: simplify(entry)
+
+  def author(author) when is_map(author) do
+    use Taggart.HTML
+
+    a href: author["url"], class: "u-author" do
+      author["name"] || author["url"]
+    end
+  end
+
+  def author(author) when is_bitstring(author), do: author(%{"url" => author})
 
   def home(preload) do
     preload["/"] ||

@@ -37,6 +37,7 @@ defmodule Sweetroll2.Doc do
 
   def to_map(%__MODULE__{
         props: props,
+        url: url,
         type: type,
         deleted: deleted,
         published: published,
@@ -45,6 +46,7 @@ defmodule Sweetroll2.Doc do
         children: children
       }) do
     props
+    |> Map.put("url", url)
     |> Map.put("type", type)
     |> Map.put("deleted", deleted)
     |> Map.put("published", published)

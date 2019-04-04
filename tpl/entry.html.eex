@@ -1,3 +1,13 @@
+<%= if length(as_many(@entry.props["in-reply-to"])) do %>
+	<%= icon name: "reply", class: ["entry-type-icon", "entry-type-icon-reply"], title: "In reply to" %>
+<% end %>
+
+<%= for irt <- Stream.map(as_many(@entry.props["in-reply-to"]), fn e -> to_cite(e, preload: @preload) end) do %>
+	<div class="entry-ctx entry-txt">
+		<%= cite cite: irt, class: "u-in-reply-to" %>
+	</div>
+<% end %>
+
 <%= if @entry.props["name"] do %>
 	<h1 class="p-name entry-txt">
 		<%= content_tag :a, [href: @entry.url, class: "u-url"], do: @entry.props["name"] %>

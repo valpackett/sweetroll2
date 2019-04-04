@@ -1,0 +1,24 @@
+<%= if is_bitstring(@cite) do %>
+	<%= content_tag :a, href: @cite, class: "h-cite #{@class}" do %>
+		<%= @cite %>
+	<% end %>
+<% else %>
+
+	<%= if @cite["content"] do %>
+		<blockquote class="e-content">
+			<%= content_rendered as_one @cite["content"] %>
+		</blockquote>
+	<% end %>
+
+	<div class="cite-info">
+		—
+		<%= @cite["author"] |> as_many |> Stream.map(&author/1) |> Enum.intersperse(", ") %>
+		on
+		<%= content_tag :a, href: as_one(@cite["url"]), class: "h-cite #{@class}" do %>
+			<%= content_tag :time, datetime: @cite["published"], class: "dt-published" do %>
+				<%= @cite["published"] %>
+			<% end %>
+		<% end %>
+	</div>
+
+<% end %>
