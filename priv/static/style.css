@@ -92,7 +92,7 @@ body {
 a { color: rgba(245,245,255,0.85); transition: color ease 0.2s; }
 a:hover { color: #fff; }
 
-header { grid-area: header; font-family: Satisfy, cursive; }
+header { grid-area: header; font-family: Satisfy, cursive; z-index: 69; }
 header a { color: white; transition: all ease 0.2s; }
 header a:hover { color: #efeffc; transform: scale(1.069); }
 header h1 { font-size: 2rem; margin: 2rem 0 0; display: inline-block; transform: rotateZ(-7deg); transform-origin: center; hyphens: none; white-space: pre; }
@@ -109,14 +109,17 @@ header nav a:nth-child(6) { text-shadow: -1px -1px 0 #b04af8, 1px -1px 0 #b04af8
 main { grid-area: main; }
 article {
 	background: #fbfbfb; color: #444;
-	padding: 1rem;
 	border: 3px solid #32E0F0;
 	border-radius: 12px;
 	box-shadow: #224BFBE6 4px 4px 24px, #FF30E7D9 -4px -4px 24px, #30EEFF 0 0 30px;
+	overflow: hidden;
 	margin-bottom: 3rem;
 }
 article a { color: #555; }
 article a:hover { color: #66b; }
+article > figure { margin: 0; }
+.entry-txt { padding: 0 1rem; }
+.entry-info { background: #f5f5f5; text-shadow: #fff 0 1px 0; font-size: 0.95rem; padding: 1rem; }
 
 footer { grid-area: side; }
 footer > div {
