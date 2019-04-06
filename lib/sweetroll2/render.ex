@@ -245,7 +245,7 @@ defmodule Sweetroll2.Render do
 
   def author(author, preload: preload) when is_bitstring(author) do
     if preload[author] do
-      preload[author] |> Doc.to_map() |> simplify
+      preload[author] |> Doc.to_map() |> simplify |> author(preload: preload)
     else
       author(%{"url" => author}, preload: preload)
     end
