@@ -1,0 +1,5 @@
+<footer>
+	<div class="h-card p-author">
+		<a href="https://github.com/myfreeweb" rel="me" title="myfreeweb on GitHub"><%= icon name: "octoface" %>myfreeweb</a>
+	</div>
+</footer>

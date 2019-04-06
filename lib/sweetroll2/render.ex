@@ -18,6 +18,7 @@ defmodule Sweetroll2.Render do
 
   deftpl :head, "tpl/head.html.eex"
   deftpl :header, "tpl/header.html.eex"
+  deftpl :footer, "tpl/footer.html.eex"
   deftpl :entry, "tpl/entry.html.eex"
   deftpl :cite, "tpl/cite.html.eex"
   deftpl :page_entry, "tpl/page_entry.html.eex"
