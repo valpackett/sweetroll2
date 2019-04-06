@@ -3,19 +3,21 @@ import Ecto.Query
 defmodule Conv do
   def convert(%{type: type, props: props, acl: acl, deleted: deleted}) do
     host = System.get_env("OLD_HOST") || "https://ruunvald.lan"
+    url = List.first(props["url"])
 
-    if !is_bitstring(List.first(props["url"])) do
+    if !is_bitstring(url) or not (String.starts_with?(url, "/") or String.starts_with?(url, "https")) do
       []
     else
       params = props
               |> Enum.map(&Sweetroll2.Convert.simplify/1)
               |> Enum.into(%{})
+              |> Map.drop(["type", "url", "acl", "deleted", "published", "updated"])
               |> Map.merge(%{
                 type: String.replace_prefix(List.first(type), "h-", ""),
-                url: String.replace_leading(List.first(props["url"]), host, ""),
+                url: String.replace_leading(url, host, ""),
                 acl: acl,
                 deleted: deleted,
-                published: List.first(props["published"] || []),
+                published: List.first(props["published"] || []) || DateTime.utc_now,
                 updated: List.first(props["updated"] || []),
               })
       [Sweetroll2.Doc.changeset(%Sweetroll2.Doc{}, params)]
