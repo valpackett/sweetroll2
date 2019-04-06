@@ -1,11 +1,33 @@
-<%= if length(as_many(@entry.props["in-reply-to"])) do %>
+<%= if length(as_many(@entry.props["in-reply-to"])) > 0 do %>
 	<%= icon name: "reply", class: ["entry-type-icon", "entry-type-icon-reply"], title: "In reply to" %>
 <% end %>
 
+<%= if length(as_many(@entry.props["like-of"])) > 0 do %>
+	<%= icon name: "star", class: ["entry-type-icon", "entry-type-icon-like"], title: "Like of" %>
+<% end %>
+
+<%= if length(as_many(@entry.props["repost-of"])) > 0 do %>
+	<%= icon name: "megaphone", class: ["entry-type-icon", "entry-type-icon-repost"], title: "Repost of" %>
+<% end %>
+
+<%= if length(as_many(@entry.props["bookmark-of"])) > 0 do %>
+	<%= icon name: "bookmark", class: ["entry-type-icon", "entry-type-icon-bookmark"], title: "Bookmark of" %>
+<% end %>
+
 <%= for irt <- Stream.map(as_many(@entry.props["in-reply-to"]), fn e -> to_cite(e, preload: @preload) end) do %>
-	<div class="entry-ctx entry-txt">
-		<%= cite cite: irt, class: "u-in-reply-to" %>
-	</div>
+	<%= cite cite: irt, preload: @preload, prop: "in-reply-to" %>
+<% end %>
+
+<%= for lko <- Stream.map(as_many(@entry.props["like-of"]), fn e -> to_cite(e, preload: @preload) end) do %>
+	<%= cite cite: lko, preload: @preload, prop: "like-of" %>
+<% end %>
+
+<%= for rpo <- Stream.map(as_many(@entry.props["repost-of"]), fn e -> to_cite(e, preload: @preload) end) do %>
+	<%= cite cite: rpo, preload: @preload, prop: "repost-of" %>
+<% end %>
+
+<%= for bko <- Stream.map(as_many(@entry.props["bookmark-of"]), fn e -> to_cite(e, preload: @preload) end) do %>
+	<%= cite cite: bko, preload: @preload, prop: "bookmark-of" %>
 <% end %>
 
 <%= if @entry.props["name"] do %>

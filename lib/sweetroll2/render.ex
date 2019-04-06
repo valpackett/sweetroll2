@@ -234,15 +234,21 @@ defmodule Sweetroll2.Render do
 
   def to_cite(entry, preload: _) when is_map(entry), do: simplify(entry)
 
-  def author(author) when is_map(author) do
+  def author(author, preload: _) when is_map(author) do
     use Taggart.HTML
 
-    a href: author["url"], class: "u-author" do
+    a href: author["url"], class: "u-author #{if author["name"], do: "h-card", else: ""}" do
       author["name"] || author["url"]
     end
   end
 
-  def author(author) when is_bitstring(author), do: author(%{"url" => author})
+  def author(author, preload: preload) when is_bitstring(author) do
+    if preload[author] do
+      preload[author] |> Doc.to_map() |> simplify
+    else
+      author(%{"url" => author}, preload: preload)
+    end
+  end
 
   def home(preload) do
     preload["/"] ||
