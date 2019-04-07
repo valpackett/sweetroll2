@@ -36,15 +36,15 @@
 	</h1>
 <% end %>
 
-<% content_tree = Floki.parse safe_to_string content_rendered @entry.props["content"] %>
+<% content_tree = @entry.props["content"] |> as_one |> Markup.content_to_tree %>
 
-<%= for photo <- exclude_inlined_media(content_tree, "photo", as_many(@entry.props["photo"])) do %>
+<%= for photo <- Markup.exclude_inlined_media(content_tree, "photo", as_many(@entry.props["photo"])) do %>
 	<%= photo_rendered photo %>
 <% end %>
 
 <%= if content_tree != [] do %>
 	<div class="e-content entry-txt">
-		<%= {:safe, inline_media_into_content(content_tree, photo: as_many(@entry.props["photo"]), video: as_many(@entry.props["video"]), audio: as_many(@entry.props["audio"])) } %>
+		<%= content_tree |> inline_media_into_content(props: @entry.props) |> Markup.render_tree |> raw %>
 	</div>
 <% end %>
 

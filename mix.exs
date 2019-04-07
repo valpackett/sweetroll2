@@ -27,6 +27,7 @@ defmodule Sweetroll2.MixProject do
       {:taggart, "~> 0.1.5"},
       # {:microformats2, "~> 0.2"},
       {:floki, git: "https://github.com/myfreeweb/floki", override: true},
+      {:html5ever, "~> 0.7.0"},
       {:microformats2, git: "https://github.com/ckruse/microformats2-elixir"},
 
       # DB

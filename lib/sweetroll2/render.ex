@@ -9,7 +9,7 @@ defmodule Sweetroll2.Render.Tpl do
 end
 
 defmodule Sweetroll2.Render do
-  alias Sweetroll2.Doc
+  alias Sweetroll2.{Doc, Markup}
   import Sweetroll2.Convert
   import Sweetroll2.Render.Tpl
   import Phoenix.HTML.Tag
@@ -26,15 +26,21 @@ defmodule Sweetroll2.Render do
 
   def render_doc(doc: doc, preload: preload) do
     cond do
-      doc.type == "entry" || doc.type == "review" -> page_entry(entry: doc, preload: preload)
+      doc.type == "entry" || doc.type == "review" ->
+        page_entry(entry: doc, preload: preload)
+
       doc.type == "x-dynamic-feed" ->
-        children = Map.keys(preload)
-                   |> Stream.filter(fn url ->
-                     String.starts_with?(url, "/") and
-                     Doc.in_feed?(preload[url], doc)
-                   end)
-        page_feed(feed: %{ doc | children: children }, preload: preload)
-      true -> {:error, :unknown_type, doc.type}
+        children =
+          Map.keys(preload)
+          |> Stream.filter(fn url ->
+            String.starts_with?(url, "/") and
+              Doc.in_feed?(preload[url], doc)
+          end)
+
+        page_feed(feed: %{doc | children: children}, preload: preload)
+
+      true ->
+        {:error, :unknown_type, doc.type}
     end
   end
 
@@ -193,44 +199,18 @@ defmodule Sweetroll2.Render do
     end
   end
 
-  defp inline_media_into_tag({"photo-here", attrs, _}, photo: photos, video: _, audio: _) do
-    {_, id} = Enum.find(attrs, fn {k, _} -> k == "id" end)
-    Floki.parse(safe_to_string(photo_rendered(Enum.find(photos, fn p -> p["id"] == id end))))
-  end
-
-  defp inline_media_into_tag({t, a, c}, photo: photos, video: videos, audio: audios)
-       when is_list(c) do
-    {t, a,
-     Enum.map(c, fn child ->
-       inline_media_into_tag(child, photo: photos, video: videos, audio: audios)
-     end)}
-  end
-
-  defp inline_media_into_tag(non_tag, photo: _, video: _, audio: _), do: non_tag
-
-  def inline_media_into_content(html, media) when is_bitstring(html),
-    do: inline_media_into_content(Floki.parse(html), media)
-
-  def inline_media_into_content(tree, photo: photos, video: videos, audio: audios) do
-    as_many(tree)
-    |> Enum.map(fn t ->
-      inline_media_into_tag(t, photo: photos, video: videos, audio: audios)
-    end)
-    |> Floki.raw_html()
-  end
-
-  def exclude_inlined_media(html, media_name, media_items) when is_bitstring(html),
-    do: exclude_inlined_media(Floki.parse(html), media_name, media_items)
-
-  def exclude_inlined_media(tree, media_name, media_items) do
-    used_ids =
-      Floki.find(tree, "#{media_name}-here")
-      |> Enum.map(fn {_, a, _} ->
-        {_, id} = Enum.find(a, fn {k, _} -> k == "id" end)
-        id
-      end)
-
-    Enum.filter(media_items, fn i -> not Enum.member?(used_ids, i["id"]) end)
+  def inline_media_into_content(tree, props: props) do
+    Markup.inline_media_into_content(
+      tree,
+      %{
+        "photo" => &photo_rendered/1
+      },
+      %{
+        "photo" => as_many(props["photo"]),
+        "video" => as_many(props["video"]),
+        "audio" => as_many(props["audio"])
+      }
+    )
   end
 
   def to_cite(url, preload: preload) when is_bitstring(url) do
