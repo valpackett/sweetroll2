@@ -67,7 +67,8 @@ defmodule Sweetroll2.Doc do
   end
 
   def in_feed?(doc = %__MODULE__{}, feed = %__MODULE__{}) do
-    matches_filters?(doc, Convert.as_many(feed.props["filter"]))
+    matches_filters?(doc, Convert.as_many(feed.props["filter"])) and
+      not matches_filters?(doc, Convert.as_many(feed.props["unfilter"]))
   end
 
   def feeds(preload) do
