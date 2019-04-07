@@ -26,7 +26,7 @@ defmodule Sweetroll2.Generate do
 
     with {:safe, data} <- render_doc(doc: preload[url], preload: preload),
          :ok <- File.mkdir_p(path_dir),
-         :ok <- File.write(Path.join(path_dir, "index.html"), data),
+         :ok <- File.write(Path.join(path_dir, "index.html"), data, [:raw]),
          do: {:ok, url},
          else: (e -> {:error, url, e})
   end
