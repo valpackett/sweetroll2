@@ -22,10 +22,18 @@ defmodule Sweetroll2.Render do
   deftpl :entry, "tpl/entry.html.eex"
   deftpl :cite, "tpl/cite.html.eex"
   deftpl :page_entry, "tpl/page_entry.html.eex"
+  deftpl :page_feed, "tpl/page_feed.html.eex"
 
   def render_doc(doc: doc, preload: preload) do
     cond do
       doc.type == "entry" || doc.type == "review" -> page_entry(entry: doc, preload: preload)
+      doc.type == "x-dynamic-feed" ->
+        children = Map.keys(preload)
+                   |> Stream.filter(fn url ->
+                     String.starts_with?(url, "/") and
+                     Doc.in_feed?(preload[url], doc)
+                   end)
+        page_feed(feed: %{ doc | children: children }, preload: preload)
       true -> {:error, :unknown_type, doc.type}
     end
   end

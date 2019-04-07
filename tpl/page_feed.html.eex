@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+	<%= head title: "#{doc_title(@feed)} / #{home(@preload).props["name"]}" %>
+	<body class="h-feed">
+		<%= header preload: @preload, cur_url: @feed.url %>
+		<main>
+			<%= for url <- @feed.children do %>
+				<article>
+					<%= entry preload: @preload, cur_url: @feed.url, entry: @preload[url] %>
+				</article>
+			<% end %>
+		</main>
+		<%= footer [] %>
+	</body>
+</html>
