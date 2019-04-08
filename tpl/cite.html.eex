@@ -9,7 +9,7 @@
 	<%= content_tag :div, class: "entry-ctx entry-txt h-cite u-#{@prop}" do %>
 		<%= if @cite["content"] do %>
 			<blockquote class="e-content">
-				<%= @cite["content"] |> as_one |> Markup.content_to_tree |> Markup.render_tree |> raw %>
+				<%= @cite["content"] |> as_one |> Markup.content_to_tree |> Markup.sanitize_tree |> Markup.render_tree |> raw %>
 			</blockquote>
 		<% end %>
 

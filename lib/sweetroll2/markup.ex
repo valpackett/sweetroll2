@@ -14,7 +14,8 @@ defmodule Sweetroll2.Markup do
   """
   def html_part_to_tree(html) do
     # html5ever always inserts a skeleton
-    case Floki.parse(html) do
+    # the cdata thing is basically before_scrub from the sanitizer
+    case html |> String.replace("<![CDATA[", "") |> Floki.parse() do
       [{"html", _, [{"head", _, _}, {"body", _, [part]}]}] -> part
       [{"html", _, [{"head", _, _}, {"body", _, parts}]}] -> parts
       x -> x
@@ -31,6 +32,12 @@ defmodule Sweetroll2.Markup do
   def content_to_tree(%{"value" => t}), do: t |> text_to_tree
   def content_to_tree(%{"text" => t}), do: t |> text_to_tree
   def content_to_tree(x), do: x |> to_string |> text_to_tree
+
+  @doc """
+  Sanitize untrusted HTML trees (fetched posts in contexts).
+  """
+  def sanitize_tree(tree),
+    do: HtmlSanitizeEx.Traverser.traverse(tree, HtmlSanitizeEx.Scrubber.MarkdownHTML)
 
   defp inline_media_into_elem({tag, attrs, content}, renderers, props)
        when is_bitstring(tag) and is_list(attrs) do
