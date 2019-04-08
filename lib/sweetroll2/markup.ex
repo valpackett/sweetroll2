@@ -39,9 +39,11 @@ defmodule Sweetroll2.Markup do
         media_type = String.trim_trailing(tag, "-here")
 
         with {_, {_, id}} <- {:id_attr, Enum.find(attrs, fn {k, _} -> k == "id" end)},
-             {_, _, rend} when is_function(rend, 1) <- {:renderer, media_type, renderers[media_type]},
+             {_, _, rend} when is_function(rend, 1) <-
+               {:renderer, media_type, renderers[media_type]},
              medias = as_many(props[media_type]),
-             {_, _, _, media} when is_map(media) <- {:media_id, media_type, id, Enum.find(medias, fn p -> p["id"] == id end)},
+             {_, _, _, media} when is_map(media) <-
+               {:media_id, media_type, id, Enum.find(medias, fn p -> p["id"] == id end)},
              do: media |> rend.() |> PH.safe_to_string() |> html_part_to_tree,
              # TODO: would be amazing to have taggart output to a tree directly
              else:

@@ -5,7 +5,8 @@ defmodule Sweetroll2.MarkupTest do
 
   defp test_photo_render(%{"value" => val}), do: {:safe, "Photo{#{val}}"}
 
-  defp i_m_i_c(html, r, p), do: html |> html_part_to_tree |> inline_media_into_content(r, p) |> render_tree
+  defp i_m_i_c(html, r, p),
+    do: html |> html_part_to_tree |> inline_media_into_content(r, p) |> render_tree
 
   describe "inline_media_into_content" do
     test "inlines photos" do
@@ -26,7 +27,10 @@ defmodule Sweetroll2.MarkupTest do
 
     test "inlines nonexistent photos" do
       html = "<photo-here id=VOID></photo-here>"
-      expect = ~S(<div class=sweetroll2-error>Media embedding failed.<pre>{:media_id, "photo", "VOID", nil}</pre></div>)
+
+      expect =
+        ~S(<div class=sweetroll2-error>Media embedding failed.<pre>{:media_id, "photo", "VOID", nil}</pre></div>)
+
       result = i_m_i_c(html, %{"photo" => &test_photo_render/1}, %{"photo" => []})
       assert html_part_to_tree(result) == html_part_to_tree(expect)
     end
@@ -51,5 +55,4 @@ defmodule Sweetroll2.MarkupTest do
       assert exclude_inlined_media(tree, "video", [%{"id" => "one"}]) == [%{"id" => "one"}]
     end
   end
-
 end
