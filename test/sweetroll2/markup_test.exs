@@ -10,16 +10,29 @@ defmodule Sweetroll2.MarkupTest do
     test "removes scripts but not text formatting" do
       # https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/XSS%20Injection
       assert s_t("<b>hi</b> <script>alert('XSS')</script>") == "<b>hi</b> alert(&apos;XSS&apos;)"
-      assert s_t("\"><img src=x onerror=alert(String.fromCharCode(88,83,83));>") == ~S[&quot;&gt;<img src="x"/>]
+
+      assert s_t("\"><img src=x onerror=alert(String.fromCharCode(88,83,83));>") ==
+               ~S[&quot;&gt;<img src="x"/>]
+
       assert s_t("<video/poster/onerror=alert(1)>") == ""
       assert s_t("#\"><img src=/ onerror=alert(2)>") == ~S[#&quot;&gt;<img src="/"/>]
-      assert s_t("-->'\"/></sCript><svG x=\">\" onload=(co\\u006efirm)``>") == "--&gt;&apos;&quot;/&gt;"
+
+      assert s_t("-->'\"/></sCript><svG x=\">\" onload=(co\\u006efirm)``>") ==
+               "--&gt;&apos;&quot;/&gt;"
+
       assert s_t("<img/src='1'/onerror=alert(0)>") == ~S[<img src="1"/>]
       assert s_t("<svgonload=alert(1)>") == ""
       assert s_t("<svg onload=alert(1)//") == ""
-      assert s_t("<</script/script><script>eval('\\u'+'0061'+'lert(1)')//</script>") == "&lt;eval(&apos;\\u&apos;+&apos;0061&apos;+&apos;lert(1)&apos;)//"
-      assert s_t(~S[<img/id="alert&lpar;&#x27;XSS&#x27;&#x29;\"/alt=\"/\"src=\"/\"onerror=eval(id&#x29;>]) == "<img alt='\\\"/\\\"src=\\\"/\\\"onerror=eval(id)'/>"
-      assert s_t(~S[<noscript><p title="</noscript><img src=x onerror=alert(1)>">]) == ~S[<img src="x"/>&quot;&gt;]
+
+      assert s_t("<</script/script><script>eval('\\u'+'0061'+'lert(1)')//</script>") ==
+               "&lt;eval(&apos;\\u&apos;+&apos;0061&apos;+&apos;lert(1)&apos;)//"
+
+      assert s_t(
+               ~S[<img/id="alert&lpar;&#x27;XSS&#x27;&#x29;\"/alt=\"/\"src=\"/\"onerror=eval(id&#x29;>]
+             ) == "<img alt='\\\"/\\\"src=\\\"/\\\"onerror=eval(id)'/>"
+
+      assert s_t(~S[<noscript><p title="</noscript><img src=x onerror=alert(1)>">]) ==
+               ~S[<img src="x"/>&quot;&gt;]
     end
   end
 
