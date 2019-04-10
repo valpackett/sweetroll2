@@ -13,7 +13,7 @@ defmodule Sweetroll2.MixProject do
 
   def application do
     [
-      extra_applications: [:logger, :httpotion],
+      extra_applications: [:logger, :httpotion, :con_cache, :event_bus],
       mod: {Sweetroll2.Application, []}
     ]
   end
@@ -30,6 +30,7 @@ defmodule Sweetroll2.MixProject do
       {:html_sanitize_ex, "~> 1.3"},
       {:html5ever, "~> 0.7.0"},
       {:microformats2, git: "https://github.com/ckruse/microformats2-elixir"},
+      {:con_cache, "~> 0.13"},
 
       # DB
       {:ecto_sql, "~> 3.0"},

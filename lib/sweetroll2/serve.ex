@@ -1,7 +1,7 @@
 defmodule Sweetroll2.Serve do
   @parsers [:urlencoded, {:multipart, length: 20_000_000}, :json]
 
-  alias Sweetroll2.{Repo, Render}
+  alias Sweetroll2.{Repo, Cache, Render}
 
   use Plug.Router
 
@@ -30,10 +30,10 @@ defmodule Sweetroll2.Serve do
   get _ do
     conn = put_resp_content_type(conn, "text/html; charset=utf-8")
     url = conn.request_path
-    preload = Repo.docs_all()
+    preload = %Cache{}
 
     cond do
-      !(url in Map.keys(preload)) ->
+      !(url in Cache.urls_local()) ->
         send_resp(conn, 404, "Page not found")
 
       !("*" in preload[url].acl) ->

@@ -9,7 +9,7 @@ defmodule Sweetroll2.Render.Tpl do
 end
 
 defmodule Sweetroll2.Render do
-  alias Sweetroll2.{Doc, Markup}
+  alias Sweetroll2.{Cache, Doc, Markup}
   import Sweetroll2.Convert
   import Sweetroll2.Render.Tpl
   import Phoenix.HTML.Tag
@@ -31,7 +31,7 @@ defmodule Sweetroll2.Render do
 
       doc.type == "x-dynamic-feed" ->
         children =
-          Map.keys(preload)
+          Cache.urls_local()
           |> Stream.filter(fn url ->
             String.starts_with?(url, "/") and
               Doc.in_feed?(preload[url], doc)

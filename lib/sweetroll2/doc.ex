@@ -1,7 +1,7 @@
 defmodule Sweetroll2.Doc do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Sweetroll2.Convert
+  alias Sweetroll2.{Cache, Convert}
 
   @primary_key {:url, :string, []}
 
@@ -71,8 +71,9 @@ defmodule Sweetroll2.Doc do
       not matches_filters?(doc, Convert.as_many(feed.props["unfilter"]))
   end
 
+  # XXX: don't call cache/repo from doc module
   def feeds(preload) do
-    Map.keys(preload)
+    Cache.urls_local()
     |> Stream.filter(fn url ->
       String.starts_with?(url, "/") && preload[url].type == "x-dynamic-feed"
     end)
