@@ -4,6 +4,7 @@ defmodule Sweetroll2.Markup do
   """
 
   import Sweetroll2.Convert
+  require Logger
   alias Phoenix.HTML, as: PH
   alias Phoenix.HTML.Format, as: PHF
 
@@ -50,11 +51,11 @@ defmodule Sweetroll2.Markup do
   Apply syntax highlighting to pre>code blocks that have known languages as classes.
   """
   def highlight_code({"pre", p_attrs, {"code", c_attrs, content}}) do
-    hl_lang =
-      Stream.concat(klasses(p_attrs), klasses(c_attrs))
-      |> Enum.find(nil, fn l -> @langs[l] end)
+    clss = Enum.concat(klasses(p_attrs), klasses(c_attrs))
+    hl_lang = Enum.find(clss, nil, fn l -> @langs[l] end)
 
     if hl_lang do
+      Logger.debug("highlighting language #{hl_lang} => #{@langs[hl_lang]}")
       # TODO: make RustledSyntect produce a parsed tree
       code_tree =
         content
@@ -68,6 +69,7 @@ defmodule Sweetroll2.Markup do
 
       {"pre", add_klass(p_attrs, "syntect"), {"code", c_attrs, code_tree}}
     else
+      Logger.debug("no known syntax language for #{inspect(clss)}")
       {"pre", p_attrs, {"code", c_attrs, content}}
     end
   end
@@ -97,16 +99,25 @@ defmodule Sweetroll2.Markup do
     if String.ends_with?(tag, "-here") do
       media_type = String.trim_trailing(tag, "-here")
 
-      with {_, {_, id}} <- {:id_attr, Enum.find(attrs, fn {k, _} -> k == "id" end)},
+      Logger.debug("inlining #{tag}..")
+
+      with {_, {_, id}} <-
+             {:no_id_attr, Enum.find(attrs, fn {k, _} -> k == "id" end)},
+           _ = Logger.debug(" #{media_type} id: #{id}"),
            {_, _, rend} when is_function(rend, 1) <-
-             {:renderer, media_type, renderers[media_type]},
+             {:no_renderer, media_type, renderers[media_type]},
+           _ = Logger.debug(" #{media_type} renderer found"),
            medias = as_many(props[media_type]),
+           _ = Logger.debug(" #{media_type} media of this type: #{Enum.count(medias)}"),
            {_, _, _, media} when is_map(media) <-
-             {:media_id, media_type, id, Enum.find(medias, fn p -> p["id"] == id end)},
+             {:no_media_id, media_type, id, Enum.find(medias, fn p -> p["id"] == id end)},
+           _ = Logger.debug(" #{media_type} found object for id: #{id}"),
            do: media |> rend.() |> PH.safe_to_string() |> html_part_to_tree,
            # TODO: would be amazing to have taggart output to a tree directly
            else:
              (err ->
+                Logger.warn(" could not inline #{media_type}: #{inspect(err)}")
+
                 {"div", [{"class", "sweetroll2-error"}],
                  ["Media embedding failed.", {"pre", [], inspect(err)}]})
     else
@@ -126,7 +137,7 @@ defmodule Sweetroll2.Markup do
     used_ids =
       Floki.find(tree, "#{media_name}-here")
       |> Enum.map(fn {_, a, _} ->
-        {_, id} = Enum.find(a, fn {k, _} -> k == "id" end)
+        {_, id} = Enum.find(a, {:x, nil}, fn {k, _} -> k == "id" end)
         id
       end)
 
@@ -144,7 +155,7 @@ defmodule Sweetroll2.Markup do
       |> Enum.map(fn {"class", c} -> c end)
       |> List.first()
 
-    String.split(c || "", ~r/\s+/)
+    if c, do: String.split(c, ~r/\s+/), else: []
   end
 
   defp add_klass(attrs, val) do
