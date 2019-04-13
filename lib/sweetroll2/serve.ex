@@ -44,8 +44,10 @@ defmodule Sweetroll2.Serve do
         send_resp(conn, 410, "Gone")
 
       true ->
+        conn = send_chunked(conn, 200)
         {:safe, data} = Render.render_doc(doc: preload[url], preload: preload, allu: urls_local)
-        send_resp(conn, 200, data)
+        chunk(conn, data)
+        conn
     end
   end
 
