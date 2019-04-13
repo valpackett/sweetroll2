@@ -2,7 +2,8 @@ defmodule Sweetroll2.Generate do
   @concurrency 5
   @default_dir "out"
 
-  alias Sweetroll2.{Doc, Repo, Render}
+  require Logger
+  alias Sweetroll2.{Repo, Render}
 
   def dir(), do: System.get_env("OUT_DIR") || @default_dir
 
@@ -24,11 +25,14 @@ defmodule Sweetroll2.Generate do
   def gen_page(url, preload) do
     path_dir = Path.join(dir(), url)
 
-    with {:safe, data} <- render_doc(doc: preload[url], preload: preload, allu: Map.keys(preload)),
-         :ok <- File.mkdir_p(path_dir),
-         :ok <- File.write(Path.join(path_dir, "index.html"), data, [:raw]),
+    with {_, {:safe, data}} <- {:render, render_doc(doc: preload[url], preload: preload, allu: Map.keys(preload))},
+         {_, :ok} <- {:mkdirp, File.mkdir_p(path_dir)},
+         {_, :ok} <- {:write, File.write(Path.join(path_dir, "index.html"), data)},
+         _ = Logger.info("generated #{url} -> #{Path.join(path_dir, "index.html")}"),
          do: {:ok, url},
-         else: (e -> {:error, url, e})
+         else: (e ->
+             Logger.error("could not generate #{url}: #{inspect e}")
+             {:error, url, e})
   end
 
   def gen_allowed_pages(urls, preload) do
@@ -43,7 +47,7 @@ defmodule Sweetroll2.Generate do
     gen_allowed_pages(Map.keys(preload), preload)
   end
 
-  def perform(multi = %Ecto.Multi{}, data = %{"type" => "generate", "urls" => urls}) do
+  def perform(multi = %Ecto.Multi{}, %{"type" => "generate", "urls" => urls}) do
     preload = Repo.docs_all()
     gen_allowed_pages(urls, preload)
 
