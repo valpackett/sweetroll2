@@ -44,7 +44,7 @@
 
 <%= if content_tree != [] do %>
 	<div class="e-content entry-txt">
-		<%= content_tree |> inline_media_into_content(props: @entry.props) |> Markup.render_tree |> raw %>
+		<%= content_tree |> Markup.highlight_code |> inline_media_into_content(props: @entry.props) |> Markup.render_tree |> raw %>
 	</div>
 <% end %>
 

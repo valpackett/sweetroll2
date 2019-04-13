@@ -39,6 +39,55 @@ defmodule Sweetroll2.Markup do
   def sanitize_tree(tree),
     do: HtmlSanitizeEx.Traverser.traverse(tree, HtmlSanitizeEx.Scrubber.MarkdownHTML)
 
+  @langs RustledSyntect.supported_langs()
+         |> Stream.flat_map(fn %RustledSyntect.Syntax{file_extensions: exts, name: name} ->
+           Enum.map(exts, fn e -> {e, name} end)
+         end)
+         |> Stream.concat([{"ruby", "Ruby"}, {"python", "Python"}, {"haskell", "Haskell"}])
+         |> Map.new()
+
+  @doc """
+  Apply syntax highlighting to pre>code blocks that have known languages as classes.
+  """
+  def highlight_code({"pre", p_attrs, {"code", c_attrs, content}}) do
+    hl_lang =
+      Stream.concat(klasses(p_attrs), klasses(c_attrs))
+      |> Enum.find(nil, fn l -> @langs[l] end)
+
+    if hl_lang do
+      # TODO: make RustledSyntect produce a parsed tree
+      code_tree =
+        content
+        |> src_text
+        |> String.split("\n")
+        |> RustledSyntect.hilite_stream(lang: @langs[hl_lang])
+        |> Enum.into([])
+        |> List.flatten()
+        |> Enum.join("")
+        |> html_part_to_tree
+
+      {"pre", add_klass(p_attrs, "syntect"), {"code", c_attrs, code_tree}}
+    else
+      {"pre", p_attrs, {"code", c_attrs, content}}
+    end
+  end
+
+  def highlight_code({"pre", attrs, content}) when is_list(content) do
+    highlight_code(
+      {"pre", attrs,
+       Enum.find(content, nil, fn
+         {"code", _, _} -> true
+         _ -> false
+       end)}
+    )
+  end
+
+  def highlight_code({tag, attrs, content}), do: {tag, attrs, highlight_code(content)}
+
+  def highlight_code(l) when is_list(l), do: Enum.map(l, &highlight_code/1)
+
+  def highlight_code(non_tag), do: non_tag
+
   @doc """
   Render tags like photo-here[id=something] inline from a map of properties
   using provided templates (renderers).
@@ -85,4 +134,34 @@ defmodule Sweetroll2.Markup do
       is_bitstring(i) or not Enum.member?(used_ids, i["id"])
     end)
   end
+
+  defp klasses(attrs) do
+    c =
+      Stream.filter(attrs, fn
+        {"class", _} -> true
+        _ -> false
+      end)
+      |> Enum.map(fn {"class", c} -> c end)
+      |> List.first()
+
+    String.split(c || "", ~r/\s+/)
+  end
+
+  defp add_klass(attrs, val) do
+    if Enum.find(attrs, nil, fn
+         {"class", _} -> true
+         _ -> false
+       end) do
+      Enum.map(attrs, fn
+        {"class", c} -> {"class", "#{val} #{c}"}
+        x -> x
+      end)
+    else
+      attrs ++ [{"class", val}]
+    end
+  end
+
+  defp src_text({_tag, _attrs, content}), do: src_text(content)
+  defp src_text(s) when is_bitstring(s), do: s
+  defp src_text(l) when is_list(l), do: Stream.map(l, &src_text/1) |> Enum.join("")
 end

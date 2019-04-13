@@ -129,6 +129,13 @@ article > figure { margin: 0; }
 .entry-type-icon-bookmark { background: #607cf5; color: white; padding: 0.25rem 0.5rem; }
 .entry-ctx > blockquote.e-content { margin: 0; }
 
+.syntect .comment { color: #666; }
+.syntect .function, .syntect .tag, .syntect .object { color: #10a080; }
+.syntect .modifier { color: #bb8080; }
+.syntect .keyword, .syntect .property-name, .syntect .attribute-name { color: #3030bf; }
+.syntect .string { color: #e110ab; }
+.syntect .punctuation { color: #a04040; }
+
 footer { grid-area: side; }
 footer > div {
 	padding-bottom: 1rem;

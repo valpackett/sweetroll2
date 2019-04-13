@@ -28,7 +28,10 @@ defmodule Sweetroll2.MixProject do
       # {:microformats2, "~> 0.2"},
       {:floki, git: "https://github.com/philss/floki", override: true},
       {:html_sanitize_ex, "~> 1.3"},
+      # old on html5ever
+      {:rustler, "~> 0.20.0", override: true},
       {:html5ever, "~> 0.7.0"},
+      {:rustled_syntect, "~> 0.1"},
       {:microformats2, git: "https://github.com/ckruse/microformats2-elixir"},
       {:con_cache, "~> 0.13"},
 
