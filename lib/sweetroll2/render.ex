@@ -9,7 +9,7 @@ defmodule Sweetroll2.Render.Tpl do
 end
 
 defmodule Sweetroll2.Render do
-  alias Sweetroll2.{Cache, Doc, Markup}
+  alias Sweetroll2.{Doc, Markup}
   import Sweetroll2.Convert
   import Sweetroll2.Render.Tpl
   import Phoenix.HTML.Tag
@@ -24,20 +24,28 @@ defmodule Sweetroll2.Render do
   deftpl :page_entry, "tpl/page_entry.html.eex"
   deftpl :page_feed, "tpl/page_feed.html.eex"
 
-  def render_doc(doc: doc, preload: preload) do
+  @doc """
+  Renders a document, choosing the right template based on its type.
+
+  - `doc`: current document
+  - `preload`: `Access` object for retrieval of docs by URL (all fetched docs or `Cache`)
+  - `allu`: *A*t *L*east *L*ocal *U*RLs -- `Enumerable` of either known local URLs or all known URLs
+  """
+  def render_doc(doc: doc = %Doc{}, preload: preload, allu: allu) do
+    feed_urls = Doc.filter_feeds(allu, preload)
+
     cond do
       doc.type == "entry" || doc.type == "review" ->
-        page_entry(entry: doc, preload: preload)
+        page_entry(entry: doc, preload: preload, feed_urls: feed_urls)
 
       doc.type == "x-dynamic-feed" ->
         children =
-          Cache.urls_local()
-          |> Stream.filter(fn url ->
+          Stream.filter(allu, fn url ->
             String.starts_with?(url, "/") and
               Doc.in_feed?(preload[url], doc)
           end)
 
-        page_feed(feed: %{doc | children: children}, preload: preload)
+        page_feed(feed: %{doc | children: children}, preload: preload, feed_urls: feed_urls)
 
       true ->
         {:error, :unknown_type, doc.type}

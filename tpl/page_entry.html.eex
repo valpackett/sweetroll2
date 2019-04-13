@@ -2,10 +2,10 @@
 <html lang="en">
 	<%= head title: "#{doc_title(@entry)} / #{home(@preload).props["name"]}" %>
 	<body class="h-entry">
-		<%= header preload: @preload, cur_url: @entry.url %>
+		<%= header preload: @preload, cur_url: @entry.url, feed_urls: @feed_urls %>
 		<main>
 			<article>
-				<%= entry preload: @preload, cur_url: @entry.url, entry: @entry %>
+				<%= entry preload: @preload, cur_url: @entry.url, entry: @entry, feed_urls: @feed_urls %>
 			</article>
 		</main>
 		<%= footer [] %>

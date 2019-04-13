@@ -2,7 +2,7 @@ defmodule Sweetroll2.Generate do
   @concurrency 5
   @default_dir "out"
 
-  alias Sweetroll2.{Repo, Render}
+  alias Sweetroll2.{Doc, Repo, Render}
 
   def dir(), do: System.get_env("OUT_DIR") || @default_dir
 
@@ -24,7 +24,7 @@ defmodule Sweetroll2.Generate do
   def gen_page(url, preload) do
     path_dir = Path.join(dir(), url)
 
-    with {:safe, data} <- render_doc(doc: preload[url], preload: preload),
+    with {:safe, data} <- render_doc(doc: preload[url], preload: preload, allu: Map.keys(preload)),
          :ok <- File.mkdir_p(path_dir),
          :ok <- File.write(Path.join(path_dir, "index.html"), data, [:raw]),
          do: {:ok, url},

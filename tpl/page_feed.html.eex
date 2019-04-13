@@ -2,11 +2,11 @@
 <html lang="en">
 	<%= head title: "#{doc_title(@feed)} / #{home(@preload).props["name"]}" %>
 	<body class="h-feed">
-		<%= header preload: @preload, cur_url: @feed.url %>
+		<%= header preload: @preload, cur_url: @feed.url, feed_urls: @feed_urls %>
 		<main>
 			<%= for url <- @feed.children do %>
 				<article>
-					<%= entry preload: @preload, cur_url: @feed.url, entry: @preload[url] %>
+					<%= entry preload: @preload, cur_url: @feed.url, entry: @preload[url], feed_urls: @feed_urls %>
 				</article>
 			<% end %>
 		</main>

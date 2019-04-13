@@ -1,9 +1,9 @@
 <header>
 	<h1><a href="/"><%= home(@preload).props["name"] %></a></h1>
 	<nav>
-		<%= for feed <- Doc.feeds(@preload) do %>
-			<%= content_tag :a, href: feed.url, rel: "feed", type: "text/html", class: (if feed.url == @cur_url, do: "current", else: "") do %>
-				<%= as_one feed.props["name"] %>
+		<%= for feed_url <- @feed_urls do %>
+			<%= content_tag :a, href: feed_url, rel: "feed", type: "text/html", class: (if feed_url == @cur_url, do: "current", else: "") do %>
+				<%= as_one @preload[feed_url].props["name"] %>
 			<% end %>
 		<% end %>
 	</nav>

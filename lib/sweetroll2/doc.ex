@@ -71,12 +71,9 @@ defmodule Sweetroll2.Doc do
       not matches_filters?(doc, Convert.as_many(feed.props["unfilter"]))
   end
 
-  # XXX: don't call cache/repo from doc module
-  def feeds(preload) do
-    Cache.urls_local()
-    |> Stream.filter(fn url ->
+  def filter_feeds(urls, preload) do
+    Stream.filter(urls, fn url ->
       String.starts_with?(url, "/") && preload[url] && preload[url].type == "x-dynamic-feed"
     end)
-    |> Enum.map(fn url -> preload[url] end)
   end
 end
