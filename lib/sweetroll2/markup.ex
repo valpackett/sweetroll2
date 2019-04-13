@@ -39,46 +39,36 @@ defmodule Sweetroll2.Markup do
   def sanitize_tree(tree),
     do: HtmlSanitizeEx.Traverser.traverse(tree, HtmlSanitizeEx.Scrubber.MarkdownHTML)
 
-  defp inline_media_into_elem({tag, attrs, content}, renderers, props)
-       when is_bitstring(tag) and is_list(attrs) do
-    cond do
-      String.ends_with?(tag, "-here") ->
-        media_type = String.trim_trailing(tag, "-here")
-
-        with {_, {_, id}} <- {:id_attr, Enum.find(attrs, fn {k, _} -> k == "id" end)},
-             {_, _, rend} when is_function(rend, 1) <-
-               {:renderer, media_type, renderers[media_type]},
-             medias = as_many(props[media_type]),
-             {_, _, _, media} when is_map(media) <-
-               {:media_id, media_type, id, Enum.find(medias, fn p -> p["id"] == id end)},
-             do: media |> rend.() |> PH.safe_to_string() |> html_part_to_tree,
-             # TODO: would be amazing to have taggart output to a tree directly
-             else:
-               (err ->
-                  {"div", [{"class", "sweetroll2-error"}],
-                   ["Media embedding failed.", {"pre", [], inspect(err)}]})
-
-      is_list(content) ->
-        {tag, attrs,
-         Enum.map(content, fn child ->
-           inline_media_into_elem(child, renderers, props)
-         end)}
-
-      true ->
-        {tag, attrs, inline_media_into_elem(content, renderers, props)}
-    end
-  end
-
-  defp inline_media_into_elem(non_tag, _renderers, _props), do: non_tag
-
   @doc """
   Render tags like photo-here[id=something] inline from a map of properties
   using provided templates (renderers).
   """
-  def inline_media_into_content(tree, renderers, props) do
-    as_many(tree)
-    |> Enum.map(fn elem -> inline_media_into_elem(elem, renderers, props) end)
+  def inline_media_into_content({tag, attrs, content}, renderers, props)
+      when is_bitstring(tag) and is_list(attrs) do
+    if String.ends_with?(tag, "-here") do
+      media_type = String.trim_trailing(tag, "-here")
+
+      with {_, {_, id}} <- {:id_attr, Enum.find(attrs, fn {k, _} -> k == "id" end)},
+           {_, _, rend} when is_function(rend, 1) <-
+             {:renderer, media_type, renderers[media_type]},
+           medias = as_many(props[media_type]),
+           {_, _, _, media} when is_map(media) <-
+             {:media_id, media_type, id, Enum.find(medias, fn p -> p["id"] == id end)},
+           do: media |> rend.() |> PH.safe_to_string() |> html_part_to_tree,
+           # TODO: would be amazing to have taggart output to a tree directly
+           else:
+             (err ->
+                {"div", [{"class", "sweetroll2-error"}],
+                 ["Media embedding failed.", {"pre", [], inspect(err)}]})
+    else
+      {tag, attrs, inline_media_into_content(content, renderers, props)}
+    end
   end
+
+  def inline_media_into_content(l, renderers, props) when is_list(l),
+    do: Enum.map(l, fn child -> inline_media_into_content(child, renderers, props) end)
+
+  def inline_media_into_content(non_tag, _renderers, _props), do: non_tag
 
   @doc """
   Remove media that was inserted by inline_media_into_content from a data property.
