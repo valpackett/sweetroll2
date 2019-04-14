@@ -18,7 +18,8 @@ defmodule Sweetroll2.RenderTest do
               "content" => %{"markdown" => "*hi* <em>hello</em>"}
             }
           },
-          preload: %{}
+          preload: %{},
+          feed_urls: []
         )
 
       assert Enum.uniq(props["url"]) == ["http://localhost/hello"]

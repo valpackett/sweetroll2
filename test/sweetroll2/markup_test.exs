@@ -62,7 +62,7 @@ defmodule Sweetroll2.MarkupTest do
       html = "<photo-here id=VOID></photo-here>"
 
       expect =
-        ~S(<div class=sweetroll2-error>Media embedding failed.<pre>{:media_id, "photo", "VOID", nil}</pre></div>)
+        ~S(<div class=sweetroll2-error>Media embedding failed.<pre>{:no_media_id, "photo", "VOID", nil}</pre></div>)
 
       result = i_m_i_c(html, %{"photo" => &test_photo_render/1}, %{"photo" => []})
       assert html_part_to_tree(result) == html_part_to_tree(expect)
