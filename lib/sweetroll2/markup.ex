@@ -42,7 +42,7 @@ defmodule Sweetroll2.Markup do
 
   @langs RustledSyntect.supported_langs()
          |> Stream.flat_map(fn %RustledSyntect.Syntax{file_extensions: exts, name: name} ->
-           Enum.map(exts, fn e -> {e, name} end)
+           Enum.map(exts, &{&1, name})
          end)
          |> Stream.concat([{"ruby", "Ruby"}, {"python", "Python"}, {"haskell", "Haskell"}])
          |> Map.new()
@@ -52,7 +52,7 @@ defmodule Sweetroll2.Markup do
   """
   def highlight_code({"pre", p_attrs, {"code", c_attrs, content}}) do
     clss = Enum.concat(klasses(p_attrs), klasses(c_attrs))
-    hl_lang = Enum.find(clss, nil, fn l -> @langs[l] end)
+    hl_lang = Enum.find(clss, nil, &@langs[&1])
 
     if hl_lang do
       Logger.debug("highlighting language #{hl_lang} => #{@langs[hl_lang]}")
@@ -110,7 +110,7 @@ defmodule Sweetroll2.Markup do
            medias = as_many(props[media_type]),
            _ = Logger.debug(" #{media_type} media of this type: #{Enum.count(medias)}"),
            {_, _, _, media} when is_map(media) <-
-             {:no_media_id, media_type, id, Enum.find(medias, fn p -> p["id"] == id end)},
+             {:no_media_id, media_type, id, Enum.find(medias, &(&1["id"] == id))},
            _ = Logger.debug(" #{media_type} found object for id: #{id}"),
            do: media |> rend.() |> PH.safe_to_string() |> html_part_to_tree,
            # TODO: would be amazing to have taggart output to a tree directly
@@ -126,7 +126,7 @@ defmodule Sweetroll2.Markup do
   end
 
   def inline_media_into_content(l, renderers, props) when is_list(l),
-    do: Enum.map(l, fn child -> inline_media_into_content(child, renderers, props) end)
+    do: Enum.map(l, &inline_media_into_content(&1, renderers, props))
 
   def inline_media_into_content(non_tag, _renderers, _props), do: non_tag
 
@@ -148,10 +148,7 @@ defmodule Sweetroll2.Markup do
 
   defp klasses(attrs) do
     c =
-      Stream.filter(attrs, fn
-        {"class", _} -> true
-        _ -> false
-      end)
+      Stream.filter(attrs, fn {k, _} -> k == "class" end)
       |> Enum.map(fn {"class", c} -> c end)
       |> List.first()
 
@@ -159,10 +156,7 @@ defmodule Sweetroll2.Markup do
   end
 
   defp add_klass(attrs, val) do
-    if Enum.find(attrs, nil, fn
-         {"class", _} -> true
-         _ -> false
-       end) do
+    if Enum.find(attrs, nil, fn {k, _} -> k == "class" end) do
       Enum.map(attrs, fn
         {"class", c} -> {"class", "#{val} #{c}"}
         x -> x

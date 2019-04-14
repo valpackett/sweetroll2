@@ -25,22 +25,24 @@ defmodule Sweetroll2.Generate do
   def gen_page(url, preload) do
     path_dir = Path.join(dir(), url)
 
-    with {_, {:safe, data}} <- {:render, render_doc(doc: preload[url], preload: preload, allu: Map.keys(preload))},
+    with {_, {:safe, data}} <-
+           {:render, render_doc(doc: preload[url], preload: preload, allu: Map.keys(preload))},
          {_, :ok} <- {:mkdirp, File.mkdir_p(path_dir)},
          {_, :ok} <- {:write, File.write(Path.join(path_dir, "index.html"), data)},
          _ = Logger.info("generated #{url} -> #{Path.join(path_dir, "index.html")}"),
          do: {:ok, url},
-         else: (e ->
-             Logger.error("could not generate #{url}: #{inspect e}")
-             {:error, url, e})
+         else:
+           (e ->
+              Logger.error("could not generate #{url}: #{inspect(e)}")
+              {:error, url, e})
   end
 
   def gen_allowed_pages(urls, preload) do
     urls
-    |> Stream.filter(fn url -> can_generate(url, preload) == :ok end)
-    |> Task.async_stream(fn url -> gen_page(url, preload) end, max_concurrency: @concurrency)
+    |> Stream.filter(&(can_generate(&1, preload) == :ok))
+    |> Task.async_stream(&gen_page(&1, preload), max_concurrency: @concurrency)
     |> Stream.map(fn {:ok, x} -> x end)
-    |> Enum.group_by(fn x -> elem(x, 0) end)
+    |> Enum.group_by(&elem(&1, 0))
   end
 
   def gen_all_allowed_pages(preload) do

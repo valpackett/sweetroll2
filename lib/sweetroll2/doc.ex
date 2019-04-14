@@ -1,7 +1,7 @@
 defmodule Sweetroll2.Doc do
   use Ecto.Schema
   import Ecto.Changeset
-  alias Sweetroll2.{Cache, Convert}
+  alias Sweetroll2.{Convert}
 
   @primary_key {:url, :string, []}
 
@@ -58,12 +58,12 @@ defmodule Sweetroll2.Doc do
   def matches_filter?(doc = %__MODULE__{}, filter) do
     Enum.all?(filter, fn {k, v} ->
       docv = Convert.as_many(doc.props[k])
-      Enum.all?(Convert.as_many(v), fn x -> Enum.member?(docv, x) end)
+      Enum.all?(Convert.as_many(v), &Enum.member?(docv, &1))
     end)
   end
 
   def matches_filters?(doc = %__MODULE__{}, filters) do
-    Enum.any?(filters, fn f -> matches_filter?(doc, f) end)
+    Enum.any?(filters, &matches_filter?(doc, &1))
   end
 
   def in_feed?(doc = %__MODULE__{}, feed = %__MODULE__{}) do

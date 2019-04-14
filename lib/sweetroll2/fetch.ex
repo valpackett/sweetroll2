@@ -22,7 +22,7 @@ defmodule Sweetroll2.Fetch do
         html = Floki.parse(resp.body)
 
         if check_mention == nil ||
-             Enum.any?(Floki.find(html, "a"), fn t -> href_matches?(t, check_mention) end) do
+             Enum.any?(Floki.find(html, "a"), &href_matches?(&1, check_mention)) do
           mf =
             Microformats2.parse(html, url)
             |> Convert.find_mf_with_url(url)
