@@ -3,7 +3,7 @@ defmodule Sweetroll2.Generate do
   @default_dir "out"
 
   require Logger
-  alias Sweetroll2.{Repo, Render}
+  alias Sweetroll2.{Doc, Repo, Render}
 
   def dir(), do: System.get_env("OUT_DIR") || @default_dir
 
@@ -22,11 +22,12 @@ defmodule Sweetroll2.Generate do
     e -> {:error, e}
   end
 
-  def gen_page(url, preload) do
+  def gen_page(url, preload, urls_dyn) do
     path_dir = Path.join(dir(), url)
+    {durl, params} = if Map.has_key?(urls_dyn, url), do: urls_dyn[url], else: {url, %{}}
 
     with {_, {:safe, data}} <-
-           {:render, render_doc(doc: preload[url], preload: preload, allu: Map.keys(preload))},
+           {:render, render_doc(doc: preload[durl], params: params, preload: preload, allu: Map.keys(preload))},
          {_, :ok} <- {:mkdirp, File.mkdir_p(path_dir)},
          {_, :ok} <- {:write, File.write(Path.join(path_dir, "index.html"), data)},
          _ = Logger.info("generated #{url} -> #{Path.join(path_dir, "index.html")}"),
@@ -38,9 +39,10 @@ defmodule Sweetroll2.Generate do
   end
 
   def gen_allowed_pages(urls, preload) do
-    urls
-    |> Stream.filter(&(can_generate(&1, preload) == :ok))
-    |> Task.async_stream(&gen_page(&1, preload), max_concurrency: @concurrency)
+    allowed_urls = urls |> Enum.filter(&(can_generate(&1, preload) == :ok))
+    urls_dyn = Doc.dynamic_urls(preload, allowed_urls)
+    (allowed_urls ++ Map.keys(urls_dyn))
+    |> Task.async_stream(&gen_page(&1, preload, urls_dyn), max_concurrency: @concurrency)
     |> Stream.map(fn {:ok, x} -> x end)
     |> Enum.group_by(&elem(&1, 0))
   end

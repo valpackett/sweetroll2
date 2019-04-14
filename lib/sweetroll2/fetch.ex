@@ -18,6 +18,7 @@ defmodule Sweetroll2.Fetch do
         {:local_host, u.host}
 
       true ->
+        # TODO handle 410 Gone
         resp = HTTPotion.get!(url)
         html = Floki.parse(resp.body)
 

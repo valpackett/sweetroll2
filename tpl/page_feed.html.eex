@@ -9,6 +9,18 @@
 					<%= entry preload: @preload, cur_url: @feed.url, entry: @preload[url], feed_urls: @feed_urls %>
 				</article>
 			<% end %>
+			<nav>
+				<%= if @cur_page > 0 do %>
+					<%= content_tag :a, href: Doc.page_url(@feed.url, @cur_page - 1), rel: "prev" do %>
+						← newer entries
+					<% end %>
+				<% end %>
+				<%= if @cur_page < @page_count - 1 do %>
+					<%= content_tag :a, href: Doc.page_url(@feed.url, @cur_page + 1), rel: "next" do %>
+						earlier entries →
+					<% end %>
+				<% end %>
+			</nav>
 		</main>
 		<%= footer [] %>
 	</body>

@@ -32,20 +32,30 @@ defmodule Sweetroll2.Serve do
     url = conn.request_path
     preload = %Cache{}
     urls_local = Cache.urls_local()
+    urls_dyn = Doc.dynamic_urls(preload, urls_local)
+    {durl, params} = if Map.has_key?(urls_dyn, url), do: urls_dyn[url], else: {url, %{}}
 
     cond do
-      !(url in urls_local) ->
+      !(durl in urls_local) ->
         send_resp(conn, 404, "Page not found")
 
-      !("*" in preload[url].acl) ->
+      !("*" in preload[durl].acl) ->
         send_resp(conn, 401, "Unauthorized")
 
-      preload[url].deleted ->
+      preload[durl].deleted ->
         send_resp(conn, 410, "Gone")
 
       true ->
         conn = send_chunked(conn, 200)
-        {:safe, data} = Render.render_doc(doc: preload[url], preload: preload, allu: urls_local)
+
+        {:safe, data} =
+          Render.render_doc(
+            doc: preload[durl],
+            params: params,
+            preload: preload,
+            allu: urls_local
+          )
+
         chunk(conn, data)
         conn
     end

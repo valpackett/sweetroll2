@@ -31,7 +31,7 @@ defmodule Sweetroll2.Render do
   - `preload`: `Access` object for retrieval of docs by URL (all fetched docs or `Cache`)
   - `allu`: *A*t *L*east *L*ocal *U*RLs -- `Enumerable` of either known local URLs or all known URLs
   """
-  def render_doc(doc: doc = %Doc{}, preload: preload, allu: allu) do
+  def render_doc(doc: doc = %Doc{}, params: params, preload: preload, allu: allu) do
     feed_urls = Doc.filter_feeds(allu, preload)
 
     cond do
@@ -39,13 +39,19 @@ defmodule Sweetroll2.Render do
         page_entry(entry: doc, preload: preload, feed_urls: feed_urls)
 
       doc.type == "x-dynamic-feed" ->
-        children =
-          Stream.filter(allu, fn url ->
-            String.starts_with?(url, "/") and
-              Doc.in_feed?(preload[url], doc)
-          end)
+        page = params[:page] || 0
+        children = Doc.filter_feed_entries(doc, preload, allu)
+        page_children = Enum.slice(children, page * 10, 10)
+        # IO.inspect Doc.dynamic_urls(preload, allu)
 
-        page_feed(feed: %{doc | children: children}, preload: preload, feed_urls: feed_urls)
+        page_feed(
+          feed: %{doc | children: page_children},
+          preload: preload,
+          feed_urls: feed_urls,
+          per_page: 10,
+          page_count: Doc.feed_page_count(children),
+          cur_page: page
+        )
 
       true ->
         {:error, :unknown_type, doc.type}

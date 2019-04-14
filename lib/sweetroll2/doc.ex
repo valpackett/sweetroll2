@@ -76,4 +76,33 @@ defmodule Sweetroll2.Doc do
       String.starts_with?(url, "/") && preload[url] && preload[url].type == "x-dynamic-feed"
     end)
   end
+
+  def filter_feed_entries(doc = %__MODULE__{type: "x-dynamic-feed"}, preload, allu) do
+    Stream.filter(allu, &(String.starts_with?(&1, "/") and in_feed?(preload[&1], doc)))
+    |> Enum.sort(&(DateTime.compare(preload[&1].published, preload[&2].published) == :gt))
+
+    # TODO rely on sorting from repo (should be sorted in Generate too)
+  end
+
+  def feed_page_count(entries) do
+    # TODO get per_page from feed settings
+    ceil(Enum.count(entries) / Application.get_env(:sweetroll2, :entries_per_page, 10))
+  end
+
+  def page_url(url, 0), do: url
+  def page_url(url, page), do: String.replace_leading("#{url}/page#{page}", "//", "/")
+
+  def dynamic_urls_for(doc = %__MODULE__{type: "x-dynamic-feed"}, preload, allu) do
+    cnt = feed_page_count(filter_feed_entries(doc, preload, allu))
+    Map.new(1..cnt, &{page_url(doc.url, &1), {doc.url, %{page: &1}}})
+  end
+
+  # TODO def dynamic_urls_for(doc = %__MODULE__{type: "x-dynamic-tag-feed"}, preload, allu) do end
+
+  def dynamic_urls_for(_, _, _), do: %{}
+
+  def dynamic_urls(preload, allu) do
+    Stream.map(allu, &dynamic_urls_for(preload[&1], preload, allu))
+    |> Enum.reduce(&Map.merge/2)
+  end
 end

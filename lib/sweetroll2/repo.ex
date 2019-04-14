@@ -19,5 +19,12 @@ defmodule Sweetroll2.Repo do
     |> Map.new(fn doc -> {doc.url, doc} end)
   end
 
-  def urls_local, do: all(from d in Doc, where: fragment("ascii(url) = 47"), select: d.url)
+  def urls_local do
+    all(
+      from d in Doc,
+        where: fragment("ascii(url) = 47"),
+        order_by: [desc: d.published],
+        select: d.url
+    )
+  end
 end
