@@ -35,4 +35,45 @@ defmodule Sweetroll2.DocTest do
       assert not Doc.matches_filter?(%Doc{props: %{"x" => "y"}}, %{"category" => ["test"]})
     end
   end
+
+  describe "separate_comments" do
+    test "does not fail on no comments" do
+      assert Doc.separate_comments(%Doc{props: %{"comments" => []}}) == %{}
+      assert Doc.separate_comments(%Doc{props: %{"comments" => nil}}) == %{}
+      assert Doc.separate_comments(%Doc{}) == %{}
+    end
+
+    test "splits comments" do
+      assert Doc.separate_comments(%Doc{
+               url: "/yo",
+               props: %{
+                 "comments" => [
+                   %{"properties" => %{"x" => "like-str", "like-of" => "/yo"}},
+                   %{properties: %{"x" => "like-atom", "like-of" => "/yo"}},
+                   %{props: %{"x" => "like-atom-short", "like-of" => "/yo"}},
+                   %{"x" => "like-direct", "like-of" => "/yo"},
+                   %{"properties" => %{"x" => "reply-str", "in-reply-to" => "/yo"}},
+                   %{properties: %{"x" => "repost-atom", "repost-of" => "/yo"}},
+                   %{"properties" => %{"x" => "bookmark-str", "bookmark-of" => "/yo"}}
+                 ]
+               }
+             }) == %{
+               likes: [
+                 %{"x" => "like-direct", "like-of" => "/yo"},
+                 %{props: %{"x" => "like-atom-short", "like-of" => "/yo"}},
+                 %{properties: %{"x" => "like-atom", "like-of" => "/yo"}},
+                 %{"properties" => %{"x" => "like-str", "like-of" => "/yo"}}
+               ],
+               replies: [
+                 %{"properties" => %{"x" => "reply-str", "in-reply-to" => "/yo"}}
+               ],
+               reposts: [
+                 %{properties: %{"x" => "repost-atom", "repost-of" => "/yo"}}
+               ],
+               bookmarks: [
+                 %{"properties" => %{"x" => "bookmark-str", "bookmark-of" => "/yo"}}
+               ]
+             }
+    end
+  end
 end

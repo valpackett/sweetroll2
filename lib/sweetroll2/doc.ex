@@ -105,4 +105,44 @@ defmodule Sweetroll2.Doc do
     Stream.map(allu, &dynamic_urls_for(preload[&1], preload, allu))
     |> Enum.reduce(&Map.merge/2)
   end
+
+  defp lookup_property(%__MODULE__{props: props}, prop) do
+    props[prop]
+  end
+
+  defp lookup_property(x, prop) do
+    x[prop] || x["properties"][prop] || x[:properties][prop] || x["props"][prop] ||
+      x[:props][prop]
+  end
+
+  defp compare_property(x, prop, url) do
+    val = lookup_property(x, prop)
+
+    url && val &&
+      (val == url || URI.parse(val) == URI.merge(Sweetroll2.our_host(), URI.parse(url)))
+  end
+
+  @doc """
+  Splits "comments" (saved webmentions) by post type.
+
+  Requires entries to be maps (does not load urls from the database).
+
+  Lists are reversed.
+  """
+  def separate_comments(doc = %__MODULE__{url: url, props: %{"comments" => comments}})
+      when is_list(comments) do
+    Enum.reduce(comments, %{}, fn x, acc ->
+      cond do
+        # TODO reacji
+        compare_property(x, "in-reply-to", url) -> Map.update(acc, :replies, [x], &[x | &1])
+        compare_property(x, "like-of", url) -> Map.update(acc, :likes, [x], &[x | &1])
+        compare_property(x, "repost-of", url) -> Map.update(acc, :reposts, [x], &[x | &1])
+        compare_property(x, "bookmark-of", url) -> Map.update(acc, :bookmarks, [x], &[x | &1])
+        compare_property(x, "quotation-of", url) -> Map.update(acc, :quotations, [x], &[x | &1])
+        true -> acc
+      end
+    end)
+  end
+
+  def separate_comments(doc = %__MODULE__{}), do: %{}
 end
