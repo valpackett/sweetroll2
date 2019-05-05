@@ -82,4 +82,44 @@
 			<% end %>
 		<% end %>
 	<% end %>
+
+	<%= if !@expand_comments do %>
+		<%= for {typ, coms} <- Doc.separate_comments(@entry) do %>
+			<% ic = reaction_icon(typ) %>
+			<span class="reaction-count">
+				<%= icon name: ic, class: ["reaction-type-icon", "reaction-type-icon-#{ic}"], title: "number of #{typ}:" %>
+				<%= length coms %>
+			</span>
+		<% end %>
+	<% end %>
 </div>
+
+<%= if @expand_comments do %>
+	<% {w_replies, facepiles} = Doc.separate_comments(@entry) |> Map.split([:replies]) %>
+
+	<div class="entry-facepiles entry-txt">
+		<%= for {typ, coms} <- facepiles do %>
+			<% ic = reaction_icon typ %>
+			<div class="entry-facepile">
+				<%= icon name: ic, class: ["reaction-type-icon", "reaction-type-icon-#{ic}"], title: typ %>
+				<%= for com <- coms do %>
+					<%= content_tag :a, class: "h-cite #{reaction_class typ}", href: com.url do %>
+						<span class="p-author h-card">
+							<% author = as_one(com.props["author"]) %>
+							<% author = if is_bitstring(author), do: %{"name" => author}, else: author %>
+							<%= tag :img, class: "u-photo p-name", src: as_one(author["photo"]), title: as_one(author["name"]), alt: as_one(author["name"]) %>
+						</span>
+					<% end %>
+				<% end %>
+			</div>
+		<% end %>
+	</div>
+
+	<%= if w_replies[:replies] do %>
+		<div class="entry-replies">
+			<%= for reply <- w_replies[:replies] do %>
+				<%= cite cite: to_cite(reply, preload: @preload), preload: @preload, prop: "comment" %>
+			<% end %>
+		</div>
+	<% end %>
+<% end %>

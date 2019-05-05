@@ -1,6 +1,7 @@
 defmodule Sweetroll2.Doc do
   use Ecto.Schema
   import Ecto.Changeset
+  require Logger
   alias Sweetroll2.{Convert}
 
   @primary_key {:url, :string, []}
@@ -55,6 +56,8 @@ defmodule Sweetroll2.Doc do
     |> Map.put("children", children)
   end
 
+  def to_map(x) when is_map(x), do: x
+
   def matches_filter?(doc = %__MODULE__{}, filter) do
     Enum.all?(filter, fn {k, v} ->
       docv = Convert.as_many(doc.props[k])
@@ -106,21 +109,49 @@ defmodule Sweetroll2.Doc do
     |> Enum.reduce(&Map.merge/2)
   end
 
-  defp lookup_property(%__MODULE__{props: props}, prop) do
-    props[prop]
-  end
+  defp lookup_property(%__MODULE__{props: props}, prop), do: props[prop]
 
-  defp lookup_property(x, prop) do
+  defp lookup_property(x, prop) when is_map(x) do
     x[prop] || x["properties"][prop] || x[:properties][prop] || x["props"][prop] ||
       x[:props][prop]
   end
 
-  defp compare_property(x, prop, url) do
-    val = lookup_property(x, prop)
+  defp lookup_property(_, _), do: false
 
-    url && val &&
-      (val == url || URI.parse(val) == URI.merge(Sweetroll2.our_host(), URI.parse(url)))
+  defp compare_property(x, prop, url) when is_bitstring(prop) and is_bitstring(url) do
+    lookup_property(x, prop)
+    |> Convert.as_many()
+    |> Enum.any?(fn val ->
+      url && val &&
+        (val == url || URI.parse(val) == URI.merge(Sweetroll2.our_host(), URI.parse(url)))
+    end)
   end
+
+  def inline_comments(doc = %__MODULE__{url: url, props: props}, preload) do
+    Logger.debug("inline comments: working on #{url}")
+
+    comments =
+      props["comment"]
+      |> Convert.as_many()
+      |> Enum.map(fn
+        u when is_bitstring(u) ->
+          Logger.debug("inline comments: inlining #{u}")
+          preload[u]
+
+        x ->
+          x
+      end)
+
+    Map.put(doc, :props, Map.put(props, "comment", comments))
+  end
+
+  def inline_comments(doc_url, preload) when is_bitstring(doc_url) do
+    Logger.debug("inline comments: loading #{doc_url}")
+    res = preload[doc_url]
+    if res != doc_url, do: inline_comments(res, preload), else: res
+  end
+
+  def inline_comments(x, _), do: x
 
   @doc """
   Splits "comments" (saved webmentions) by post type.
@@ -129,7 +160,7 @@ defmodule Sweetroll2.Doc do
 
   Lists are reversed.
   """
-  def separate_comments(doc = %__MODULE__{url: url, props: %{"comments" => comments}})
+  def separate_comments(doc = %__MODULE__{url: url, props: %{"comment" => comments}})
       when is_list(comments) do
     Enum.reduce(comments, %{}, fn x, acc ->
       cond do

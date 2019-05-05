@@ -5,7 +5,7 @@
 		<%= header preload: @preload, cur_url: @entry.url, feed_urls: @feed_urls %>
 		<main>
 			<article>
-				<%= entry preload: @preload, cur_url: @entry.url, entry: @entry, feed_urls: @feed_urls %>
+				<%= entry preload: @preload, cur_url: @entry.url, entry: @entry, feed_urls: @feed_urls, expand_comments: true %>
 			</article>
 		</main>
 		<%= footer [] %>

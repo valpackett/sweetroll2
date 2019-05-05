@@ -4,9 +4,9 @@
 	<body class="h-feed">
 		<%= header preload: @preload, cur_url: @feed.url, feed_urls: @feed_urls %>
 		<main>
-			<%= for url <- @feed.children do %>
+			<%= for entry <- @feed.children do %>
 				<article>
-					<%= entry preload: @preload, cur_url: @feed.url, entry: @preload[url], feed_urls: @feed_urls %>
+					<%= entry preload: @preload, cur_url: @feed.url, entry: entry, feed_urls: @feed_urls, expand_comments: false %>
 				</article>
 			<% end %>
 			<nav>

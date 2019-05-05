@@ -136,6 +136,24 @@ article > figure { margin: 0; }
 .syntect .string { color: #e110ab; }
 .syntect .punctuation { color: #a04040; }
 
+.entry-facepile {
+	margin: 0.5rem 0.5rem 0.5rem 0;
+	display: inline-block;
+}
+.entry-facepile a { text-decoration: none; }
+.entry-facepile img {
+	display: inline-block;
+	margin-right: 0.1rem;
+	width: 32px;
+	height: 32px;
+	min-width: 32px;
+	border-radius: 4px;
+	font-size: 0.5rem;
+	background: linear-gradient(to bottom, #f678a0, #f83ce2);
+	color: white;
+	overflow: hidden;
+}
+
 footer { grid-area: side; }
 footer > div {
 	padding-bottom: 1rem;

@@ -47,14 +47,18 @@ defmodule Sweetroll2.DocTest do
       assert Doc.separate_comments(%Doc{
                url: "/yo",
                props: %{
-                 "comments" => [
+                 "comment" => [
                    %{"properties" => %{"x" => "like-str", "like-of" => "/yo"}},
                    %{properties: %{"x" => "like-atom", "like-of" => "/yo"}},
                    %{props: %{"x" => "like-atom-short", "like-of" => "/yo"}},
                    %{"x" => "like-direct", "like-of" => "/yo"},
                    %{"properties" => %{"x" => "reply-str", "in-reply-to" => "/yo"}},
                    %{properties: %{"x" => "repost-atom", "repost-of" => "/yo"}},
-                   %{"properties" => %{"x" => "bookmark-str", "bookmark-of" => "/yo"}}
+                   %{"properties" => %{"x" => "bookmark-str", "bookmark-of" => "/yo"}},
+                   "whatever",
+                   :lol,
+                   nil,
+                   69420
                  ]
                }
              }) == %{

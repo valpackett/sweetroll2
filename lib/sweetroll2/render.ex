@@ -36,12 +36,17 @@ defmodule Sweetroll2.Render do
 
     cond do
       doc.type == "entry" || doc.type == "review" ->
+        doc = Doc.inline_comments(doc, preload)
         page_entry(entry: doc, preload: preload, feed_urls: feed_urls)
 
       doc.type == "x-dynamic-feed" ->
         page = params[:page] || 0
         children = Doc.filter_feed_entries(doc, preload, allu)
-        page_children = Enum.slice(children, page * 10, 10)
+
+        page_children =
+          Enum.slice(children, page * 10, 10)
+          |> Enum.map(&Doc.inline_comments(&1, preload))
+
         # IO.inspect Doc.dynamic_urls(preload, allu)
 
         page_feed(
@@ -77,6 +82,20 @@ defmodule Sweetroll2.Render do
       end
     end
   end
+
+  def reaction_icon(:replies), do: "reply"
+  def reaction_icon(:likes), do: "star"
+  def reaction_icon(:reposts), do: "megaphone"
+  def reaction_icon(:quotations), do: "quote"
+  def reaction_icon(:bookmarks), do: "bookmark"
+  def reaction_icon(_), do: "link"
+
+  def reaction_class(:replies), do: "reply"
+  def reaction_class(:likes), do: "like"
+  def reaction_class(:reposts), do: "repost"
+  def reaction_class(:quotations), do: "quotation"
+  def reaction_class(:bookmarks), do: "bookmark"
+  def reaction_class(_), do: "comment"
 
   def time_permalink(%Doc{published: published, url: url}, rel: rel) do
     use Taggart.HTML
@@ -234,6 +253,8 @@ defmodule Sweetroll2.Render do
       url
     end
   end
+
+  def to_cite(entry = %Doc{}, preload: _), do: Doc.to_map(entry) |> simplify
 
   def to_cite(entry, preload: _) when is_map(entry), do: simplify(entry)
 
