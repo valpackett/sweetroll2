@@ -145,15 +145,6 @@ defmodule Sweetroll2.Render do
     doc.props["name"] || DateTime.to_iso8601(doc.published)
   end
 
-  def content_rendered(cont) do
-    case cont do
-      %{"markdown" => md} -> raw(Earmark.as_html!(md))
-      %{"html" => h} -> raw(h)
-      %{"text" => t} -> Phoenix.HTML.Format.text_to_html(t)
-      t -> Phoenix.HTML.Format.text_to_html(to_string(t))
-    end
-  end
-
   def responsive_container(media, do: body) when is_map(media) do
     use Taggart.HTML
 

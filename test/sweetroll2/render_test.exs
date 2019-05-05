@@ -29,32 +29,6 @@ defmodule Sweetroll2.RenderTest do
     end
   end
 
-  describe "content_rendered" do
-    test "renders markdown" do
-      assert safe_to_string(content_rendered(%{"markdown" => "*hi*"})) == "<p><em>hi</em></p>\n"
-
-      assert safe_to_string(content_rendered(%{"markdown" => "*hi*", "html" => "nope"})) ==
-               "<p><em>hi</em></p>\n"
-    end
-
-    test "uses html" do
-      assert safe_to_string(content_rendered(%{"html" => "<em>hi</em>"})) == "<em>hi</em>"
-
-      assert safe_to_string(content_rendered(%{"html" => "<em>hi</em>", "text" => "nope"})) ==
-               "<em>hi</em>"
-    end
-
-    test "uses text" do
-      assert safe_to_string(content_rendered(%{"text" => "<em>hi</em>"})) ==
-               "<p>&lt;em&gt;hi&lt;/em&gt;</p>\n"
-
-      assert safe_to_string(content_rendered(%{"text" => "<em>hi</em>", "xxx" => "whatever"})) ==
-               "<p>&lt;em&gt;hi&lt;/em&gt;</p>\n"
-
-      assert safe_to_string(content_rendered("<em>hi</em>")) == "<p>&lt;em&gt;hi&lt;/em&gt;</p>\n"
-    end
-  end
-
   defp parse_rendered_entry(args) do
     html = safe_to_string(page_entry(args))
 
