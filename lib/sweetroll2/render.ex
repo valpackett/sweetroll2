@@ -36,7 +36,7 @@ defmodule Sweetroll2.Render do
 
     cond do
       doc.type == "entry" || doc.type == "review" ->
-        doc = Post.inline_comments(doc, preload)
+        doc = Post.Comments.inline_comments(doc, preload)
         page_entry(entry: doc, preload: preload, feed_urls: feed_urls)
 
       doc.type == "x-dynamic-feed" ->
@@ -45,7 +45,7 @@ defmodule Sweetroll2.Render do
 
         page_children =
           Enum.slice(children, page * 10, 10)
-          |> Enum.map(&Post.inline_comments(&1, preload))
+          |> Enum.map(&Post.Comments.inline_comments(&1, preload))
 
         # IO.inspect Post.dynamic_urls(preload, allu)
 

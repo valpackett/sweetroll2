@@ -84,7 +84,7 @@
 	<% end %>
 
 	<%= if !@expand_comments do %>
-		<%= for {typ, coms} <- Post.separate_comments(@entry) do %>
+		<%= for {typ, coms} <- Post.Comments.separate_comments(@entry) do %>
 			<% ic = reaction_icon(typ) %>
 			<span class="reaction-count">
 				<%= icon name: ic, class: ["reaction-type-icon", "reaction-type-icon-#{ic}"], title: "number of #{typ}:" %>
@@ -95,7 +95,7 @@
 </div>
 
 <%= if @expand_comments do %>
-	<% {w_replies, facepiles} = Post.separate_comments(@entry) |> Map.split([:replies]) %>
+	<% {w_replies, facepiles} = Post.Comments.separate_comments(@entry) |> Map.split([:replies]) %>
 
 	<div class="entry-facepiles entry-txt">
 		<%= for {typ, coms} <- facepiles do %>
