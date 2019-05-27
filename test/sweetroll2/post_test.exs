@@ -1,50 +1,50 @@
 defmodule Sweetroll2.PostTest do
   use ExUnit.Case, async: true
-  alias Sweetroll2.Post
+  alias Sweetroll2.{Post, Post.Feed, Post.Comments}
   doctest Sweetroll2.Post
 
-  describe "matches_filter?" do
+  describe "Feed.matches_filter?" do
     test "true when matches" do
-      assert Post.matches_filter?(%Post{props: %{"category" => "test", "x" => "y"}}, %{
+      assert Feed.matches_filter?(%Post{props: %{"category" => "test", "x" => "y"}}, %{
                "category" => "test"
              })
 
-      assert Post.matches_filter?(%Post{props: %{"category" => "test", "x" => "y"}}, %{
+      assert Feed.matches_filter?(%Post{props: %{"category" => "test", "x" => "y"}}, %{
                "category" => ["test"]
              })
 
-      assert Post.matches_filter?(%Post{props: %{"category" => ["test"], "x" => "y"}}, %{
+      assert Feed.matches_filter?(%Post{props: %{"category" => ["test"], "x" => "y"}}, %{
                "category" => "test"
              })
 
-      assert Post.matches_filter?(%Post{props: %{"category" => ["test"], "x" => "y"}}, %{
+      assert Feed.matches_filter?(%Post{props: %{"category" => ["test"], "x" => "y"}}, %{
                "category" => ["test"]
              })
     end
 
     test "false when doesn't match" do
-      assert not Post.matches_filter?(%Post{props: %{"category" => [], "x" => "y"}}, %{
+      assert not Feed.matches_filter?(%Post{props: %{"category" => [], "x" => "y"}}, %{
                "category" => "test"
              })
 
-      assert not Post.matches_filter?(%Post{props: %{"category" => [], "x" => "y"}}, %{
+      assert not Feed.matches_filter?(%Post{props: %{"category" => [], "x" => "y"}}, %{
                "category" => ["test"]
              })
 
-      assert not Post.matches_filter?(%Post{props: %{"x" => "y"}}, %{"category" => "test"})
-      assert not Post.matches_filter?(%Post{props: %{"x" => "y"}}, %{"category" => ["test"]})
+      assert not Feed.matches_filter?(%Post{props: %{"x" => "y"}}, %{"category" => "test"})
+      assert not Feed.matches_filter?(%Post{props: %{"x" => "y"}}, %{"category" => ["test"]})
     end
   end
 
-  describe "separate_comments" do
+  describe "Comments.separate_comments" do
     test "does not fail on no comments" do
-      assert Post.separate_comments(%Post{props: %{"comments" => []}}) == %{}
-      assert Post.separate_comments(%Post{props: %{"comments" => nil}}) == %{}
-      assert Post.separate_comments(%Post{}) == %{}
+      assert Comments.separate_comments(%Post{props: %{"comments" => []}}) == %{}
+      assert Comments.separate_comments(%Post{props: %{"comments" => nil}}) == %{}
+      assert Comments.separate_comments(%Post{}) == %{}
     end
 
     test "splits comments" do
-      assert Post.separate_comments(%Post{
+      assert Comments.separate_comments(%Post{
                url: "/yo",
                props: %{
                  "comment" => [
