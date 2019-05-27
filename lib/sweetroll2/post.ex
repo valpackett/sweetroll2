@@ -12,6 +12,8 @@ defmodule Sweetroll2.Post do
   - `published` and `updated` are extracted for storage as DateTime records instead of text
   """
 
+  import Sweetroll2.Convert
+
   use Memento.Table,
     attributes: [:url, :deleted, :published, :updated, :acl, :type, :props, :children]
 
@@ -32,32 +34,6 @@ defmodule Sweetroll2.Post do
       end)
       |> Enum.each(&Memento.Query.write/1)
     end)
-  end
-
-  require Logger
-  alias Sweetroll2.{Convert}
-
-  def map_prop(map, prop_str, prop_atom) do
-    Convert.as_one(
-      map[prop_str] || map[prop_atom] ||
-        map["properties"][prop_str] || map[:properties][prop_atom]
-    )
-  end
-
-  def from_iso8601(nil), do: nil
-
-  def from_iso8601(s) when is_binary(s) do
-    case DateTime.from_iso8601(s) do
-      {:ok, x, _} ->
-        x
-
-      {:error, :missing_offset} ->
-        from_iso8601(s <> "Z")
-
-      err ->
-        Logger.warn("could not parse iso8601: '#{s}' -> #{inspect(err)}")
-        nil
-    end
   end
 
   def from_map(map) do
@@ -91,7 +67,7 @@ defmodule Sweetroll2.Post do
         |> Map.delete("updated")
         |> Map.delete(:updated),
       url: if(is_binary(url), do: url, else: "___WTF"),
-      type: String.replace_prefix(Convert.as_one(map["type"] || map[:type]), "h-", ""),
+      type: String.replace_prefix(as_one(map["type"] || map[:type]), "h-", ""),
       deleted: map["deleted"] || map[:deleted],
       published: from_iso8601(map_prop(map, "published", :published)),
       updated: from_iso8601(map_prop(map, "updated", :updated)),
@@ -124,4 +100,10 @@ defmodule Sweetroll2.Post do
 
   def to_map(x) when is_map(x), do: x
 
+  defp map_prop(map, prop_str, prop_atom) do
+    as_one(
+      map[prop_str] || map[prop_atom] ||
+        map["properties"][prop_str] || map[:properties][prop_atom]
+    )
+  end
 end
