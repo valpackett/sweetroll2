@@ -52,5 +52,4 @@ defmodule Sweetroll2.Convert do
         nil
     end
   end
-
 end

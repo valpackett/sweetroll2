@@ -48,5 +48,4 @@ defmodule Sweetroll2.Post.Feed do
     # TODO get per_page from feed settings
     ceil(Enum.count(entries) / Application.get_env(:sweetroll2, :entries_per_page, 10))
   end
-
 end

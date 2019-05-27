@@ -80,5 +80,4 @@ defmodule Sweetroll2.Post.Comments do
         (val == url || URI.parse(val) == URI.merge(Sweetroll2.our_host(), URI.parse(url)))
     end)
   end
-
 end

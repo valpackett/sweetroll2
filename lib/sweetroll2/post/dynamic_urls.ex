@@ -23,5 +23,4 @@ defmodule Sweetroll2.Post.DynamicUrls do
     Stream.map(allu, &dynamic_urls_for(preload[&1], preload, allu))
     |> Enum.reduce(&Map.merge/2)
   end
-
 end
