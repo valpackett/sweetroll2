@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-	<%= head title: "#{doc_title(@entry)} / #{home(@preload).props["name"]}" %>
+	<%= head title: "#{doc_title(@entry)} / #{home(@posts).props["name"]}" %>
 	<body class="h-entry">
-		<%= header preload: @preload, cur_url: @entry.url, feed_urls: @feed_urls %>
+		<%= header posts: @posts, cur_url: @entry.url, feed_urls: @feed_urls %>
 		<main>
 			<article>
-				<%= entry preload: @preload, cur_url: @entry.url, entry: @entry, feed_urls: @feed_urls, expand_comments: true %>
+				<%= entry posts: @posts, cur_url: @entry.url, entry: @entry, feed_urls: @feed_urls, expand_comments: true %>
 			</article>
 		</main>
 		<%= footer [] %>

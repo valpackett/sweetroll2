@@ -15,7 +15,7 @@
 
 		<div class="cite-info">
 			—
-			<%= @cite["author"] |> as_many |> Stream.map(fn a -> author(a, preload: @preload) end) |> Enum.intersperse(", ") %>
+			<%= @cite["author"] |> as_many |> Stream.map(fn a -> author(a, posts: @posts) end) |> Enum.intersperse(", ") %>
 			on
 			<%= content_tag :a, href: as_one(@cite["url"]), class: "u-url" do %>
 				<%= content_tag :time, datetime: @cite["published"], class: "dt-published" do %>

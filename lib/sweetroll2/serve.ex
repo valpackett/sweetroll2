@@ -30,19 +30,19 @@ defmodule Sweetroll2.Serve do
   get _ do
     conn = put_resp_content_type(conn, "text/html; charset=utf-8")
     url = conn.request_path
-    preload = %Post.DbAsMap{}
+    posts = %Post.DbAsMap{}
     urls_local = Post.urls_local()
-    urls_dyn = Post.DynamicUrls.dynamic_urls(preload, urls_local)
+    urls_dyn = Post.DynamicUrls.dynamic_urls(posts, urls_local)
     {durl, params} = if Map.has_key?(urls_dyn, url), do: urls_dyn[url], else: {url, %{}}
 
     cond do
       !(durl in urls_local) ->
         send_resp(conn, 404, "Page not found")
 
-      !("*" in preload[durl].acl) ->
+      !("*" in posts[durl].acl) ->
         send_resp(conn, 401, "Unauthorized")
 
-      preload[durl].deleted ->
+      posts[durl].deleted ->
         send_resp(conn, 410, "Gone")
 
       true ->
@@ -50,10 +50,10 @@ defmodule Sweetroll2.Serve do
 
         {:safe, data} =
           Render.render_doc(
-            doc: preload[durl],
+            doc: posts[durl],
             params: params,
-            preload: preload,
-            allu: urls_local
+            posts: posts,
+            local_urls: urls_local
           )
 
         chunk(conn, data)

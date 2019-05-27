@@ -18,7 +18,7 @@ defmodule Sweetroll2.RenderTest do
               "content" => %{"markdown" => "*hi* <em>hello</em>"}
             }
           },
-          preload: %{},
+          posts: %{},
           feed_urls: []
         )
 

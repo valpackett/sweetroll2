@@ -28,18 +28,18 @@ defmodule Sweetroll2.Post.Feed do
       not matches_filters?(doc, as_many(feed.props["unfilter"]))
   end
 
-  def filter_feeds(urls, preload) do
+  def filter_feeds(urls, posts) do
     Stream.filter(urls, fn url ->
-      String.starts_with?(url, "/") && preload[url] && preload[url].type == "x-dynamic-feed"
+      String.starts_with?(url, "/") && posts[url] && posts[url].type == "x-dynamic-feed"
     end)
   end
 
-  def filter_feed_entries(doc = %Post{type: "x-dynamic-feed"}, preload, allu) do
-    Stream.filter(allu, &(String.starts_with?(&1, "/") and in_feed?(preload[&1], doc)))
+  def filter_feed_entries(doc = %Post{type: "x-dynamic-feed"}, posts, local_urls) do
+    Stream.filter(local_urls, &(String.starts_with?(&1, "/") and in_feed?(posts[&1], doc)))
     |> Enum.sort(
       &(DateTime.compare(
-          preload[&1].published || DateTime.utc_now(),
-          preload[&2].published || DateTime.utc_now()
+          posts[&1].published || DateTime.utc_now(),
+          posts[&2].published || DateTime.utc_now()
         ) == :gt)
     )
   end

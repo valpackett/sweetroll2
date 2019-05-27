@@ -28,30 +28,28 @@ defmodule Sweetroll2.Render do
   Renders a document, choosing the right template based on its type.
 
   - `doc`: current document
-  - `preload`: `Access` object for retrieval of docs by URL (all fetched docs or `Cache`)
-  - `allu`: *A*t *L*east *L*ocal *U*RLs -- `Enumerable` of either known local URLs or all known URLs
+  - `posts`: `Access` object for retrieval of posts by URL
+  - `local_urls`: Enumerable of at least local URLs -- all URLs are fine, will be filtered anyway
   """
-  def render_doc(doc: doc = %Post{}, params: params, preload: preload, allu: allu) do
-    feed_urls = Post.Feed.filter_feeds(allu, preload)
+  def render_doc(doc: doc = %Post{}, params: params, posts: posts, local_urls: local_urls) do
+    feed_urls = Post.Feed.filter_feeds(local_urls, posts)
 
     cond do
       doc.type == "entry" || doc.type == "review" ->
-        doc = Post.Comments.inline_comments(doc, preload)
-        page_entry(entry: doc, preload: preload, feed_urls: feed_urls)
+        doc = Post.Comments.inline_comments(doc, posts)
+        page_entry(entry: doc, posts: posts, feed_urls: feed_urls)
 
       doc.type == "x-dynamic-feed" ->
         page = params[:page] || 0
-        children = Post.Feed.filter_feed_entries(doc, preload, allu)
+        children = Post.Feed.filter_feed_entries(doc, posts, local_urls)
 
         page_children =
           Enum.slice(children, page * 10, 10)
-          |> Enum.map(&Post.Comments.inline_comments(&1, preload))
-
-        # IO.inspect Post.dynamic_urls(preload, allu)
+          |> Enum.map(&Post.Comments.inline_comments(&1, posts))
 
         page_feed(
           feed: %{doc | children: page_children},
-          preload: preload,
+          posts: posts,
           feed_urls: feed_urls,
           per_page: 10,
           page_count: Post.Feed.feed_page_count(children),
@@ -237,19 +235,19 @@ defmodule Sweetroll2.Render do
     )
   end
 
-  def to_cite(url, preload: preload) when is_bitstring(url) do
-    if preload[url] do
-      preload[url] |> Post.to_map() |> simplify
+  def to_cite(url, posts: posts) when is_bitstring(url) do
+    if posts[url] do
+      posts[url] |> Post.to_map() |> simplify
     else
       url
     end
   end
 
-  def to_cite(entry = %Post{}, preload: _), do: Post.to_map(entry) |> simplify
+  def to_cite(entry = %Post{}, posts: _), do: Post.to_map(entry) |> simplify
 
-  def to_cite(entry, preload: _) when is_map(entry), do: simplify(entry)
+  def to_cite(entry, posts: _) when is_map(entry), do: simplify(entry)
 
-  def author(author, preload: _) when is_map(author) do
+  def author(author, posts: _) when is_map(author) do
     use Taggart.HTML
 
     a href: author["url"], class: "u-author #{if author["name"], do: "h-card", else: ""}" do
@@ -257,16 +255,16 @@ defmodule Sweetroll2.Render do
     end
   end
 
-  def author(author, preload: preload) when is_bitstring(author) do
-    if preload[author] do
-      preload[author] |> Post.to_map() |> simplify |> author(preload: preload)
+  def author(author, posts: posts) when is_bitstring(author) do
+    if posts[author] do
+      posts[author] |> Post.to_map() |> simplify |> author(posts: posts)
     else
-      author(%{"url" => author}, preload: preload)
+      author(%{"url" => author}, posts: posts)
     end
   end
 
-  def home(preload) do
-    preload["/"] ||
+  def home(posts) do
+    posts["/"] ||
       %Post{
         url: "/",
         props: %{"name" => "Create an entry at the root URL (/)!"}

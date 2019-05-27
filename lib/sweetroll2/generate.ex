@@ -7,11 +7,11 @@ defmodule Sweetroll2.Generate do
 
   def dir(), do: System.get_env("OUT_DIR") || @default_dir
 
-  def can_generate(url, preload) do
+  def can_generate(url, posts) when is_map(posts) do
     cond do
       !String.starts_with?(url, "/") -> :nonlocal
-      !Map.has_key?(preload, url) -> :nonexistent
-      !("*" in preload[url].acl) -> :nonpublic
+      !Map.has_key?(posts, url) -> :nonexistent
+      !("*" in posts[url].acl) -> :nonpublic
       true -> :ok
     end
   end
@@ -22,17 +22,17 @@ defmodule Sweetroll2.Generate do
     e -> {:error, e}
   end
 
-  def gen_page(url, preload, urls_dyn) do
+  def gen_page(url, posts, urls_dyn) when is_map(posts) do
     path_dir = Path.join(dir(), url)
     {durl, params} = if Map.has_key?(urls_dyn, url), do: urls_dyn[url], else: {url, %{}}
 
     with {_, {:safe, data}} <-
            {:render,
             render_doc(
-              doc: preload[durl],
+              doc: posts[durl],
               params: params,
-              preload: preload,
-              allu: Map.keys(preload)
+              posts: posts,
+              local_urls: Map.keys(posts) # all URLs is fine
             )},
          {_, :ok} <- {:mkdirp, File.mkdir_p(path_dir)},
          {_, :ok} <- {:write, File.write(Path.join(path_dir, "index.html"), data)},
@@ -44,22 +44,22 @@ defmodule Sweetroll2.Generate do
               {:error, url, e})
   end
 
-  def gen_allowed_pages(urls, preload) do
-    allowed_urls = urls |> Enum.filter(&(can_generate(&1, preload) == :ok))
-    urls_dyn = Post.DynamicUrls.dynamic_urls(preload, allowed_urls)
+  def gen_allowed_pages(urls, posts) when is_map(posts) do
+    allowed_urls = urls |> Enum.filter(&(can_generate(&1, posts) == :ok))
+    urls_dyn = Post.DynamicUrls.dynamic_urls(posts, allowed_urls)
 
     (allowed_urls ++ Map.keys(urls_dyn))
-    |> Task.async_stream(&gen_page(&1, preload, urls_dyn), max_concurrency: @concurrency)
+    |> Task.async_stream(&gen_page(&1, posts, urls_dyn), max_concurrency: @concurrency)
     |> Stream.map(fn {:ok, x} -> x end)
     |> Enum.group_by(&elem(&1, 0))
   end
 
-  def gen_all_allowed_pages(preload) do
-    gen_allowed_pages(Map.keys(preload), preload)
+  def gen_all_allowed_pages(posts) when is_map(posts) do
+    gen_allowed_pages(Map.keys(posts), posts)
   end
 
   # def perform(%{"type" => "generate", "urls" => urls}) do
-  #   preload = Map.new(Memento.transaction!(fn -> Memento.Query.all(Post) end), &{&1.url, &1})
-  #   gen_allowed_pages(urls, preload)
+  #   posts = Map.new(Memento.transaction!(fn -> Memento.Query.all(Post) end), &{&1.url, &1})
+  #   gen_allowed_pages(urls, posts)
   # end
 end

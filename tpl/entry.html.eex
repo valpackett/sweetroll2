@@ -15,19 +15,19 @@
 <% end %>
 
 <%= for irt <- as_many(@entry.props["in-reply-to"]) do %>
-	<%= cite cite: to_cite(irt, preload: @preload), preload: @preload, prop: "in-reply-to" %>
+	<%= cite cite: to_cite(irt, posts: @posts), posts: @posts, prop: "in-reply-to" %>
 <% end %>
 
 <%= for lko <- as_many(@entry.props["like-of"]) do %>
-	<%= cite cite: to_cite(lko, preload: @preload), preload: @preload, prop: "like-of" %>
+	<%= cite cite: to_cite(lko, posts: @posts), posts: @posts, prop: "like-of" %>
 <% end %>
 
 <%= for rpo <- as_many(@entry.props["repost-of"]) do %>
-	<%= cite cite: to_cite(rpo, preload: @preload), preload: @preload, prop: "repost-of" %>
+	<%= cite cite: to_cite(rpo, posts: @posts), posts: @posts, prop: "repost-of" %>
 <% end %>
 
 <%= for bko <- as_many(@entry.props["bookmark-of"]) do %>
-	<%= cite cite: to_cite(bko, preload: @preload), preload: @preload, prop: "bookmark-of" %>
+	<%= cite cite: to_cite(bko, posts: @posts), posts: @posts, prop: "bookmark-of" %>
 <% end %>
 
 <%= if @entry.props["name"] do %>
@@ -54,7 +54,7 @@
 
 	in
 	<%= for feed_url <- @feed_urls do %>
-		<% feed = @preload[feed_url] %>
+		<% feed = @posts[feed_url] %>
 		<%= if Post.Feed.in_feed?(@entry, feed) do %>
 			<%= content_tag :a, href: feed.url, rel: "feed", type: "text/html", class: (if feed.url == @cur_url, do: "current", else: "") do %>
 				<%= as_one feed.props["name"] %>
@@ -118,7 +118,7 @@
 	<%= if w_replies[:replies] do %>
 		<div class="entry-replies">
 			<%= for reply <- w_replies[:replies] do %>
-				<%= cite cite: to_cite(reply, preload: @preload), preload: @preload, prop: "comment" %>
+				<%= cite cite: to_cite(reply, posts: @posts), posts: @posts, prop: "comment" %>
 			<% end %>
 		</div>
 	<% end %>
