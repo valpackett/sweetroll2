@@ -1,4 +1,4 @@
-defmodule Sweetroll2.Doc do
+defmodule Sweetroll2.Post do
   @moduledoc """
   A Mnesia table for storing microformats2 style posts.
   (+ Everything to do with data access. This really should be split up.)
@@ -29,7 +29,7 @@ defmodule Sweetroll2.Doc do
 
     @impl Access
     def fetch(%__MODULE__{}, key) do
-      case :mnesia.dirty_read(Sweetroll2.Doc, key) do
+      case :mnesia.dirty_read(Sweetroll2.Post, key) do
         [x | _] -> {:ok, Memento.Query.Data.load(x)}
         _ -> :error
       end

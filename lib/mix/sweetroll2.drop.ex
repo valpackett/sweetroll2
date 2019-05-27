@@ -7,6 +7,6 @@ defmodule Mix.Tasks.Sweetroll2.Drop do
   @doc false
   def run(_) do
     Memento.start()
-    Memento.Table.delete!(Sweetroll2.Doc)
+    Memento.Table.delete!(Sweetroll2.Post)
   end
 end

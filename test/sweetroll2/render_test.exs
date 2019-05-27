@@ -10,7 +10,7 @@ defmodule Sweetroll2.RenderTest do
 
       %{props: props, html: _html} =
         parse_rendered_entry(
-          entry: %Sweetroll2.Doc{
+          entry: %Sweetroll2.Post{
             published: pubdate,
             url: "/hello",
             props: %{

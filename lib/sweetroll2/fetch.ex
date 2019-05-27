@@ -1,5 +1,5 @@
 defmodule Sweetroll2.Fetch do
-  alias Sweetroll2.{Doc, Convert}
+  alias Sweetroll2.{Post, Convert}
 
   def href_matches?({_, attrs, _}, url) do
     attrs

@@ -3,7 +3,7 @@ defmodule Sweetroll2.Generate do
   @default_dir "out"
 
   require Logger
-  alias Sweetroll2.{Doc, Render}
+  alias Sweetroll2.{Post, Render}
 
   def dir(), do: System.get_env("OUT_DIR") || @default_dir
 
@@ -46,7 +46,7 @@ defmodule Sweetroll2.Generate do
 
   def gen_allowed_pages(urls, preload) do
     allowed_urls = urls |> Enum.filter(&(can_generate(&1, preload) == :ok))
-    urls_dyn = Doc.dynamic_urls(preload, allowed_urls)
+    urls_dyn = Post.dynamic_urls(preload, allowed_urls)
 
     (allowed_urls ++ Map.keys(urls_dyn))
     |> Task.async_stream(&gen_page(&1, preload, urls_dyn), max_concurrency: @concurrency)
@@ -59,7 +59,7 @@ defmodule Sweetroll2.Generate do
   end
 
   # def perform(%{"type" => "generate", "urls" => urls}) do
-  #   preload = Map.new(Memento.transaction!(fn -> Memento.Query.all(Doc) end), &{&1.url, &1})
+  #   preload = Map.new(Memento.transaction!(fn -> Memento.Query.all(Post) end), &{&1.url, &1})
   #   gen_allowed_pages(urls, preload)
   # end
 end

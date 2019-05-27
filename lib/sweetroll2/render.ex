@@ -9,7 +9,7 @@ defmodule Sweetroll2.Render.Tpl do
 end
 
 defmodule Sweetroll2.Render do
-  alias Sweetroll2.{Doc, Markup}
+  alias Sweetroll2.{Post, Markup}
   import Sweetroll2.Convert
   import Sweetroll2.Render.Tpl
   import Phoenix.HTML.Tag
@@ -31,30 +31,30 @@ defmodule Sweetroll2.Render do
   - `preload`: `Access` object for retrieval of docs by URL (all fetched docs or `Cache`)
   - `allu`: *A*t *L*east *L*ocal *U*RLs -- `Enumerable` of either known local URLs or all known URLs
   """
-  def render_doc(doc: doc = %Doc{}, params: params, preload: preload, allu: allu) do
-    feed_urls = Doc.filter_feeds(allu, preload)
+  def render_doc(doc: doc = %Post{}, params: params, preload: preload, allu: allu) do
+    feed_urls = Post.filter_feeds(allu, preload)
 
     cond do
       doc.type == "entry" || doc.type == "review" ->
-        doc = Doc.inline_comments(doc, preload)
+        doc = Post.inline_comments(doc, preload)
         page_entry(entry: doc, preload: preload, feed_urls: feed_urls)
 
       doc.type == "x-dynamic-feed" ->
         page = params[:page] || 0
-        children = Doc.filter_feed_entries(doc, preload, allu)
+        children = Post.filter_feed_entries(doc, preload, allu)
 
         page_children =
           Enum.slice(children, page * 10, 10)
-          |> Enum.map(&Doc.inline_comments(&1, preload))
+          |> Enum.map(&Post.inline_comments(&1, preload))
 
-        # IO.inspect Doc.dynamic_urls(preload, allu)
+        # IO.inspect Post.dynamic_urls(preload, allu)
 
         page_feed(
           feed: %{doc | children: page_children},
           preload: preload,
           feed_urls: feed_urls,
           per_page: 10,
-          page_count: Doc.feed_page_count(children),
+          page_count: Post.feed_page_count(children),
           cur_page: page
         )
 
@@ -97,7 +97,7 @@ defmodule Sweetroll2.Render do
   def reaction_class(:bookmarks), do: "bookmark"
   def reaction_class(_), do: "comment"
 
-  def time_permalink(%Doc{published: published, url: url}, rel: rel) do
+  def time_permalink(%Post{published: published, url: url}, rel: rel) do
     use Taggart.HTML
 
     if published do
@@ -239,13 +239,13 @@ defmodule Sweetroll2.Render do
 
   def to_cite(url, preload: preload) when is_bitstring(url) do
     if preload[url] do
-      preload[url] |> Doc.to_map() |> simplify
+      preload[url] |> Post.to_map() |> simplify
     else
       url
     end
   end
 
-  def to_cite(entry = %Doc{}, preload: _), do: Doc.to_map(entry) |> simplify
+  def to_cite(entry = %Post{}, preload: _), do: Post.to_map(entry) |> simplify
 
   def to_cite(entry, preload: _) when is_map(entry), do: simplify(entry)
 
@@ -259,7 +259,7 @@ defmodule Sweetroll2.Render do
 
   def author(author, preload: preload) when is_bitstring(author) do
     if preload[author] do
-      preload[author] |> Doc.to_map() |> simplify |> author(preload: preload)
+      preload[author] |> Post.to_map() |> simplify |> author(preload: preload)
     else
       author(%{"url" => author}, preload: preload)
     end
@@ -267,7 +267,7 @@ defmodule Sweetroll2.Render do
 
   def home(preload) do
     preload["/"] ||
-      %Doc{
+      %Post{
         url: "/",
         props: %{"name" => "Create an entry at the root URL (/)!"}
       }

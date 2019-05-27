@@ -19,7 +19,7 @@ defmodule Mix.Tasks.Sweetroll2.Import do
 
     for path <- argv do
       Mix.shell().info("Importing #{path}")
-      Sweetroll2.Doc.import_json_lines(File.read!(path), domains)
+      Sweetroll2.Post.import_json_lines(File.read!(path), domains)
       Mix.shell().info("Finished importing #{path}")
     end
   end
