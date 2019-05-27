@@ -8,4 +8,4 @@ config :logger, :console, metadata: [:request_id]
 
 config :floki, :html_parser, Floki.HTMLParser.Html5ever
 
-config :event_bus, topics: [:doc_changed]
+config :event_bus, topics: [:post_changed]

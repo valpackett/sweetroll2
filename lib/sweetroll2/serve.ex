@@ -49,8 +49,8 @@ defmodule Sweetroll2.Serve do
         conn = send_chunked(conn, 200)
 
         {:safe, data} =
-          Render.render_doc(
-            doc: posts[durl],
+          Render.render_post(
+            post: posts[durl],
             params: params,
             posts: posts,
             local_urls: urls_local

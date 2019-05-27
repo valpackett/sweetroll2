@@ -12,20 +12,20 @@ defmodule Sweetroll2.Post.Feed do
   import Sweetroll2.Convert
   alias Sweetroll2.Post
 
-  def matches_filter?(doc = %Post{}, filter) do
+  def matches_filter?(post = %Post{}, filter) do
     Enum.all?(filter, fn {k, v} ->
-      docv = as_many(doc.props[k])
-      Enum.all?(as_many(v), &Enum.member?(docv, &1))
+      vals = as_many(post.props[k])
+      Enum.all?(as_many(v), &Enum.member?(vals, &1))
     end)
   end
 
-  def matches_filters?(doc = %Post{}, filters) do
-    Enum.any?(filters, &matches_filter?(doc, &1))
+  def matches_filters?(post = %Post{}, filters) do
+    Enum.any?(filters, &matches_filter?(post, &1))
   end
 
-  def in_feed?(doc = %Post{}, feed = %Post{}) do
-    matches_filters?(doc, as_many(feed.props["filter"])) and
-      not matches_filters?(doc, as_many(feed.props["unfilter"]))
+  def in_feed?(post = %Post{}, feed = %Post{}) do
+    matches_filters?(post, as_many(feed.props["filter"])) and
+      not matches_filters?(post, as_many(feed.props["unfilter"]))
   end
 
   def filter_feeds(urls, posts) do
@@ -34,8 +34,8 @@ defmodule Sweetroll2.Post.Feed do
     end)
   end
 
-  def filter_feed_entries(doc = %Post{type: "x-dynamic-feed"}, posts, local_urls) do
-    Stream.filter(local_urls, &(String.starts_with?(&1, "/") and in_feed?(posts[&1], doc)))
+  def filter_feed_entries(post = %Post{type: "x-dynamic-feed"}, posts, local_urls) do
+    Stream.filter(local_urls, &(String.starts_with?(&1, "/") and in_feed?(posts[&1], post)))
     |> Enum.sort(
       &(DateTime.compare(
           posts[&1].published || DateTime.utc_now(),

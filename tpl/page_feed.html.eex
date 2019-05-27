@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-	<%= head title: "#{doc_title(@feed)} / #{home(@posts).props["name"]}" %>
+	<%= head title: "#{post_title(@feed)} / #{home(@posts).props["name"]}" %>
 	<body class="h-feed">
 		<%= header posts: @posts, cur_url: @feed.url, feed_urls: @feed_urls %>
 		<main>

@@ -16,8 +16,8 @@ defmodule Sweetroll2.Generate do
     end
   end
 
-  defp render_doc(opts) do
-    Render.render_doc(opts)
+  defp render_post(opts) do
+    Render.render_post(opts)
   rescue
     e -> {:error, e}
   end
@@ -28,11 +28,12 @@ defmodule Sweetroll2.Generate do
 
     with {_, {:safe, data}} <-
            {:render,
-            render_doc(
-              doc: posts[durl],
+            render_post(
+              post: posts[durl],
               params: params,
               posts: posts,
-              local_urls: Map.keys(posts) # all URLs is fine
+              # all URLs is fine
+              local_urls: Map.keys(posts)
             )},
          {_, :ok} <- {:mkdirp, File.mkdir_p(path_dir)},
          {_, :ok} <- {:write, File.write(Path.join(path_dir, "index.html"), data)},

@@ -15,7 +15,7 @@ defmodule Sweetroll2.Post.Comments do
 
   Lists are reversed.
   """
-  def separate_comments(doc = %Post{url: url, props: %{"comment" => comments}})
+  def separate_comments(%Post{url: url, props: %{"comment" => comments}})
       when is_list(comments) do
     Enum.reduce(comments, %{}, fn x, acc ->
       cond do
@@ -30,14 +30,14 @@ defmodule Sweetroll2.Post.Comments do
     end)
   end
 
-  def separate_comments(doc = %Post{}), do: %{}
+  def separate_comments(%Post{}), do: %{}
 
   @doc """
   Inlines posts mentioned by URL in the `comment` property.
 
   The inlined ones are Post structs, but other things in the array remain as-is.
   """
-  def inline_comments(doc = %Post{url: url, props: props}, posts) do
+  def inline_comments(post = %Post{url: url, props: props}, posts) do
     Logger.debug("inline comments: working on #{url}")
 
     comments =
@@ -52,13 +52,13 @@ defmodule Sweetroll2.Post.Comments do
           x
       end)
 
-    Map.put(doc, :props, Map.put(props, "comment", comments))
+    Map.put(post, :props, Map.put(props, "comment", comments))
   end
 
-  def inline_comments(doc_url, posts) when is_bitstring(doc_url) do
-    Logger.debug("inline comments: loading #{doc_url}")
-    res = posts[doc_url]
-    if res != doc_url, do: inline_comments(res, posts), else: res
+  def inline_comments(post_url, posts) when is_bitstring(post_url) do
+    Logger.debug("inline comments: loading #{post_url}")
+    res = posts[post_url]
+    if res != post_url, do: inline_comments(res, posts), else: res
   end
 
   def inline_comments(x, _), do: x

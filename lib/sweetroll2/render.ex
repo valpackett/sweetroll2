@@ -25,30 +25,30 @@ defmodule Sweetroll2.Render do
   deftpl :page_feed, "tpl/page_feed.html.eex"
 
   @doc """
-  Renders a document, choosing the right template based on its type.
+  Renders a post, choosing the right template based on its type.
 
-  - `doc`: current document
+  - `post`: current post
   - `posts`: `Access` object for retrieval of posts by URL
   - `local_urls`: Enumerable of at least local URLs -- all URLs are fine, will be filtered anyway
   """
-  def render_doc(doc: doc = %Post{}, params: params, posts: posts, local_urls: local_urls) do
+  def render_post(post: post = %Post{}, params: params, posts: posts, local_urls: local_urls) do
     feed_urls = Post.Feed.filter_feeds(local_urls, posts)
 
     cond do
-      doc.type == "entry" || doc.type == "review" ->
-        doc = Post.Comments.inline_comments(doc, posts)
-        page_entry(entry: doc, posts: posts, feed_urls: feed_urls)
+      post.type == "entry" || post.type == "review" ->
+        post = Post.Comments.inline_comments(post, posts)
+        page_entry(entry: post, posts: posts, feed_urls: feed_urls)
 
-      doc.type == "x-dynamic-feed" ->
+      post.type == "x-dynamic-feed" ->
         page = params[:page] || 0
-        children = Post.Feed.filter_feed_entries(doc, posts, local_urls)
+        children = Post.Feed.filter_feed_entries(post, posts, local_urls)
 
         page_children =
           Enum.slice(children, page * 10, 10)
           |> Enum.map(&Post.Comments.inline_comments(&1, posts))
 
         page_feed(
-          feed: %{doc | children: page_children},
+          feed: %{post | children: page_children},
           posts: posts,
           feed_urls: feed_urls,
           per_page: 10,
@@ -57,7 +57,7 @@ defmodule Sweetroll2.Render do
         )
 
       true ->
-        {:error, :unknown_type, doc.type}
+        {:error, :unknown_type, post.type}
     end
   end
 
@@ -139,8 +139,8 @@ defmodule Sweetroll2.Render do
     end
   end
 
-  def doc_title(doc) do
-    doc.props["name"] || DateTime.to_iso8601(doc.published)
+  def post_title(post) do
+    post.props["name"] || DateTime.to_iso8601(post.published)
   end
 
   def responsive_container(media, do: body) when is_map(media) do

@@ -29,8 +29,8 @@ defmodule Sweetroll2.Post do
       |> Stream.filter(&(String.length(&1) > 1))
       |> Stream.map(&Jason.decode!/1)
       |> Stream.map(&__MODULE__.from_map/1)
-      |> Stream.map(fn doc ->
-        %{doc | url: Enum.reduce(local_domains, doc.url, &String.replace_prefix(&2, &1, ""))}
+      |> Stream.map(fn post ->
+        %{post | url: Enum.reduce(local_domains, post.url, &String.replace_prefix(&2, &1, ""))}
       end)
       |> Enum.each(&Memento.Query.write/1)
     end)
