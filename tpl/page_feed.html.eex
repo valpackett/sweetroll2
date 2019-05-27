@@ -11,12 +11,12 @@
 			<% end %>
 			<nav>
 				<%= if @cur_page > 0 do %>
-					<%= content_tag :a, href: Post.page_url(@feed.url, @cur_page - 1), rel: "prev" do %>
+					<%= content_tag :a, href: Post.DynamicUrls.page_url(@feed.url, @cur_page - 1), rel: "prev" do %>
 						← newer entries
 					<% end %>
 				<% end %>
 				<%= if @cur_page < @page_count - 1 do %>
-					<%= content_tag :a, href: Post.page_url(@feed.url, @cur_page + 1), rel: "next" do %>
+					<%= content_tag :a, href: Post.DynamicUrls.page_url(@feed.url, @cur_page + 1), rel: "next" do %>
 						earlier entries →
 					<% end %>
 				<% end %>

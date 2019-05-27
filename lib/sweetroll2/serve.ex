@@ -32,7 +32,7 @@ defmodule Sweetroll2.Serve do
     url = conn.request_path
     preload = %Post.DbAsMap{}
     urls_local = Post.urls_local()
-    urls_dyn = Post.dynamic_urls(preload, urls_local)
+    urls_dyn = Post.DynamicUrls.dynamic_urls(preload, urls_local)
     {durl, params} = if Map.has_key?(urls_dyn, url), do: urls_dyn[url], else: {url, %{}}
 
     cond do

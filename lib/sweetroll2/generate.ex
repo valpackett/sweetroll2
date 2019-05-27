@@ -46,7 +46,7 @@ defmodule Sweetroll2.Generate do
 
   def gen_allowed_pages(urls, preload) do
     allowed_urls = urls |> Enum.filter(&(can_generate(&1, preload) == :ok))
-    urls_dyn = Post.dynamic_urls(preload, allowed_urls)
+    urls_dyn = Post.DynamicUrls.dynamic_urls(preload, allowed_urls)
 
     (allowed_urls ++ Map.keys(urls_dyn))
     |> Task.async_stream(&gen_page(&1, preload, urls_dyn), max_concurrency: @concurrency)

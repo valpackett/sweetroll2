@@ -124,25 +124,6 @@ defmodule Sweetroll2.Post do
 
   def to_map(x) when is_map(x), do: x
 
-  def page_url(url, 0), do: url
-  def page_url(url, page), do: String.replace_leading("#{url}/page#{page}", "//", "/")
-
-  alias Sweetroll2.Post.Feed
-
-  def dynamic_urls_for(doc = %__MODULE__{type: "x-dynamic-feed"}, preload, allu) do
-    cnt = Feed.feed_page_count(Feed.filter_feed_entries(doc, preload, allu))
-    Map.new(1..cnt, &{page_url(doc.url, &1), {doc.url, %{page: &1}}})
-  end
-
-  # TODO def dynamic_urls_for(doc = %__MODULE__{type: "x-dynamic-tag-feed"}, preload, allu) do end
-
-  def dynamic_urls_for(_, _, _), do: %{}
-
-  def dynamic_urls(preload, allu) do
-    Stream.map(allu, &dynamic_urls_for(preload[&1], preload, allu))
-    |> Enum.reduce(&Map.merge/2)
-  end
-
   defp lookup_property(%__MODULE__{props: props}, prop), do: props[prop]
 
   defp lookup_property(x, prop) when is_map(x) do
