@@ -1,39 +1,124 @@
 defmodule Sweetroll2.Doc do
-  use Ecto.Schema
-  import Ecto.Changeset
+  @moduledoc """
+  A Mnesia table for storing microformats2 style posts.
+  (+ Everything to do with data access. This really should be split up.)
+
+  Fields and conventions:
+
+  - `type` is the mf2 type without the `h-` prefix, and each entry has one type
+    (practically there was no need for multiple types ever in sweetroll 1)
+  - `props` are the "meat" of the post, the mf2 properties (with string keys) expect the special ones:
+  - `url` is extracted because it's the primary key
+  - `published` and `updated` are extracted for storage as DateTime records instead of text
+  """
+
+  use Memento.Table,
+    attributes: [:url, :deleted, :published, :updated, :acl, :type, :props, :children]
+
+  defmodule Store do
+    @behaviour Access
+    @moduledoc """
+    Access implementation for the doc DB.
+
+    The idea is that you can either use a Map
+    (for a preloaded local snapshot of the DB or for test data)
+    or this blank struct (for live DB access).
+    """
+
+    defstruct []
+
+    @impl Access
+    def fetch(%__MODULE__{}, key) do
+      case :mnesia.dirty_read(Sweetroll2.Doc, key) do
+        [x | _] -> {:ok, Memento.Query.Data.load(x)}
+        _ -> :error
+      end
+    end
+  end
+
+  def urls_local do
+    :mnesia.dirty_select(__MODULE__, [{:"$1", [], [{:element, 2, :"$1"}]}])
+    |> Enum.filter(&String.starts_with?(&1, "/"))
+  end
+
+  def import_json_lines(text, local_domains \\ ["http://localhost", "https://localhost"]) do
+    Memento.transaction!(fn ->
+      text
+      |> String.splitter("\n")
+      |> Stream.filter(&(String.length(&1) > 1))
+      |> Stream.map(&Jason.decode!/1)
+      |> Stream.map(&__MODULE__.from_map/1)
+      |> Stream.map(fn doc ->
+        %{doc | url: Enum.reduce(local_domains, doc.url, &String.replace_prefix(&2, &1, ""))}
+      end)
+      |> Enum.each(&Memento.Query.write/1)
+    end)
+  end
+
   require Logger
   alias Sweetroll2.{Convert}
 
-  @primary_key {:url, :string, []}
-
-  schema "docs" do
-    field :type, :string
-    field :deleted, :boolean
-    field :published, :utc_datetime
-    field :updated, :utc_datetime
-    field :acl, {:array, :string}
-    field :props, :map
-    field :children, {:array, :map}
+  def map_prop(map, prop_str, prop_atom) do
+    Convert.as_one(
+      map[prop_str] || map[prop_atom] ||
+        map["properties"][prop_str] || map[:properties][prop_atom]
+    )
   end
 
-  @real_fields [:url, :type, :deleted, :published, :updated, :acl, :children]
+  def from_iso8601(nil), do: nil
 
-  def atomize_real_key({"url", v}), do: {:url, v}
-  def atomize_real_key({"type", v}), do: {:type, v}
-  def atomize_real_key({"deleted", v}), do: {:deleted, v}
-  def atomize_real_key({"published", v}), do: {:published, v}
-  def atomize_real_key({"updated", v}), do: {:updated, v}
-  def atomize_real_key({"acl", v}), do: {:acl, v}
-  def atomize_real_key({"children", v}), do: {:children, v}
-  def atomize_real_key({k, v}), do: {k, v}
+  def from_iso8601(s) when is_binary(s) do
+    case DateTime.from_iso8601(s) do
+      {:ok, x, _} ->
+        x
 
-  def changeset(struct, params) do
-    {allowed, others} = params |> Map.new(&atomize_real_key/1) |> Map.split(@real_fields)
-    params = Map.put(allowed, :props, others)
+      {:error, :missing_offset} ->
+        from_iso8601(s <> "Z")
 
-    struct
-    |> cast(params, [:props | @real_fields])
-    |> validate_required([:url, :type, :published])
+      err ->
+        Logger.warn("could not parse iso8601: '#{s}' -> #{inspect(err)}")
+        nil
+    end
+  end
+
+  def from_map(map) do
+    url = map_prop(map, "url", :url)
+
+    %__MODULE__{
+      props:
+        (map["properties"] || %{})
+        |> Map.merge(map[:properties] || %{})
+        |> Map.merge(map["props"] || %{})
+        |> Map.merge(map[:props] || %{})
+        |> Map.merge(
+          map
+          |> Map.delete("properties")
+          |> Map.delete(:properties)
+          |> Map.delete("props")
+          |> Map.delete(:props)
+          |> Map.delete("type")
+          |> Map.delete(:type)
+          |> Map.delete("deleted")
+          |> Map.delete(:deleted)
+          |> Map.delete("acl")
+          |> Map.delete(:acl)
+          |> Map.delete("children")
+          |> Map.delete(:children)
+        )
+        |> Map.delete("url")
+        |> Map.delete(:url)
+        |> Map.delete("published")
+        |> Map.delete(:published)
+        |> Map.delete("updated")
+        |> Map.delete(:updated),
+      url: if(is_binary(url), do: url, else: "___WTF"),
+      type: String.replace_prefix(Convert.as_one(map["type"] || map[:type]), "h-", ""),
+      deleted: map["deleted"] || map[:deleted],
+      published: from_iso8601(map_prop(map, "published", :published)),
+      updated: from_iso8601(map_prop(map, "updated", :updated)),
+      acl: map["acl"] || map[:acl],
+      children: map["children"] || map[:children]
+    }
   end
 
   def to_map(%__MODULE__{
@@ -47,11 +132,13 @@ defmodule Sweetroll2.Doc do
         children: children
       }) do
     props
+    |> (fn x ->
+          if published, do: Map.put(x, "published", DateTime.to_iso8601(published)), else: x
+        end).()
+    |> (fn x -> if updated, do: Map.put(x, "updated", DateTime.to_iso8601(updated)), else: x end).()
     |> Map.put("url", url)
     |> Map.put("type", type)
     |> Map.put("deleted", deleted)
-    |> Map.put("published", published)
-    |> Map.put("updated", updated)
     |> Map.put("acl", acl)
     |> Map.put("children", children)
   end
@@ -82,9 +169,12 @@ defmodule Sweetroll2.Doc do
 
   def filter_feed_entries(doc = %__MODULE__{type: "x-dynamic-feed"}, preload, allu) do
     Stream.filter(allu, &(String.starts_with?(&1, "/") and in_feed?(preload[&1], doc)))
-    |> Enum.sort(&(DateTime.compare(preload[&1].published, preload[&2].published) == :gt))
-
-    # TODO rely on sorting from repo (should be sorted in Generate too)
+    |> Enum.sort(
+      &(DateTime.compare(
+          preload[&1].published || DateTime.utc_now(),
+          preload[&2].published || DateTime.utc_now()
+        ) == :gt)
+    )
   end
 
   def feed_page_count(entries) do

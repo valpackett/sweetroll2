@@ -14,14 +14,21 @@ defmodule Sweetroll2.Application do
       end
 
     children = [
-      {Sweetroll2.Repo, []},
-      Sweetroll2.Cache,
-      Sweetroll2.Notify,
-      {Sweetroll2.Queue, repo: Sweetroll2.Repo, max_demand: 69},
       Plug.Cowboy.child_spec(scheme: :http, plug: Sweetroll2.Serve, options: server_opts)
     ]
 
     opts = [strategy: :one_for_one, name: Sweetroll2.Supervisor]
     Supervisor.start_link(children, opts)
+  end
+
+  def setup!(nodes \\ [node()]) do
+    if path = Application.get_env(:mnesia, :dir) do
+      :ok = File.mkdir_p!(path)
+    end
+
+    Memento.stop()
+    Memento.Schema.create(nodes)
+    Memento.start()
+    Memento.Table.create!(Sweetroll2.Doc, disc_copies: nodes)
   end
 end

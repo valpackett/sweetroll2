@@ -1,6 +1,6 @@
 use Mix.Config
 
-config :sweetroll2, ecto_repos: [Sweetroll2.Repo]
+config :mnesia, dir: 'priv/db/#{Mix.env()}/#{node()}'
 
 config :microformats2, atomize_keys: false
 

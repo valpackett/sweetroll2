@@ -1,7 +1,7 @@
 defmodule Sweetroll2.Serve do
   @parsers [:urlencoded, {:multipart, length: 20_000_000}, :json]
 
-  alias Sweetroll2.{Doc, Cache, Render}
+  alias Sweetroll2.{Doc, Render}
 
   use Plug.Router
 
@@ -30,8 +30,8 @@ defmodule Sweetroll2.Serve do
   get _ do
     conn = put_resp_content_type(conn, "text/html; charset=utf-8")
     url = conn.request_path
-    preload = %Cache{}
-    urls_local = Cache.urls_local()
+    preload = %Doc.Store{}
+    urls_local = Doc.urls_local()
     urls_dyn = Doc.dynamic_urls(preload, urls_local)
     {durl, params} = if Map.has_key?(urls_dyn, url), do: urls_dyn[url], else: {url, %{}}
 

@@ -75,13 +75,17 @@ defmodule Sweetroll2.Markup do
   end
 
   def highlight_code({"pre", attrs, content}) when is_list(content) do
-    highlight_code(
-      {"pre", attrs,
-       Enum.find(content, nil, fn
-         {"code", _, _} -> true
-         _ -> false
-       end)}
-    )
+    code_tag =
+      Enum.find(content, nil, fn
+        {"code", _, _} -> true
+        _ -> false
+      end)
+
+    if code_tag && length(Enum.filter(content, &is_tuple/1)) < 3 do
+      highlight_code({"pre", attrs, code_tag})
+    else
+      {"pre", attrs, content}
+    end
   end
 
   def highlight_code({tag, attrs, content}), do: {tag, attrs, highlight_code(content)}

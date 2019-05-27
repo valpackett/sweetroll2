@@ -13,14 +13,13 @@ defmodule Sweetroll2.MixProject do
 
   def application do
     [
-      extra_applications: [:logger, :httpotion, :con_cache, :event_bus],
+      extra_applications: [:logger, :httpotion, :event_bus],
       mod: {Sweetroll2.Application, []}
     ]
   end
 
   defp deps do
     [
-      # Data
       {:jason, "~> 1.1"},
       {:earmark, "~> 1.3"},
       {:phoenix_html, "~> 2.13"},
@@ -33,18 +32,18 @@ defmodule Sweetroll2.MixProject do
       {:html5ever, "~> 0.7.0"},
       {:rustled_syntect, "~> 0.1"},
       {:microformats2, git: "https://github.com/ckruse/microformats2-elixir"},
-      {:con_cache, "~> 0.13"},
+      # {:timex, "~> 3.0"}
 
-      # DB
-      {:ecto_sql, "~> 3.0"},
-      {:ecto_job, "~> 2.0"},
-      {:postgrex, ">= 0.0.0"},
+      # {:hammer, "~> 6.0"},
+      # {:quantum, "~> 2.3"}
 
-      # HTTP
+      {:memento, "~> 0.3.1"},
+      {:que, "~> 0.10.0"},
       {:httpotion, "~> 3.1"},
       {:plug_cowboy, "~> 2.0"},
       {:sse, "~> 0.4"},
       {:event_bus, ">= 1.6.0"}
+      # {:plug_micropub, git: "https://github.com/bismark/plug_micropub"},
     ]
   end
 end

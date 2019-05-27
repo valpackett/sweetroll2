@@ -1,5 +1,5 @@
 defmodule Sweetroll2.Fetch do
-  alias Sweetroll2.{Doc, Repo, Convert}
+  alias Sweetroll2.{Doc, Convert}
 
   def href_matches?({_, attrs, _}, url) do
     attrs
@@ -34,16 +34,5 @@ defmodule Sweetroll2.Fetch do
           {:no_mention, check_mention}
         end
     end
-  end
-
-  def perform(multi = %Ecto.Multi{}, data = %{"type" => "fetch", "url" => url}) do
-    {:ok, data} = fetch(url, check_mention: data["check_mention"])
-
-    multi
-    |> Ecto.Multi.insert(:docs, Doc.changeset(%Doc{}, data),
-      on_conflict: :replace_all,
-      conflict_target: :url
-    )
-    |> Repo.transaction()
   end
 end

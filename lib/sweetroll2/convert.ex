@@ -6,11 +6,9 @@ defmodule Sweetroll2.Convert do
   def as_many(xs) when is_list(xs), do: xs
   def as_many(x), do: [x]
 
-  def simplify(s = %{__struct__: _}), do: s
-
   def simplify(map) when is_map(map) do
     type = map[:type] || map["type"]
-    props = map[:properties] || map["properties"]
+    props = map[:properties] || map["properties"] || map[:props]
 
     if type && props && is_map(props) do
       props
