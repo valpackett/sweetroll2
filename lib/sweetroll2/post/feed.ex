@@ -1,5 +1,12 @@
 defmodule Sweetroll2.Post.Feed do
   @moduledoc """
+  Data helpers for displaying dynamic feeds.
+
+  A feed is a special post with type `"x-dynamic-feed"` that contains configuration,
+  such as filters that determine which posts end up in the feed.
+  When rendering a dynamic feed, Sweetroll2 will automatically insert matching posts.
+
+  Feeds are paginated via dynamic URLs.
   """
 
   import Sweetroll2.Convert

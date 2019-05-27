@@ -1,5 +1,6 @@
 defmodule Sweetroll2.Post.Comments do
   @moduledoc """
+  Data helpers for presenting post responses/reactions.
   """
 
   require Logger
@@ -32,6 +33,9 @@ defmodule Sweetroll2.Post.Comments do
   def separate_comments(doc = %Post{}), do: %{}
 
   @doc """
+  Inlines posts mentioned by URL in the `comment` property.
+
+  The inlined ones are Post structs, but other things in the array remain as-is.
   """
   def inline_comments(doc = %Post{url: url, props: props}, preload) do
     Logger.debug("inline comments: working on #{url}")

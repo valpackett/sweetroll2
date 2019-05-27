@@ -1,5 +1,8 @@
 defmodule Sweetroll2.Post.DynamicUrls do
   @moduledoc """
+  Rules for special post types that create more than one URL. Currently:
+
+  - dynamic feeds are paginated, so they create `feed_url/pageN` for their pages
   """
 
   alias Sweetroll2.Post

@@ -36,6 +36,13 @@ defmodule Sweetroll2.Post do
     end)
   end
 
+  @doc """
+  Converts an mf2/jf2 map to a Post struct.
+
+  Keys can be either strings or atoms on the top level.
+  Should be strings inside properties though
+  (we don't touch it here and the rest of the system expects strings).
+  """
   def from_map(map) do
     url = map_prop(map, "url", :url)
 
@@ -76,6 +83,9 @@ defmodule Sweetroll2.Post do
     }
   end
 
+  @doc """
+  Converts a Post struct to a "simplified" (jf2-ish) map.
+  """
   def to_map(%__MODULE__{
         props: props,
         url: url,
