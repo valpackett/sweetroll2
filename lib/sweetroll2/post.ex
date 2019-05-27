@@ -15,27 +15,6 @@ defmodule Sweetroll2.Post do
   use Memento.Table,
     attributes: [:url, :deleted, :published, :updated, :acl, :type, :props, :children]
 
-  defmodule Store do
-    @behaviour Access
-    @moduledoc """
-    Access implementation for the doc DB.
-
-    The idea is that you can either use a Map
-    (for a preloaded local snapshot of the DB or for test data)
-    or this blank struct (for live DB access).
-    """
-
-    defstruct []
-
-    @impl Access
-    def fetch(%__MODULE__{}, key) do
-      case :mnesia.dirty_read(Sweetroll2.Post, key) do
-        [x | _] -> {:ok, Memento.Query.Data.load(x)}
-        _ -> :error
-      end
-    end
-  end
-
   def urls_local do
     :mnesia.dirty_select(__MODULE__, [{:"$1", [], [{:element, 2, :"$1"}]}])
     |> Enum.filter(&String.starts_with?(&1, "/"))
