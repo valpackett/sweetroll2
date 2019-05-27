@@ -32,7 +32,7 @@ defmodule Sweetroll2.Render do
   - `allu`: *A*t *L*east *L*ocal *U*RLs -- `Enumerable` of either known local URLs or all known URLs
   """
   def render_doc(doc: doc = %Post{}, params: params, preload: preload, allu: allu) do
-    feed_urls = Post.filter_feeds(allu, preload)
+    feed_urls = Post.Feed.filter_feeds(allu, preload)
 
     cond do
       doc.type == "entry" || doc.type == "review" ->
@@ -41,7 +41,7 @@ defmodule Sweetroll2.Render do
 
       doc.type == "x-dynamic-feed" ->
         page = params[:page] || 0
-        children = Post.filter_feed_entries(doc, preload, allu)
+        children = Post.Feed.filter_feed_entries(doc, preload, allu)
 
         page_children =
           Enum.slice(children, page * 10, 10)
@@ -54,7 +54,7 @@ defmodule Sweetroll2.Render do
           preload: preload,
           feed_urls: feed_urls,
           per_page: 10,
-          page_count: Post.feed_page_count(children),
+          page_count: Post.Feed.feed_page_count(children),
           cur_page: page
         )
 

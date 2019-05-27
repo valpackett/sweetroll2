@@ -124,48 +124,13 @@ defmodule Sweetroll2.Post do
 
   def to_map(x) when is_map(x), do: x
 
-  def matches_filter?(doc = %__MODULE__{}, filter) do
-    Enum.all?(filter, fn {k, v} ->
-      docv = Convert.as_many(doc.props[k])
-      Enum.all?(Convert.as_many(v), &Enum.member?(docv, &1))
-    end)
-  end
-
-  def matches_filters?(doc = %__MODULE__{}, filters) do
-    Enum.any?(filters, &matches_filter?(doc, &1))
-  end
-
-  def in_feed?(doc = %__MODULE__{}, feed = %__MODULE__{}) do
-    matches_filters?(doc, Convert.as_many(feed.props["filter"])) and
-      not matches_filters?(doc, Convert.as_many(feed.props["unfilter"]))
-  end
-
-  def filter_feeds(urls, preload) do
-    Stream.filter(urls, fn url ->
-      String.starts_with?(url, "/") && preload[url] && preload[url].type == "x-dynamic-feed"
-    end)
-  end
-
-  def filter_feed_entries(doc = %__MODULE__{type: "x-dynamic-feed"}, preload, allu) do
-    Stream.filter(allu, &(String.starts_with?(&1, "/") and in_feed?(preload[&1], doc)))
-    |> Enum.sort(
-      &(DateTime.compare(
-          preload[&1].published || DateTime.utc_now(),
-          preload[&2].published || DateTime.utc_now()
-        ) == :gt)
-    )
-  end
-
-  def feed_page_count(entries) do
-    # TODO get per_page from feed settings
-    ceil(Enum.count(entries) / Application.get_env(:sweetroll2, :entries_per_page, 10))
-  end
-
   def page_url(url, 0), do: url
   def page_url(url, page), do: String.replace_leading("#{url}/page#{page}", "//", "/")
 
+  alias Sweetroll2.Post.Feed
+
   def dynamic_urls_for(doc = %__MODULE__{type: "x-dynamic-feed"}, preload, allu) do
-    cnt = feed_page_count(filter_feed_entries(doc, preload, allu))
+    cnt = Feed.feed_page_count(Feed.filter_feed_entries(doc, preload, allu))
     Map.new(1..cnt, &{page_url(doc.url, &1), {doc.url, %{page: &1}}})
   end
 
