@@ -270,4 +270,22 @@ defmodule Sweetroll2.Render do
         props: %{"name" => "Create an entry at the root URL (/)!"}
       }
   end
+
+  def feed_urls_filter(feed_urls, posts: posts, show_prop: show_prop, order_prop: order_prop) do
+    feed_urls
+    |> Stream.filter(fn url ->
+      try do
+        Access.get(as_one(posts[url].props["feed-settings"]), show_prop, true)
+      rescue
+        _ -> true
+      end
+    end)
+    |> Enum.sort_by(fn url ->
+      try do
+        Access.get(as_one(posts[url].props["feed-settings"]), order_prop, 1)
+      rescue
+        _ -> 1
+      end
+    end)
+  end
 end

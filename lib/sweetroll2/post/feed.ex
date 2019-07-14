@@ -30,12 +30,17 @@ defmodule Sweetroll2.Post.Feed do
 
   def filter_feeds(urls, posts) do
     Stream.filter(urls, fn url ->
-      String.starts_with?(url, "/") && posts[url] && posts[url].type == "x-dynamic-feed"
+      posts[url] && posts[url].type == "x-dynamic-feed" && !(posts[url].deleted || false) &&
+        String.starts_with?(url, "/")
     end)
   end
 
-  def filter_feed_entries(post = %Post{type: "x-dynamic-feed"}, posts, local_urls) do
-    Stream.filter(local_urls, &(String.starts_with?(&1, "/") and in_feed?(posts[&1], post)))
+  def filter_feed_entries(feed = %Post{type: "x-dynamic-feed"}, posts, local_urls) do
+    Stream.filter(
+      local_urls,
+      &(!(posts[&1].deleted || false) and String.starts_with?(&1, "/") and
+          in_feed?(posts[&1], feed))
+    )
     |> Enum.sort(
       &(DateTime.compare(
           posts[&1].published || DateTime.utc_now(),
