@@ -8,9 +8,14 @@ defmodule Sweetroll2.Micropub do
   @impl true
   def handle_create(type, properties, token) do
     if Bearer.is_allowed?(token, :create) do
-      # TODO allow custom url
+      IO.inspect(type)
+      IO.inspect(properties)
+      ctxs = contexts_for(properties)
+      fetch_contexts(ctxs)
+
       cat = category_for(properties)
-      url = "/#{cat}/#{slug_for(properties)}"
+      url = as_one(properties["url"]) || "/#{cat}/#{slug_for(properties)}"
+      Logger.info("URL '#{url}'")
 
       properties =
         properties
@@ -19,12 +24,17 @@ defmodule Sweetroll2.Micropub do
       params = %{type: type, properties: properties, url: url}
 
       Memento.transaction!(fn ->
-        %{Post.from_map(params) | acl: ["*"]}
-        |> Map.update(:published, DateTime.utc_now(), &(&1 || DateTime.utc_now()))
-        |> Memento.Query.write()
+        post = Memento.Query.read(Post, url)
+        if is_nil(post) or post.deleted do
+          %{Post.from_map(params) | acl: ["*"]}
+          |> Map.update(:published, DateTime.utc_now(), &(&1 || DateTime.utc_now()))
+          |> Memento.Query.write()
+          {:ok, :created, url}
+        else
+          Logger.error("URL already exists '#{url}'")
+          {:error, :invalid_request, :url_exists}
+        end
       end)
-
-      {:ok, :created, url}
     else
       {:error, :insufficient_scope, :unauthorized}
     end
@@ -37,6 +47,9 @@ defmodule Sweetroll2.Micropub do
 
       Memento.transaction!(fn ->
         post = Memento.Query.read(Post, url)
+
+        # We want to e.g. notify posts that aren't mentioned anymore too
+        ctxs = contexts_for(post.props)
 
         props =
           Enum.reduce(replace, post.props, fn {k, v}, props ->
@@ -61,6 +74,7 @@ defmodule Sweetroll2.Micropub do
               Map.delete(props, k)
           end)
 
+        fetch_contexts(MapSet.union(contexts_for(props), ctxs))
         Memento.Query.write(%{post | props: props, updated: DateTime.utc_now()})
       end)
 
@@ -78,6 +92,8 @@ defmodule Sweetroll2.Micropub do
       Memento.transaction!(fn ->
         post = Memento.Query.read(Post, url)
         Memento.Query.write(%{post | deleted: true})
+        ctxs = contexts_for(post.props)
+        fetch_contexts(ctxs)
       end)
 
       :ok
@@ -94,6 +110,8 @@ defmodule Sweetroll2.Micropub do
       Memento.transaction!(fn ->
         post = Memento.Query.read(Post, url)
         Memento.Query.write(%{post | deleted: false})
+        ctxs = contexts_for(post.props)
+        fetch_contexts(ctxs)
       end)
 
       :ok
@@ -195,4 +213,16 @@ defmodule Sweetroll2.Micropub do
   defp category_for(%{"bookmark-of" => x}) when is_list(x) and length(x) != 0, do: "bookmarks"
   defp category_for(%{"rsvp" => x}) when is_list(x) and length(x) != 0, do: "rsvp"
   defp category_for(_), do: "notes"
+
+  defp contexts_for(props) do
+    (as_many(props["in-reply-to"]) ++ as_many(props["like-of"]) ++ as_many(props["repost-of"]) ++ as_many(props["quotation-of"]) ++ as_many(props["bookmark-of"]))
+    |> Enum.map(&Post.as_url/1)
+    |> MapSet.new()
+  end
+
+  defp fetch_contexts(ctxs) do
+    for url <- ctxs do
+      Que.add(Sweetroll2.Job.Fetch, url: url, check_mention: nil)
+    end
+  end
 end

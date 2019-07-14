@@ -1,4 +1,4 @@
-defmodule Sweetroll2.Generate do
+defmodule Sweetroll2.Job.Generate do
   @concurrency 8
   @default_dir "out"
 

@@ -126,7 +126,7 @@ defmodule Sweetroll2.Post do
       |> Map.put("acl", acl)
 
     %{
-      type: as_many(type),
+      type: as_many("h-" <> type),
       properties: for({k, v} <- props, into: %{}, do: {k, as_many(v)}),
       children: children
     }
@@ -148,4 +148,7 @@ defmodule Sweetroll2.Post do
         map["properties"][prop_str] || map[:properties][prop_atom]
     )
   end
+
+  def as_url(s) when is_bitstring(s), do: s
+  def as_url(m) when is_map(m), do: map_prop(m, "url", :url)
 end

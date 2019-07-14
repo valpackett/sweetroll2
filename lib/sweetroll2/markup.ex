@@ -29,9 +29,13 @@ defmodule Sweetroll2.Markup do
   Parse a JSON content object into a tree.
   """
   def content_to_tree(%{"markdown" => md}), do: md |> Earmark.as_html!() |> html_part_to_tree
+  def content_to_tree(%{markdown: md}), do: md |> Earmark.as_html!() |> html_part_to_tree
   def content_to_tree(%{"html" => h}), do: h |> html_part_to_tree
+  def content_to_tree(%{html: h}), do: h |> html_part_to_tree
   def content_to_tree(%{"value" => t}), do: t |> text_to_tree
+  def content_to_tree(%{value: t}), do: t |> text_to_tree
   def content_to_tree(%{"text" => t}), do: t |> text_to_tree
+  def content_to_tree(%{text: t}), do: t |> text_to_tree
   def content_to_tree(x), do: x |> to_string |> text_to_tree
 
   @doc """

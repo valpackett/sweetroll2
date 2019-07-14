@@ -1,5 +1,6 @@
-defmodule Sweetroll2.Fetch do
+defmodule Sweetroll2.Job.Fetch do
   alias Sweetroll2.{Post, Convert}
+  use Que.Worker, concurrency: 4
 
   def href_matches?({_, attrs, _}, url) do
     attrs
@@ -14,6 +15,7 @@ defmodule Sweetroll2.Fetch do
       u.scheme != "http" && u.scheme != "https" ->
         {:non_http_scheme, u.scheme}
 
+      # TODO: check IP address ranges too.. or just ban IP addreses
       u.host == nil || u.host == "localhost" ->
         {:local_host, u.host}
 
@@ -34,5 +36,13 @@ defmodule Sweetroll2.Fetch do
           {:no_mention, check_mention}
         end
     end
+  end
+
+  def perform(url: url, check_mention: check_mention) do
+    {:ok, mf} = fetch(url, check_mention: check_mention)
+    Memento.transaction!(fn ->
+      %{ Post.from_map(mf) | url: url }
+      |> Memento.Query.write()
+    end)
   end
 end
