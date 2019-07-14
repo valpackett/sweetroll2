@@ -22,6 +22,6 @@
 				<% end %>
 			</nav>
 		</main>
-		<%= footer [] %>
+		<%= footer logged_in: @logged_in %>
 	</body>
 </html>

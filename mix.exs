@@ -34,6 +34,9 @@ defmodule Sweetroll2.MixProject do
       {:microformats2, git: "https://github.com/ckruse/microformats2-elixir"},
       # {:timex, "~> 3.0"}
 
+      {:argon2_elixir, "~> 2.0"},
+      {:nanoid, "~> 2.0.1"},
+
       # {:hammer, "~> 6.0"},
       # {:quantum, "~> 2.3"}
 

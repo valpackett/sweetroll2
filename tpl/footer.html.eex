@@ -1,4 +1,10 @@
 <footer>
+	<%= if @logged_in do %>
+		<form method="POST" action="/auth/logout">
+			<%= tag :input, hidden: true, type: "hidden", name: "_csrf_token", value: Plug.CSRFProtection.get_csrf_token() %>
+			<button type="submit">log out</button>
+		</form>
+	<% end %>
 	<div class="h-card p-author">
 		<a href="https://github.com/myfreeweb" rel="me" title="myfreeweb on GitHub"><%= icon name: "octoface" %>myfreeweb</a>
 	</div>

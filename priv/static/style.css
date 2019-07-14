@@ -108,7 +108,7 @@ header nav a:nth-child(5) { text-shadow: -1px -1px 0 #607cf5, 1px -1px 0 #607cf5
 header nav a:nth-child(6) { text-shadow: -1px -1px 0 #b04af8, 1px -1px 0 #b04af8, -1px 1px 0 #b04af8, 2px 2px 0 #d65af5, 3px 3px 6px #a11dff, -3px -3px 13px #c53cf8; }
 
 main { grid-area: main; }
-article {
+article, .block-thingy {
 	background: #fbfbfb; color: #444;
 	border: 3px solid #32E0F0;
 	border-radius: 12px;

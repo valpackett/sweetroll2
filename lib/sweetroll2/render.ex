@@ -23,6 +23,7 @@ defmodule Sweetroll2.Render do
   deftpl :cite, "tpl/cite.html.eex"
   deftpl :page_entry, "tpl/page_entry.html.eex"
   deftpl :page_feed, "tpl/page_feed.html.eex"
+  deftpl :page_login, "tpl/page_login.html.eex"
 
   @doc """
   Renders a post, choosing the right template based on its type.
@@ -30,14 +31,21 @@ defmodule Sweetroll2.Render do
   - `post`: current post
   - `posts`: `Access` object for retrieval of posts by URL
   - `local_urls`: Enumerable of at least local URLs -- all URLs are fine, will be filtered anyway
+  - `logged_in`: bool
   """
-  def render_post(post: post = %Post{}, params: params, posts: posts, local_urls: local_urls) do
+  def render_post(
+        post: post = %Post{},
+        params: params,
+        posts: posts,
+        local_urls: local_urls,
+        logged_in: logged_in
+      ) do
     feed_urls = Post.Feed.filter_feeds(local_urls, posts)
 
     cond do
       post.type == "entry" || post.type == "review" ->
         post = Post.Comments.inline_comments(post, posts)
-        page_entry(entry: post, posts: posts, feed_urls: feed_urls)
+        page_entry(entry: post, posts: posts, feed_urls: feed_urls, logged_in: logged_in)
 
       post.type == "x-dynamic-feed" ->
         page = params[:page] || 0
@@ -53,7 +61,8 @@ defmodule Sweetroll2.Render do
           feed_urls: feed_urls,
           per_page: 10,
           page_count: Post.Feed.feed_page_count(children),
-          cur_page: page
+          cur_page: page,
+          logged_in: logged_in
         )
 
       true ->

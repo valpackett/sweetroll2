@@ -33,7 +33,8 @@ defmodule Sweetroll2.Generate do
               params: params,
               posts: posts,
               # all URLs is fine
-              local_urls: Map.keys(posts)
+              local_urls: Map.keys(posts),
+              logged_in: false
             )},
          {_, :ok} <- {:mkdirp, File.mkdir_p(path_dir)},
          {_, :ok} <- {:write, File.write(Path.join(path_dir, "index.html"), data)},

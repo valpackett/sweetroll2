@@ -1,7 +1,7 @@
 defmodule Sweetroll2.Serve do
   @parsers [:urlencoded, {:multipart, length: 20_000_000}, :json]
 
-  alias Sweetroll2.{Post, Render}
+  alias Sweetroll2.{Auth, Post, Render}
 
   use Plug.Router
 
@@ -25,7 +25,13 @@ defmodule Sweetroll2.Serve do
   plug Plug.MethodOverride
   plug :match
   plug Plug.Parsers, parsers: @parsers, json_decoder: Jason
+  plug Auth.Session
+  plug :fetch_session
+  plug :skip_csrf_anon
+  plug Plug.CSRFProtection
   plug :dispatch
+
+  forward "/auth", to: Auth.ServeSession
 
   get _ do
     conn = put_resp_content_type(conn, "text/html; charset=utf-8")
@@ -46,22 +52,31 @@ defmodule Sweetroll2.Serve do
         send_resp(conn, 410, "Gone")
 
       true ->
-        conn = send_chunked(conn, 200)
-
+        # NOTE: chunking without special considerations would break CSRF tokens
         {:safe, data} =
           Render.render_post(
             post: posts[durl],
             params: params,
             posts: posts,
-            local_urls: urls_local
+            local_urls: urls_local,
+            logged_in: !is_nil(IO.inspect(Auth.Session.current_token(conn)))
           )
 
-        chunk(conn, data)
-        conn
+        send_resp(conn, :ok, data)
     end
   end
 
   def handle_errors(conn, %{kind: _kind, reason: _reason, stack: _stack}) do
     send_resp(conn, 500, "Something went wrong")
+  end
+
+  defp skip_csrf_anon(conn, opts) do
+    # we don't have anonymous sessions, so we can't exactly store the CSRF token in a session
+    # when logged out (this enables the login form to work)
+    if is_nil(Auth.Session.current_token(conn)) do
+      put_private(conn, :plug_skip_csrf_protection, true)
+    else
+      conn
+    end
   end
 end

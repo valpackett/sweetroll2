@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+	<%= head title: "Log In" %>
+	<body>
+		<header>
+			<h1>The Sweetroll2 Security Theater</h1>
+		</header>
+		<main>
+			<style>
+form { padding: 1rem; }
+input, button { width: 100%; margin: 0 0 1em; }
+			</style>
+
+			<form method="POST" action="" class="block-thingy">
+				<input name="pwd" type="password" placeholder="Closely guarded secret" /><br>
+				<button type="submit">Launch Rocket 69</button>
+
+				<%= if @err do %>
+					<div class="login-error">
+						<%= @err %>
+					</div>
+				<% end %>
+			</form>
+
+		</main>
+	</body>
+</html>
