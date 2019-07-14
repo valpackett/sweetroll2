@@ -5,7 +5,7 @@ defmodule Sweetroll2.Generate do
   require Logger
   alias Sweetroll2.{Post, Render}
 
-  def dir(), do: System.get_env("OUT_DIR") || @default_dir
+  def dir(), do: System.get_env("SR2_STATIC_GEN_OUT_DIR") || @default_dir
 
   def can_generate(url, posts) when is_map(posts) do
     cond do

@@ -12,7 +12,7 @@ defmodule Sweetroll2.Fetch do
 
     cond do
       u.scheme != "http" && u.scheme != "https" ->
-        {:non_http_schema, u.scheme}
+        {:non_http_scheme, u.scheme}
 
       u.host == nil || u.host == "localhost" ->
         {:local_host, u.host}

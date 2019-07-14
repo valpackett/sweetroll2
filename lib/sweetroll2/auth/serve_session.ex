@@ -14,7 +14,7 @@ defmodule Sweetroll2.Auth.ServeSession do
     # TODO: use hashcash to prevent spam logins from starting slow argon2 calc
     # TODO: 2FA
     if conn.body_params["pwd"] &&
-         Argon2.verify_pass(conn.body_params["pwd"], System.get_env("PASSWORD_HASH")) do
+         Argon2.verify_pass(conn.body_params["pwd"], System.get_env("SR2_PASSWORD_HASH")) do
       token = Session.create(user_agent: conn.req_headers[:"user-agent"])
 
       conn
