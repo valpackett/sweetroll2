@@ -29,9 +29,17 @@ defmodule Sweetroll2.Serve do
   plug :fetch_session
   plug :skip_csrf_anon
   plug Plug.CSRFProtection
+  plug :add_host_to_process
   plug :dispatch
 
   forward "/auth", to: Auth.ServeSession
+
+  forward "/micropub",
+    to: PlugMicropub,
+    init_opts: [
+      handler: Sweetroll2.Micropub,
+      json_encoder: Jason
+    ]
 
   get _ do
     conn = put_resp_content_type(conn, "text/html; charset=utf-8")
@@ -45,7 +53,7 @@ defmodule Sweetroll2.Serve do
       !(durl in urls_local) ->
         send_resp(conn, 404, "Page not found")
 
-      !("*" in posts[durl].acl) ->
+      !("*" in (posts[url].acl || ["*"])) ->
         send_resp(conn, 401, "Unauthorized")
 
       posts[durl].deleted ->
@@ -70,7 +78,7 @@ defmodule Sweetroll2.Serve do
     send_resp(conn, 500, "Something went wrong")
   end
 
-  defp skip_csrf_anon(conn, opts) do
+  defp skip_csrf_anon(conn, _opts) do
     # we don't have anonymous sessions, so we can't exactly store the CSRF token in a session
     # when logged out (this enables the login form to work)
     if is_nil(Auth.Session.current_token(conn)) do
@@ -78,5 +86,15 @@ defmodule Sweetroll2.Serve do
     else
       conn
     end
+  end
+
+  # Used by micropub
+  defp add_host_to_process(conn, _opts) do
+    Process.put(
+      :sr2_host,
+      if(conn.port != 443 and conn.port != 80, do: "#{conn.host}:#{conn.port}", else: conn.host)
+    )
+
+    conn
   end
 end

@@ -34,3 +34,6 @@ sweetroll2-*.tar
 # Compressed assets
 /priv/static/*.br
 /priv/static/*.gz
+
+# Debug assets
+/priv/static/*.js.map

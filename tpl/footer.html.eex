@@ -9,3 +9,10 @@
 		<a href="https://github.com/myfreeweb" rel="me" title="myfreeweb on GitHub"><%= icon name: "octoface" %>myfreeweb</a>
 	</div>
 </footer>
+
+<%= if @logged_in do %>
+	<style>micro-panel-toolbar { position: fixed; top: 0; width: 100%; } body { padding-top: 3rem; }</style>
+	<%= content_tag :"micro-panel-editor", hidden: true, micropub: "/micropub", defaultctype: "markdown", csrfheader: "x-csrf-token", csrftoken: Plug.CSRFProtection.get_csrf_token() do end %>
+	<micro-panel-toolbar></micro-panel-toolbar>
+	<script defer src="/as/micro-panel-all.bundle.min.js"></script>
+<% end %>

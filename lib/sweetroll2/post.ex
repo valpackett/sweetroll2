@@ -1,7 +1,6 @@
 defmodule Sweetroll2.Post do
   @moduledoc """
   A Mnesia table for storing microformats2 style posts.
-  (+ Everything to do with data access. This really should be split up.)
 
   Fields and conventions:
 
@@ -97,10 +96,7 @@ defmodule Sweetroll2.Post do
         children: children
       }) do
     props
-    |> (fn x ->
-          if published, do: Map.put(x, "published", DateTime.to_iso8601(published)), else: x
-        end).()
-    |> (fn x -> if updated, do: Map.put(x, "updated", DateTime.to_iso8601(updated)), else: x end).()
+    |> add_dates(published: published, updated: updated)
     |> Map.put("url", url)
     |> Map.put("type", type)
     |> Map.put("deleted", deleted)
@@ -109,6 +105,42 @@ defmodule Sweetroll2.Post do
   end
 
   def to_map(x) when is_map(x), do: x
+
+  @doc """
+  Converts a Post struct to a "full" (mf2-source-ish) map.
+  """
+  def to_full_map(%__MODULE__{
+        props: props,
+        url: url,
+        type: type,
+        # deleted: deleted,
+        published: published,
+        updated: updated,
+        acl: acl,
+        children: children
+      }) do
+    props =
+      props
+      |> add_dates(published: published, updated: updated)
+      |> Map.put("url", url)
+      |> Map.put("acl", acl)
+
+    %{
+      type: as_many(type),
+      properties: for({k, v} <- props, into: %{}, do: {k, as_many(v)}),
+      children: children
+    }
+  end
+
+  def to_full_map(x) when is_map(x), do: x
+
+  defp add_dates(props, published: published, updated: updated) do
+    props
+    |> (fn x ->
+          if published, do: Map.put(x, "published", DateTime.to_iso8601(published)), else: x
+        end).()
+    |> (fn x -> if updated, do: Map.put(x, "updated", DateTime.to_iso8601(updated)), else: x end).()
+  end
 
   defp map_prop(map, prop_str, prop_atom) do
     as_one(

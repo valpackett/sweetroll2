@@ -107,11 +107,11 @@ defmodule Sweetroll2.Render do
   def time_permalink(%Post{published: published, url: url}, rel: rel) do
     use Taggart.HTML
 
-    if published do
-      time datetime: DateTime.to_iso8601(published), class: "dt-published" do
-        a href: url, class: "u-url u-uid", rel: rel do
-          published
-        end
+    s = if published, do: DateTime.to_iso8601(published), else: ""
+
+    time datetime: s, class: "dt-published" do
+      a href: url, class: "u-url u-uid", rel: rel do
+        if String.length(s) > 1, do: s, else: "<permalink>"
       end
     end
   end

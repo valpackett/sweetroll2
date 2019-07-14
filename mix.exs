@@ -33,9 +33,10 @@ defmodule Sweetroll2.MixProject do
       {:rustled_syntect, "~> 0.1"},
       {:microformats2, git: "https://github.com/ckruse/microformats2-elixir"},
       # {:timex, "~> 3.0"}
-
+      {:plug_micropub, git: "https://github.com/bismark/plug_micropub"},
       {:argon2_elixir, "~> 2.0"},
       {:nanoid, "~> 2.0.1"},
+      {:slugger, "~> 0.3.0"},
 
       # {:hammer, "~> 6.0"},
       # {:quantum, "~> 2.3"}
@@ -46,7 +47,6 @@ defmodule Sweetroll2.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:sse, "~> 0.4"},
       {:event_bus, ">= 1.6.0"}
-      # {:plug_micropub, git: "https://github.com/bismark/plug_micropub"},
     ]
   end
 end
