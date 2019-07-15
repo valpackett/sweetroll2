@@ -34,6 +34,7 @@ defmodule Sweetroll2.MixProject do
       {:microformats2, git: "https://github.com/ckruse/microformats2-elixir"},
       # {:timex, "~> 3.0"}
       {:plug_micropub, git: "https://github.com/bismark/plug_micropub"},
+      {:ex_http_link, "~> 0.1.1"},
       {:argon2_elixir, "~> 2.0"},
       {:nanoid, "~> 2.0.1"},
       {:slugger, "~> 0.3.0"},

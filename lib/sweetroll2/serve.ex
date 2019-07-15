@@ -14,6 +14,7 @@ defmodule Sweetroll2.Serve do
   plug Plug.Logger
   plug Plug.RequestId
   plug Plug.Head
+  plug :add_links
 
   plug Plug.Static,
     at: "/as",
@@ -42,12 +43,16 @@ defmodule Sweetroll2.Serve do
     ]
 
   get _ do
-    conn = conn
-           |> put_resp_content_type("text/html")
-           |> put_resp_header("Feature-Policy", "unsized-media 'none'; sync-xhr 'none'; document-write 'none'")
-           |> put_resp_header("Referrer-Policy", "no-referrer-when-downgrade")
-           |> put_resp_header("X-XSS-Protection", "1; mode=block")
-           |> put_resp_header("Link", "</micropub>; rel=micropub")
+    conn =
+      conn
+      |> put_resp_content_type("text/html")
+      |> put_resp_header(
+        "Feature-Policy",
+        "unsized-media 'none'; sync-xhr 'none'; document-write 'none'"
+      )
+      |> put_resp_header("Referrer-Policy", "no-referrer-when-downgrade")
+      |> put_resp_header("X-XSS-Protection", "1; mode=block")
+
     url = conn.request_path
     posts = %Post.DbAsMap{}
     urls_local = Post.urls_local()
@@ -81,6 +86,12 @@ defmodule Sweetroll2.Serve do
 
   def handle_errors(conn, %{kind: _kind, reason: _reason, stack: _stack}) do
     send_resp(conn, 500, "Something went wrong")
+  end
+
+  @link_header ExHttpLink.generate([{"/micropub", {"rel", "micropub"}}])
+
+  defp add_links(conn, _opts) do
+    put_resp_header(conn, "Link", @link_header)
   end
 
   defp skip_csrf_anon(conn, _opts) do
