@@ -118,7 +118,7 @@ defmodule Sweetroll2.Serve do
   defp fprofile(conn, _opts) do
     conn = fetch_query_params(conn)
 
-    if Mix.env() != :prod and conn.query_params["fprof"] do
+    if Mix.env() != :prod and Map.has_key?(conn.query_params, "fprof") do
       :fprof.trace(:start)
 
       register_before_send(conn, fn conn ->
@@ -126,8 +126,8 @@ defmodule Sweetroll2.Serve do
         :fprof.profile()
         conn
       end)
+    else
+      conn
     end
-
-    conn
   end
 end
