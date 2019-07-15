@@ -42,7 +42,12 @@ defmodule Sweetroll2.Serve do
     ]
 
   get _ do
-    conn = put_resp_content_type(conn, "text/html; charset=utf-8")
+    conn = conn
+           |> put_resp_content_type("text/html")
+           |> put_resp_header("Feature-Policy", "unsized-media 'none'; sync-xhr 'none'; document-write 'none'")
+           |> put_resp_header("Referrer-Policy", "no-referrer-when-downgrade")
+           |> put_resp_header("X-XSS-Protection", "1; mode=block")
+           |> put_resp_header("Link", "</micropub>; rel=micropub")
     url = conn.request_path
     posts = %Post.DbAsMap{}
     urls_local = Post.urls_local()
