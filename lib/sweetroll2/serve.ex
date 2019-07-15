@@ -11,6 +11,7 @@ defmodule Sweetroll2.Serve do
 
   use Plug.ErrorHandler
 
+  plug :fprofile
   plug Plug.Logger
   plug Plug.RequestId
   plug Plug.Head
@@ -110,6 +111,22 @@ defmodule Sweetroll2.Serve do
       :sr2_host,
       if(conn.port != 443 and conn.port != 80, do: "#{conn.host}:#{conn.port}", else: conn.host)
     )
+
+    conn
+  end
+
+  defp fprofile(conn, _opts) do
+    conn = fetch_query_params(conn)
+
+    if Mix.env() != :prod and conn.query_params["fprof"] do
+      :fprof.trace(:start)
+
+      register_before_send(conn, fn conn ->
+        :fprof.trace(:stop)
+        :fprof.profile()
+        conn
+      end)
+    end
 
     conn
   end
