@@ -41,8 +41,14 @@ defmodule Sweetroll2.Markup do
   @doc """
   Sanitize untrusted HTML trees (fetched posts in contexts).
   """
-  def sanitize_tree(tree),
-    do: HtmlSanitizeEx.Traverser.traverse(tree, HtmlSanitizeEx.Scrubber.MarkdownHTML)
+  def sanitize_tree(tree) do
+    HtmlSanitizeEx.Traverser.traverse(tree, HtmlSanitizeEx.Scrubber.MarkdownHTML)
+  rescue
+    CaseClauseError ->
+      # https://github.com/rrrene/html_sanitize_ex/issues/28
+      Logger.warn("html sanitizer error, falling back to escaping")
+      tree |> render_tree |> Plug.HTML.html_escape() |> text_to_tree
+  end
 
   @langs RustledSyntect.supported_langs()
          |> Stream.flat_map(fn %RustledSyntect.Syntax{file_extensions: exts, name: name} ->

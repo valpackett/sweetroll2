@@ -4,14 +4,17 @@ defmodule Sweetroll2.Job.Generate do
 
   require Logger
   alias Sweetroll2.{Post, Render}
+  use Que.Worker
 
   def dir(), do: System.get_env("SR2_STATIC_GEN_OUT_DIR") || @default_dir
 
-  def can_generate(url, posts) when is_map(posts) do
+  def can_generate(url, posts, urls_dyn) when is_map(posts) do
+    {durl, _} = if Map.has_key?(urls_dyn, url), do: urls_dyn[url], else: {url, nil}
+
     cond do
-      !String.starts_with?(url, "/") -> :nonlocal
-      !Map.has_key?(posts, url) -> :nonexistent
-      !("*" in posts[url].acl) -> :nonpublic
+      !String.starts_with?(durl, "/") -> :nonlocal
+      !Map.has_key?(posts, durl) -> :nonexistent
+      !("*" in (posts[durl].acl || ["*"])) -> :nonpublic
       true -> :ok
     end
   end
@@ -47,8 +50,9 @@ defmodule Sweetroll2.Job.Generate do
   end
 
   def gen_allowed_pages(urls, posts) when is_map(posts) do
-    allowed_urls = urls |> Enum.filter(&(can_generate(&1, posts) == :ok))
-    urls_dyn = Post.DynamicUrls.dynamic_urls(posts, allowed_urls)
+    urls_local = Post.urls_local()
+    urls_dyn = Post.DynamicUrls.dynamic_urls(posts, urls_local)
+    allowed_urls = urls |> Enum.filter(&(can_generate(&1, posts, urls_dyn) == :ok))
 
     (allowed_urls ++ Map.keys(urls_dyn))
     |> Task.async_stream(&gen_page(&1, posts, urls_dyn), max_concurrency: @concurrency)
@@ -56,12 +60,13 @@ defmodule Sweetroll2.Job.Generate do
     |> Enum.group_by(&elem(&1, 0))
   end
 
-  def gen_all_allowed_pages(posts) when is_map(posts) do
-    gen_allowed_pages(Map.keys(posts), posts)
-  end
+  def perform(urls: urls) do
+    posts = Map.new(Memento.transaction!(fn -> Memento.Query.all(Post) end), &{&1.url, &1})
 
-  # def perform(%{"type" => "generate", "urls" => urls}) do
-  #   posts = Map.new(Memento.transaction!(fn -> Memento.Query.all(Post) end), &{&1.url, &1})
-  #   gen_allowed_pages(urls, posts)
-  # end
+    if urls == :all do
+      gen_allowed_pages(Map.keys(posts), posts)
+    else
+      gen_allowed_pages(urls, posts)
+    end
+  end
 end

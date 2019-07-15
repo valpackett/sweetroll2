@@ -1,5 +1,5 @@
 defmodule Sweetroll2.Job.Fetch do
-  alias Sweetroll2.{Post, Convert}
+  alias Sweetroll2.{Events, Post, Convert}
   use Que.Worker, concurrency: 4
 
   def href_matches?({_, attrs, _}, url) do
@@ -38,11 +38,14 @@ defmodule Sweetroll2.Job.Fetch do
     end
   end
 
-  def perform(url: url, check_mention: check_mention) do
+  def perform(url: url, check_mention: check_mention, notify_update: notify_update) do
     {:ok, mf} = fetch(url, check_mention: check_mention)
+
     Memento.transaction!(fn ->
-      %{ Post.from_map(mf) | url: url }
+      %{Post.from_map(mf) | url: url}
       |> Memento.Query.write()
     end)
+
+    Events.notify_urls_updated([notify_update])
   end
 end

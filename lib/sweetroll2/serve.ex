@@ -53,7 +53,7 @@ defmodule Sweetroll2.Serve do
       !(durl in urls_local) ->
         send_resp(conn, 404, "Page not found")
 
-      !("*" in (posts[url].acl || ["*"])) ->
+      !("*" in (posts[durl].acl || ["*"])) ->
         send_resp(conn, 401, "Unauthorized")
 
       posts[durl].deleted ->
