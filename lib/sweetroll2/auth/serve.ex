@@ -1,4 +1,4 @@
-defmodule Sweetroll2.Auth.ServeSession do
+defmodule Sweetroll2.Auth.Serve do
   alias Sweetroll2.{Render, Auth.Session}
   use Plug.Router
 

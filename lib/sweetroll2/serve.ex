@@ -32,7 +32,7 @@ defmodule Sweetroll2.Serve do
   plug :add_host_to_process
   plug :dispatch
 
-  forward "/auth", to: Auth.ServeSession
+  forward "/auth", to: Auth.Serve
 
   forward "/micropub",
     to: PlugMicropub,
