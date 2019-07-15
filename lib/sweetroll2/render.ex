@@ -49,7 +49,10 @@ defmodule Sweetroll2.Render do
 
       post.type == "x-dynamic-feed" ->
         page = params[:page] || 0
-        children = Post.Feed.filter_feed_entries(post, posts, local_urls)
+
+        children =
+          Post.Feed.filter_feed_entries(post, posts, local_urls)
+          |> Post.Feed.sort_feed_entries(posts)
 
         page_children =
           Enum.slice(children, page * 10, 10)

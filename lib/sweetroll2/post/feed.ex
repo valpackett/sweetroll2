@@ -41,10 +41,16 @@ defmodule Sweetroll2.Post.Feed do
       &(!(posts[&1].deleted || false) and String.starts_with?(&1, "/") and
           in_feed?(posts[&1], feed))
     )
-    |> Enum.sort(
+  end
+
+  def sort_feed_entries(urls, posts) do
+    now = DateTime.utc_now()
+
+    Enum.sort(
+      urls,
       &(DateTime.compare(
-          posts[&1].published || DateTime.utc_now(),
-          posts[&2].published || DateTime.utc_now()
+          posts[&1].published || now,
+          posts[&2].published || now
         ) == :gt)
     )
   end
