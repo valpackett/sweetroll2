@@ -13,8 +13,22 @@ defmodule Sweetroll2.Post.DbAsMap do
   @impl Access
   def fetch(%__MODULE__{}, key) do
     case :mnesia.dirty_read(Sweetroll2.Post, key) do
-      [x | _] -> {:ok, Memento.Query.Data.load(x)}
-      _ -> :error
+      # Memento.Query.Data.load is too dynamic -> too slow
+      [{Sweetroll2.Post, url, deleted, published, updated, acl, type, props, children} | _] ->
+        {:ok,
+         %Sweetroll2.Post{
+           url: url,
+           deleted: deleted,
+           published: published,
+           updated: updated,
+           acl: acl,
+           type: type,
+           props: props,
+           children: children
+         }}
+
+      _ ->
+        :error
     end
   end
 end
