@@ -25,6 +25,9 @@ sweetroll2-*.tar
 # Lang server
 .elixir_ls
 
+# Profiler
+fprof.trace
+
 # Default static generator output folder
 /out/
 
