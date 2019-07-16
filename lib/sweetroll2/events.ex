@@ -28,6 +28,8 @@ defmodule Sweetroll2.Events do
 
     Que.add(Job.Generate, urls: event.data)
 
+    Sweetroll2.Post.DynamicUrls.Cache.clear()
+
     EventBus.mark_as_completed({__MODULE__, event_shadow})
     {:noreply, state}
   end

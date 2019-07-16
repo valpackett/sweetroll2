@@ -15,7 +15,8 @@ defmodule Sweetroll2.Application do
 
     children = [
       Plug.Cowboy.child_spec(scheme: :http, plug: Sweetroll2.Serve, options: server_opts),
-      Sweetroll2.Events
+      Sweetroll2.Post.DynamicUrls.Cache,
+      Sweetroll2.Events,
     ]
 
     opts = [strategy: :one_for_one, name: Sweetroll2.Supervisor]

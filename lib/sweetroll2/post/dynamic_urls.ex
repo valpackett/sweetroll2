@@ -23,4 +23,27 @@ defmodule Sweetroll2.Post.DynamicUrls do
     Stream.map(local_urls, &dynamic_urls_for(posts[&1], posts, local_urls))
     |> Enum.reduce(&Map.merge/2)
   end
+
+  defmodule Cache do
+    use Agent
+    alias Sweetroll2.Post
+
+    def start_link(_) do
+      Agent.start_link(fn -> nil end, name: __MODULE__)
+    end
+
+    def dynamic_urls() do
+      if result = Agent.get(__MODULE__, & &1) do
+        result
+      else
+        result = Post.DynamicUrls.dynamic_urls(%Post.DbAsMap{}, Post.urls_local())
+        Agent.update(__MODULE__, fn _ -> result end)
+        result
+      end
+    end
+
+    def clear() do
+      Agent.update(__MODULE__, fn _ -> nil end)
+    end
+  end
 end
