@@ -75,4 +75,8 @@ defmodule Sweetroll2.Job.Generate do
       Que.add(Compress, path: path)
     end
   end
+
+  def enqueue_all() do
+    Que.add(__MODULE__, urls: :all)
+  end
 end

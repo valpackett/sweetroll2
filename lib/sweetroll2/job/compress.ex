@@ -7,6 +7,25 @@ defmodule Sweetroll2.Job.Compress do
     System.cmd("brotli", ["--keep", "--best", "--force", path])
   end
 
+  @asset_dir "priv/static"
+
+  def enqueue_assets() do
+    {:ok, files} = File.ls(@asset_dir)
+
+    for file <- files do
+      path = Path.join(@asset_dir, file)
+
+      if !File.dir?(path) and !String.ends_with?(path, ".br") and !String.ends_with?(path, ".gz") do
+        Que.add(Sweetroll2.Job.Compress, path: path)
+      end
+
+      if (String.ends_with?(path, ".br") or String.ends_with?(path, ".gz")) and
+           !File.exists?(Path.rootname(path)) do
+        File.rm(path)
+      end
+    end
+  end
+
   defmodule AssetWatcher do
     require Logger
     use GenServer
