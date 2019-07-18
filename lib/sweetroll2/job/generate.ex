@@ -3,7 +3,7 @@ defmodule Sweetroll2.Job.Generate do
   @default_dir "out"
 
   require Logger
-  alias Sweetroll2.{Post, Render}
+  alias Sweetroll2.{Post, Render, Job.Compress}
   use Que.Worker
 
   def dir(), do: System.get_env("SR2_STATIC_GEN_OUT_DIR") || @default_dir
@@ -40,9 +40,10 @@ defmodule Sweetroll2.Job.Generate do
               logged_in: false
             )},
          {_, :ok} <- {:mkdirp, File.mkdir_p(path_dir)},
-         {_, :ok} <- {:write, File.write(Path.join(path_dir, "index.html"), data)},
-         _ = Logger.info("generated #{url} -> #{Path.join(path_dir, "index.html")}"),
-         do: {:ok, url},
+         path = Path.join(path_dir, "index.html"),
+         {_, :ok} <- {:write, File.write(path, data)},
+         _ = Logger.info("generated #{url} -> #{path}"),
+         do: {:ok, path},
          else:
            (e ->
               Logger.error("could not generate #{url}: #{inspect(e)}")
@@ -63,10 +64,15 @@ defmodule Sweetroll2.Job.Generate do
   def perform(urls: urls) do
     posts = Map.new(Memento.transaction!(fn -> Memento.Query.all(Post) end), &{&1.url, &1})
 
-    if urls == :all do
-      gen_allowed_pages(Map.keys(posts), posts)
-    else
-      gen_allowed_pages(urls, posts)
+    result =
+      if urls == :all do
+        gen_allowed_pages(Map.keys(posts), posts)
+      else
+        gen_allowed_pages(urls, posts)
+      end
+
+    for {:ok, path} <- result.ok do
+      Que.add(Compress, path: path)
     end
   end
 end

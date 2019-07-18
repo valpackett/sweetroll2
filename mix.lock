@@ -11,6 +11,7 @@
   "event_bus": {:hex, :event_bus, "1.6.0", "00a26d524f061dd142c170afd2084698fcf2c57c434da180ba0b507728d83dd9", [:mix], [], "hexpm"},
   "ex_http_link": {:hex, :ex_http_link, "0.1.1", "617088700884d3551e080c2c46c023833e3d6b4fe53be69579c698e4a33ab3a5", [:mix], [{:nimble_parsec, "~> 0.2", [hex: :nimble_parsec, repo: "hexpm", optional: false]}], "hexpm"},
   "ex_utils": {:hex, :ex_utils, "0.1.7", "2c133e0bcdc49a858cf8dacf893308ebc05bc5fba501dc3d2935e65365ec0bf3", [:mix], [], "hexpm"},
+  "file_system": {:git, "https://github.com/falood/file_system", "66bda61ba4edea559fba58a530d32a07c9ce9560", []},
   "floki": {:git, "https://github.com/philss/floki", "6dd943501136d7be8f9dc0c4c2f1631eae027028", []},
   "gen_stage": {:hex, :gen_stage, "0.14.1", "9d46723fda072d4f4bb31a102560013f7960f5d80ea44dcb96fd6304ed61e7a4", [:mix], [], "hexpm"},
   "html5ever": {:hex, :html5ever, "0.7.0", "9f63ec1c783b2dc9f326840fcc993c01e926dbdef4e51ba1bbe5355993c258b4", [:mix], [{:rustler, "~> 0.18.0", [hex: :rustler, repo: "hexpm", optional: false]}], "hexpm"},

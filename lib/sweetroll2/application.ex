@@ -15,6 +15,7 @@ defmodule Sweetroll2.Application do
 
     children = [
       Plug.Cowboy.child_spec(scheme: :http, plug: Sweetroll2.Serve, options: server_opts),
+      {Sweetroll2.Job.Compress.AssetWatcher, dirs: ["priv/static"]},
       Sweetroll2.Post.DynamicUrls.Cache,
       Sweetroll2.Events
     ]
