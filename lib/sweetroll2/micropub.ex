@@ -2,7 +2,7 @@ defmodule Sweetroll2.Micropub do
   @behaviour PlugMicropub.HandlerBehaviour
 
   require Logger
-  alias Sweetroll2.{Auth.Bearer, Events, Post}
+  alias Sweetroll2.{Auth.Bearer, Auth.AccessToken, Events, Post}
   import Sweetroll2.Convert
 
   @impl true
@@ -11,9 +11,11 @@ defmodule Sweetroll2.Micropub do
       cat = category_for(properties)
       url = as_one(properties["url"]) || "/#{cat}/#{slug_for(properties)}"
 
-      properties =
-        properties
-        |> Map.update("category", [], &["_" <> cat | &1])
+      properties = Map.update(properties, "category", ["_" <> cat], &["_" <> cat | &1])
+
+      clid = AccessToken.get_client_id(token)
+
+      properties = if !is_nil(clid), do: Map.put(properties, "client-id", clid), else: properties
 
       params = %{type: type, properties: properties, url: url}
 

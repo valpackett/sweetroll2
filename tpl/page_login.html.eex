@@ -12,6 +12,7 @@ input, button { width: 100%; margin: 0 0 1em; }
 			</style>
 
 			<form method="POST" action="" class="block-thingy">
+				<%= tag :input, hidden: true, type: "hidden", name: "redirect_uri", value: @redir %>
 				<input name="pwd" type="password" placeholder="Closely guarded secret" /><br>
 				<button type="submit">Launch Rocket 69</button>
 

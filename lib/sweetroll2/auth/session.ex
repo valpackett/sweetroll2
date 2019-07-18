@@ -101,7 +101,7 @@ defmodule Sweetroll2.Auth.Session do
           |> Conn.register_before_send(fn conn ->
             if conn.private[:plug_session_info] == :write do
               Memento.transaction!(fn ->
-                Memento.Query.write(IO.inspect(%{session | data: conn.private[:plug_session]}))
+                Memento.Query.write(%{session | data: conn.private[:plug_session]})
               end)
             end
 

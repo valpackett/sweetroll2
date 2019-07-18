@@ -89,7 +89,11 @@ defmodule Sweetroll2.Serve do
     send_resp(conn, 500, "Something went wrong")
   end
 
-  @link_header ExHttpLink.generate([{"/micropub", {"rel", "micropub"}}])
+  @link_header ExHttpLink.generate([
+                 {"/micropub", {"rel", "micropub"}},
+                 {"/auth/authorize", {"rel", "authorization_endpoint"}},
+                 {"/auth/token", {"rel", "token_endpoint"}}
+               ])
 
   defp add_links(conn, _opts) do
     put_resp_header(conn, "Link", @link_header)

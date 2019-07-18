@@ -24,6 +24,7 @@ defmodule Sweetroll2.Render do
   deftpl :page_entry, "tpl/page_entry.html.eex"
   deftpl :page_feed, "tpl/page_feed.html.eex"
   deftpl :page_login, "tpl/page_login.html.eex"
+  deftpl :page_authorize, "tpl/page_authorize.html.eex"
 
   @doc """
   Renders a post, choosing the right template based on its type.

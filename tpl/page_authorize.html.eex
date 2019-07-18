@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+	<%= head title: "Log In" %>
+	<body>
+		<header>
+			<h1>The Sweetroll2 Security Theater</h1>
+		</header>
+		<main>
+			<style>
+form { padding: 1rem; }
+input, button { width: 100%; margin: 0 0 1em; }
+			</style>
+			<div class="block-thingy">
+				<%= if @err do %>
+					<div class="login-error">
+						<%= @err %>
+					</div>
+				<% else %>
+
+					<h1>Authorize application</h1>
+
+					Client ID: <%= @query["client_id"] %>
+
+					Scope: <%= inspect @scopes %>
+
+					<form method="POST" action="allow">
+						<%= tag :input, hidden: true, type: "hidden", name: "_csrf_token", value: Plug.CSRFProtection.get_csrf_token() %>
+						<%= tag :input, hidden: true, type: "hidden", name: "me", value: @query["me"] %>
+						<%= tag :input, hidden: true, type: "hidden", name: "state", value: @query["state"] %>
+						<%= tag :input, hidden: true, type: "hidden", name: "redirect_uri", value: @query["redirect_uri"] %>
+						<%= tag :input, hidden: true, type: "hidden", name: "client_id", value: @query["client_id"] %>
+						<%= tag :input, hidden: true, type: "hidden", name: "scope", value: Enum.join(@scopes, " ") %>
+						<button type="submit">Let's Go</button>
+					</form>
+
+				<% end %>
+			</div>
+		</main>
+	</body>
+</html>
