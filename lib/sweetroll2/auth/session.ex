@@ -93,7 +93,7 @@ defmodule Sweetroll2.Auth.Session do
     Conn.put_private(conn, :plug_session_fetch, fn conn ->
       conn = Conn.fetch_cookies(conn)
 
-      if token = conn.cookies[@cookie_key] do
+      if (token = conn.cookies[@cookie_key]) && token != "" do
         if session = get_if_valid(token) do
           conn
           |> Conn.put_private(:sr2_session_token, token)

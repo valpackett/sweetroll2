@@ -7,7 +7,7 @@ defmodule Sweetroll2.Auth.Serve do
   plug :dispatch
 
   get "/login" do
-    {:safe, body} = Render.page_login(err: nil, redir: conn.query_params["redirect_uri"])
+    {:safe, body} = Render.page_login(err: nil, redir: conn.query_params["redirect_uri"] || "/")
     resp(conn, :ok, body)
   end
 
@@ -23,7 +23,7 @@ defmodule Sweetroll2.Auth.Serve do
       |> put_resp_header("Location", conn.body_params["redirect_uri"] || "/")
       |> resp(:found, "")
     else
-      {:safe, body} = Render.page_login(err: "No correct password provided")
+      {:safe, body} = Render.page_login(err: "No correct password provided", redir: nil)
       resp(conn, :ok, body)
     end
   end
