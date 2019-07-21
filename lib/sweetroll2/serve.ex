@@ -14,6 +14,7 @@ defmodule Sweetroll2.Serve do
   plug :fprofile
   plug Plug.Logger
   plug Plug.RequestId
+  plug Plug.SSL, rewrite_on: [:x_forwarded_proto]
   plug Plug.Head
   plug :add_links
 
@@ -109,11 +110,18 @@ defmodule Sweetroll2.Serve do
     end
   end
 
-  # Used by micropub
+  @doc """
+  Puts the request host with scheme and port but without path (not even /) into the process dictionary.
+
+  NOTE: reverse proxies must be configured to preserve Host!
+  """
   defp add_host_to_process(conn, _opts) do
     Process.put(
-      :sr2_host,
-      if(conn.port != 443 and conn.port != 80, do: "#{conn.host}:#{conn.port}", else: conn.host)
+      :our_home_url,
+      if(conn.port != 443 and conn.port != 80,
+        do: "#{conn.scheme}://#{conn.host}:#{conn.port}",
+        else: "#{conn.scheme}://#{conn.host}"
+      )
     )
 
     conn

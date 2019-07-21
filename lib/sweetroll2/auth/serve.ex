@@ -50,9 +50,13 @@ defmodule Sweetroll2.Auth.Serve do
       )
       |> resp(:found, "")
     else
+      Logger.info(
+        "authorize request: #{inspect(conn.query_params)}, our home: #{Process.get(:our_home_url)}"
+      )
+
       {status, err} =
         cond do
-          me_host(conn) != Process.get(:sr2_host) ->
+          me_param(conn) != Process.get(:our_home_url) ->
             {:bad_request, "Wrong host"}
 
           is_nil(conn.query_params["redirect_uri"]) or
@@ -147,7 +151,7 @@ defmodule Sweetroll2.Auth.Serve do
               TempCode.use(tempcode.code)
 
               Jason.encode(%{
-                me: "http://" <> Process.get(:sr2_host)
+                me: Process.get(:our_home_url)
               })
           end
       end
@@ -167,7 +171,7 @@ defmodule Sweetroll2.Auth.Serve do
         conn.body_params["grant_type"] != "authorization_code" ->
           {:bad_request, "No/unknown grant type"}
 
-        me_host(conn) != Process.get(:sr2_host) ->
+        me_param(conn) != Process.get(:our_home_url) ->
           {:bad_request, "Wrong host"}
 
         is_nil(conn.body_params["redirect_uri"]) or
@@ -205,9 +209,8 @@ defmodule Sweetroll2.Auth.Serve do
 
               Jason.encode(%{
                 token_type: "Bearer",
-                # TODO: https
                 access_token: token,
-                me: "http://" <> Process.get(:sr2_host),
+                me: Process.get(:our_home_url),
                 scope: Enum.join(tempcode.scopes, " ")
               })
           end
@@ -227,10 +230,8 @@ defmodule Sweetroll2.Auth.Serve do
     |> String.split()
   end
 
-  defp me_host(conn) do
+  defp me_param(conn) do
     (conn.query_params["me"] || conn.body_params["me"] || "")
-    |> String.replace_leading("http://", "")
-    |> String.replace_leading("https://", "")
     |> String.replace_trailing("/", "")
   end
 end

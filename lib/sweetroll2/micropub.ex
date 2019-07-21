@@ -195,11 +195,7 @@ defmodule Sweetroll2.Micropub do
   end
 
   defp read_url(url) do
-    new_url =
-      String.replace_prefix(url, "http://", "")
-      |> String.replace_prefix("https://", "")
-      |> String.replace_prefix(Process.get(:sr2_host), "")
-      |> String.replace_prefix(Process.get(:sr2_host), "")
+    new_url = String.replace_prefix(url, Process.get(:our_home_url), "")
 
     Logger.info("micropub: url '#{url}' -> '#{new_url}'")
     new_url

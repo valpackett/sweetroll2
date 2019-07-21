@@ -77,7 +77,12 @@ defmodule Sweetroll2.Post.Comments do
     |> as_many()
     |> Enum.any?(fn val ->
       url && val &&
-        (val == url || URI.parse(val) == URI.merge(Sweetroll2.our_host(), URI.parse(url)))
+        (val == url || URI.parse(val).path == URI.parse(url).path)
     end)
+
+    # Assumes that path match is enough to avoid needing to know our host.
+    # If a post is already in the comments list, it has been verified to link here.
+    # Faking e.g. a like by liking the same path on a different domain and just mentioning this one is..
+    # Not a significant concern really.
   end
 end
