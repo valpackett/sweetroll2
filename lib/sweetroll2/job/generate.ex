@@ -76,6 +76,13 @@ defmodule Sweetroll2.Job.Generate do
     end
   end
 
+  def remove_generated(url) do
+    path_dir = Path.join(dir(), url)
+    File.rm(Path.join(path_dir, "index.html"))
+    File.rm(Path.join(path_dir, "index.html.gz"))
+    File.rm(Path.join(path_dir, "index.html.br"))
+  end
+
   def enqueue_all() do
     Que.add(__MODULE__, urls: :all)
   end

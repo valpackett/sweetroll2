@@ -21,12 +21,13 @@ defmodule Sweetroll2.Events do
     event = EventBus.fetch_event(event_shadow)
 
     for url <- event.data do
+      Job.Generate.remove_generated(url)
       affected = affected_urls(url)
       Logger.info("potentially affected by '#{url}': #{inspect(affected)}")
       notify_urls_updated(affected)
     end
 
-    Que.add(Job.Generate, urls: event.data)
+    # Que.add(Job.Generate, urls: event.data)
 
     Sweetroll2.Post.DynamicUrls.Cache.clear()
 
