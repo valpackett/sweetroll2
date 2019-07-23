@@ -263,8 +263,8 @@ defmodule Sweetroll2.Render do
   def author(author, posts: _) when is_map(author) do
     use Taggart.HTML
 
-    a href: author["url"], class: "u-author #{if author["name"], do: "h-card", else: ""}" do
-      author["name"] || author["url"]
+    a href: filter_scheme(author["url"]), class: "u-author #{if author["name"], do: "h-card", else: ""}" do
+      author["name"] || author["url"] || "<unknown author>"
     end
   end
 
@@ -301,4 +301,8 @@ defmodule Sweetroll2.Render do
       end
     end)
   end
+
+  def filter_scheme(x = "http://" <> _), do: x
+  def filter_scheme(x = "https://" <> _), do: x
+  def filter_scheme(_), do: "#non_http_url_found"
 end

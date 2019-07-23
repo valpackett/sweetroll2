@@ -1,6 +1,6 @@
 <%= if is_bitstring(@cite) do %>
 	<div class="entry-ctx entry-txt">
-		<%= content_tag :a, href: @cite, class: "h-cite u-#{@prop}" do %>
+		<%= content_tag :a, href: filter_scheme(@cite), class: "h-cite u-#{@prop}" do %>
 			<%= @cite %>
 		<% end %>
 	</div>
@@ -17,7 +17,7 @@
 			—
 			<%= @cite["author"] |> as_many |> Stream.map(fn a -> author(a, posts: @posts) end) |> Enum.intersperse(", ") %>
 			on
-			<%= content_tag :a, href: as_one(@cite["url"]), class: "u-url" do %>
+			<%= content_tag :a, href: filter_scheme(as_one(@cite["url"])), class: "u-url" do %>
 				<% dt = if is_bitstring(@cite["published"]), do: @cite["published"], else: "<weird date object>" %>
 				<%= content_tag :time, datetime: dt, class: "dt-published" do %>
 					<%= dt %>
