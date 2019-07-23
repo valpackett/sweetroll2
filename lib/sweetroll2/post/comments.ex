@@ -72,9 +72,14 @@ defmodule Sweetroll2.Post.Comments do
 
   defp lookup_property(_, _), do: false
 
+  defp get_url(s) when is_bitstring(s), do: s
+
+  defp get_url(m) when is_map(m), do: lookup_property(m, "url")
+
   defp compare_property(x, prop, url) when is_bitstring(prop) and is_bitstring(url) do
     lookup_property(x, prop)
     |> as_many()
+    |> Stream.map(&get_url/1)
     |> Enum.any?(fn val ->
       url && val &&
         (val == url || URI.parse(val).path == URI.parse(url).path)
