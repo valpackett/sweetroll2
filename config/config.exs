@@ -2,7 +2,11 @@ use Mix.Config
 
 config :mnesia, dir: 'priv/db/#{Mix.env()}/#{node()}'
 
-config :microformats2, atomize_keys: false
+config :ibrowse, max_headers_size: 10240
+
+config :httpotion, :default_headers, "user-agent": "Sweetroll2 (HTTPotion/ibrowse)"
+
+config :microformats2, atomize_keys: false, underscore_keys: false
 
 config :logger, :console, metadata: [:request_id]
 

@@ -1,7 +1,7 @@
 defmodule Sweetroll2.Serve do
   @parsers [:urlencoded, {:multipart, length: 20_000_000}, :json]
 
-  alias Sweetroll2.{Auth, Post, Render}
+  alias Sweetroll2.{Auth, Post, Render, Job}
 
   use Plug.Router
 
@@ -43,6 +43,50 @@ defmodule Sweetroll2.Serve do
       handler: Sweetroll2.Micropub,
       json_encoder: Jason
     ]
+
+  post "/webmention" do
+    sourceu = URI.parse(conn.body_params["source"])
+    targetu = URI.parse(conn.body_params["target"])
+    posts = %Post.DbAsMap{}
+
+    cond do
+      is_nil(conn.body_params["source"]) ->
+        send_resp(conn, :bad_request, "No source parameter")
+
+      is_nil(conn.body_params["target"]) ->
+        send_resp(conn, :bad_request, "No target parameter")
+
+      sourceu.scheme != "https" and sourceu.scheme != "http" ->
+        send_resp(conn, :bad_request, "Non-HTTP(S) source parameter")
+
+      String.starts_with?(conn.body_params["source"], Process.get(:our_home_url)) ->
+        send_resp(
+          conn,
+          :bad_request,
+          "Source parameter on our host (must not be on '#{Process.get(:our_home_url)}')"
+        )
+
+      !String.starts_with?(conn.body_params["target"], Process.get(:our_home_url)) ->
+        send_resp(
+          conn,
+          :bad_request,
+          "Target parameter not on our host (must be on '#{Process.get(:our_home_url)}')"
+        )
+
+      is_nil(posts[targetu.path]) || posts[targetu.path].deleted ->
+        send_resp(conn, :bad_request, "Target post does not exist")
+
+      true ->
+        Que.add(Job.Fetch,
+          url: conn.body_params["source"],
+          check_mention: conn.body_params["target"],
+          save_mention: targetu.path,
+          notify_update: targetu.path
+        )
+
+        send_resp(conn, :accepted, "Accepted for processing")
+    end
+  end
 
   get _ do
     conn =
@@ -91,6 +135,7 @@ defmodule Sweetroll2.Serve do
   end
 
   @link_header ExHttpLink.generate([
+                 {"/webmention", {"rel", "webmention"}},
                  {"/micropub", {"rel", "micropub"}},
                  {"/auth/authorize", {"rel", "authorization_endpoint"}},
                  {"/auth/token", {"rel", "token_endpoint"}}

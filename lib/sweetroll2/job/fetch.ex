@@ -1,5 +1,6 @@
 defmodule Sweetroll2.Job.Fetch do
   alias Sweetroll2.{Events, Post, Convert}
+  require Logger
   use Que.Worker, concurrency: 4
 
   def href_matches?({_, attrs, _}, url) do
@@ -38,12 +39,29 @@ defmodule Sweetroll2.Job.Fetch do
     end
   end
 
-  def perform(url: url, check_mention: check_mention, notify_update: notify_update) do
+  def perform(
+        url: url,
+        check_mention: check_mention,
+        save_mention: save_mention,
+        notify_update: notify_update
+      ) do
     {:ok, mf} = fetch(url, check_mention: check_mention)
 
     Memento.transaction!(fn ->
-      %{Post.from_map(mf) | url: url}
-      |> Memento.Query.write()
+      post = Post.from_map(mf)
+      if post.url != url, do: Logger.warn("URL mismatch '#{post.url}' vs #{url}")
+      Memento.Query.write(%{post | url: url})
+
+      if !is_nil(save_mention) do
+        post = Memento.Query.read(Post, save_mention)
+
+        props =
+          Map.update(post.props, "comment", [url], fn comm ->
+            if url in comm, do: comm, else: comm ++ [url]
+          end)
+
+        Memento.Query.write(%{post | props: props})
+      end
     end)
 
     Events.notify_urls_updated([notify_update])

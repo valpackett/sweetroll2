@@ -240,7 +240,12 @@ defmodule Sweetroll2.Micropub do
 
   defp fetch_contexts(ctxs, url: url) do
     for ctx_url <- ctxs do
-      Que.add(Sweetroll2.Job.Fetch, url: ctx_url, check_mention: nil, notify_update: url)
+      Que.add(Sweetroll2.Job.Fetch,
+        url: ctx_url,
+        check_mention: nil,
+        save_mention: nil,
+        notify_update: url
+      )
     end
   end
 end
