@@ -1,0 +1,20 @@
+max-delegations: 5 # default - do not set a different number!
+hosts:
+  "riverwood.lan:80":
+    listen:
+      port: 80
+    paths:
+      "/":
+        redirect: https://riverwood.lan
+  "riverwood.lan:443":
+    listen:
+      port: 443
+      ssl:
+        key-file: key.pem
+        certificate-file: cert.pem
+        min-version: TLSv1.2
+    compress: ON
+    file.send-compressed: ON
+    file.dirlisting: OFF
+    paths:
+      <<: !file sweetroll2.h2o.yaml

@@ -28,6 +28,9 @@ sweetroll2-*.tar
 # Profiler
 fprof.trace
 
+# Dev TLS cert and key
+/*.pem
+
 # Default static generator output folder
 /out/
 
