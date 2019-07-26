@@ -51,11 +51,10 @@ defmodule Sweetroll2.Job.Generate do
   end
 
   def gen_allowed_pages(urls, posts) when is_map(posts) do
-    urls_local = Post.urls_local()
-    urls_dyn = Post.DynamicUrls.dynamic_urls(posts, urls_local)
-    allowed_urls = urls |> Enum.filter(&(can_generate(&1, posts, urls_dyn) == :ok))
+    urls_dyn = Post.DynamicUrls.dynamic_urls(posts, Post.urls_local())
 
-    (allowed_urls ++ Map.keys(urls_dyn))
+    if(urls == :all, do: Map.keys(posts) ++ Map.keys(urls_dyn), else: urls)
+    |> Enum.filter(&(can_generate(&1, posts, urls_dyn) == :ok))
     |> Task.async_stream(&gen_page(&1, posts, urls_dyn), max_concurrency: @concurrency)
     |> Stream.map(fn {:ok, x} -> x end)
     |> Enum.group_by(&elem(&1, 0))
@@ -64,12 +63,7 @@ defmodule Sweetroll2.Job.Generate do
   def perform(urls: urls) do
     posts = Map.new(Memento.transaction!(fn -> Memento.Query.all(Post) end), &{&1.url, &1})
 
-    result =
-      if urls == :all do
-        gen_allowed_pages(Map.keys(posts), posts)
-      else
-        gen_allowed_pages(urls, posts)
-      end
+    result = gen_allowed_pages(urls, posts)
 
     for {:ok, path} <- result.ok do
       Que.add(Compress, path: path)
