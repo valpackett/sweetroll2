@@ -70,7 +70,7 @@
 	<%= if @entry.updated do %>
 		and updated
 		<%= content_tag :time, datetime: DateTime.to_iso8601(@entry.updated), class: "dt-updated" do %>
-			<%= DateTime.to_iso8601 @entry.updated %>
+			<%= readable_datetime! @entry.updated %>
 		<% end %>
 	<% end %>
 

@@ -12,6 +12,7 @@ defmodule Sweetroll2.Post do
   """
 
   import Sweetroll2.Convert
+  require Logger
 
   use Memento.Table,
     attributes: [:url, :deleted, :published, :updated, :acl, :type, :props, :children]
@@ -45,6 +46,29 @@ defmodule Sweetroll2.Post do
   def from_map(map) do
     url = map_prop(map, "url", :url)
 
+    published =
+      case DateTimeParser.parse_datetime(map_prop(map, "published", :published), assume_utc: true) do
+        {:ok, d} ->
+          d
+
+        {:error, e} ->
+          Logger.warn(
+            "could not parse published: '#{inspect(map_prop(map, "published", :published))}'"
+          )
+
+          nil
+      end
+
+    updated =
+      case DateTimeParser.parse_datetime(map_prop(map, "updated", :updated), assume_utc: true) do
+        {:ok, d} ->
+          d
+
+        {:error, e} ->
+          Logger.warn("could not parse updated: '#{inspect(map_prop(map, "updated", :updated))}'")
+          nil
+      end
+
     %__MODULE__{
       props:
         (map["properties"] || %{})
@@ -75,8 +99,8 @@ defmodule Sweetroll2.Post do
       url: if(is_binary(url), do: url, else: "___WTF"),
       type: String.replace_prefix(as_one(map["type"] || map[:type]), "h-", ""),
       deleted: map["deleted"] || map[:deleted],
-      published: from_iso8601(map_prop(map, "published", :published)),
-      updated: from_iso8601(map_prop(map, "updated", :updated)),
+      published: published,
+      updated: updated,
       acl: map["acl"] || map[:acl],
       children: map["children"] || map[:children]
     }

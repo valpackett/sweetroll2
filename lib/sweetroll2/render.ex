@@ -108,14 +108,47 @@ defmodule Sweetroll2.Render do
   def reaction_class(:bookmarks), do: "bookmark"
   def reaction_class(_), do: "comment"
 
+  def readable_datetime!(dt), do: Timex.format!(dt, "{Mshort} {D}, {YYYY} {h24}:{m}")
+
   def time_permalink(%Post{published: published, url: url}, rel: rel) do
     use Taggart.HTML
 
-    s = if published, do: DateTime.to_iso8601(published), else: ""
+    attrdt = if published, do: DateTime.to_iso8601(published), else: ""
 
-    time datetime: s, class: "dt-published" do
+    readabledt = if published, do: readable_datetime!(published), else: "<permalink>"
+
+    time datetime: attrdt, class: "dt-published" do
       a href: url, class: "u-url u-uid", rel: rel do
-        if String.length(s) > 1, do: s, else: "<permalink>"
+        readabledt
+      end
+    end
+  end
+
+  def time_permalink_cite(%{} = cite) do
+    use Taggart.HTML
+
+    dt =
+      if is_bitstring(cite["published"]) do
+        DateTimeParser.parse_datetime(cite["published"], assume_utc: true)
+      else
+        {:error, "weird non-string date"}
+      end
+
+    attrdt =
+      case dt do
+        {:ok, d} -> DateTime.to_iso8601(d)
+        _ -> ""
+      end
+
+    readabledt =
+      case dt do
+        {:ok, d} -> readable_datetime!(d)
+        _ -> "<permalink>"
+      end
+
+    time datetime: attrdt, class: "dt-published" do
+      a href: filter_scheme(as_one(cite["url"])), class: "u-url u-uid" do
+        readabledt
       end
     end
   end

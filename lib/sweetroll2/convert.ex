@@ -36,20 +36,4 @@ defmodule Sweetroll2.Convert do
       url in (item["properties"]["url"] || [])
     end) || List.first(items)
   end
-
-  def from_iso8601(nil), do: nil
-
-  def from_iso8601(s) when is_binary(s) do
-    case DateTime.from_iso8601(s) do
-      {:ok, x, _} ->
-        x
-
-      {:error, :missing_offset} ->
-        from_iso8601(s <> "Z")
-
-      err ->
-        Logger.warn("could not parse iso8601: '#{s}' -> #{inspect(err)}")
-        nil
-    end
-  end
 end

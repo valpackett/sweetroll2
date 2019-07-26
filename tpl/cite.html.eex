@@ -17,12 +17,7 @@
 			—
 			<%= @cite["author"] |> as_many |> Stream.map(fn a -> author(a, posts: @posts) end) |> Enum.intersperse(", ") %>
 			on
-			<%= content_tag :a, href: filter_scheme(as_one(@cite["url"])), class: "u-url" do %>
-				<% dt = if is_bitstring(@cite["published"]), do: @cite["published"], else: "<weird date object>" %>
-				<%= content_tag :time, datetime: dt, class: "dt-published" do %>
-					<%= dt %>
-				<% end %>
-			<% end %>
+			<%= time_permalink_cite(@cite) %>
 		</div>
 	<% end %>
 

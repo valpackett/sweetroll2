@@ -21,6 +21,7 @@ defmodule Sweetroll2.MixProject do
   defp deps do
     [
       {:timex, "~> 3.5"},
+      {:date_time_parser, "~> 0.1.2"},
       {:jason, "~> 1.1"},
       {:earmark, "~> 1.3"},
       {:phoenix_html, "~> 2.13"},
