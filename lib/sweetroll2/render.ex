@@ -263,7 +263,8 @@ defmodule Sweetroll2.Render do
   def author(author, posts: _) when is_map(author) do
     use Taggart.HTML
 
-    a href: filter_scheme(author["url"]), class: "u-author #{if author["name"], do: "h-card", else: ""}" do
+    a href: filter_scheme(author["url"]),
+      class: "u-author #{if author["name"], do: "h-card", else: ""}" do
       author["name"] || author["url"] || "<unknown author>"
     end
   end
