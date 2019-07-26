@@ -3,7 +3,7 @@ defmodule Sweetroll2.Job.Compress do
   use Que.Worker, concurrency: 2
 
   def perform(path: path) do
-    System.cmd("zopfli", [path])
+    System.cmd("zopfli", ["--i8", path])
     System.cmd("brotli", ["--keep", "--best", "--force", path])
   end
 
