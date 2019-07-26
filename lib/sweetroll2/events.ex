@@ -12,27 +12,44 @@ defmodule Sweetroll2.Events do
 
   @impl true
   def init(:ok) do
-    EventBus.subscribe({__MODULE__, ["urls_updated"]})
+    EventBus.subscribe({__MODULE__, ["url_updated"]})
     {:ok, %{}}
   end
 
   @impl true
-  def handle_cast({:urls_updated, _id} = event_shadow, state) do
-    event = EventBus.fetch_event(event_shadow)
+  def handle_cast({:url_updated, _id} = event_shadow, state) do
+    %{data: url} = EventBus.fetch_event(event_shadow)
 
-    for url <- event.data do
-      Job.Generate.remove_generated(url)
-      affected = affected_urls(url)
-      Logger.info("potentially affected by '#{url}': #{inspect(affected)}")
-      notify_urls_updated(affected)
-    end
-
-    # Que.add(Job.Generate, urls: event.data)
-
+    Job.Generate.remove_generated(url)
     Sweetroll2.Post.DynamicUrls.Cache.clear()
+
+    Que.add(Job.Generate, urls: [url])
 
     EventBus.mark_as_completed({__MODULE__, event_shadow})
     {:noreply, state}
+  end
+
+  @impl true
+  def handle_cast({:notify_url_for_real, url}, state) do
+    Logger.debug("finished debounce for url '#{url}', notifying event bus")
+    EventSource.notify %{topic: :url_updated}, do: url
+    {:noreply, Map.delete(state, url)}
+  end
+
+  @impl true
+  def handle_cast({:notify_url_req, url}, state) do
+    if Map.has_key?(state, url) do
+      Debounce.apply(state[url])
+      Logger.debug("reset debounce for url '#{url}': #{inspect(state[url])}")
+      {:noreply, state}
+    else
+      {:ok, pid} =
+        Debounce.start_link({GenServer, :cast, [__MODULE__, {:notify_url_for_real, url}]}, 420)
+
+      Debounce.apply(pid)
+      Logger.debug("started debounce for url '#{url}': #{inspect(pid)}")
+      {:noreply, Map.put(state, url, pid)}
+    end
   end
 
   @doc "callback for EventBus"
@@ -45,8 +62,11 @@ defmodule Sweetroll2.Events do
   end
 
   def notify_urls_updated(urls) when is_list(urls) do
-    EventSource.notify %{topic: :urls_updated} do
-      urls
+    for url <- urls do
+      GenServer.cast(__MODULE__, {:notify_url_req, url})
+      aff = affected_urls(url)
+      Logger.info("potentially affected by '#{url}': #{inspect(aff)}")
+      notify_urls_updated(aff)
     end
   end
 

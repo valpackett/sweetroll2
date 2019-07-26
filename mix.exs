@@ -38,6 +38,7 @@ defmodule Sweetroll2.MixProject do
       {:nanoid, "~> 2.0.1"},
       {:slugger, "~> 0.3.0"},
       {:file_system, git: "https://github.com/falood/file_system"},
+      {:debounce, "~> 0.1.0"},
       {:quantum, "~> 2.3"},
       {:memento, "~> 0.3.1"},
       {:que, "~> 0.10.0"},
