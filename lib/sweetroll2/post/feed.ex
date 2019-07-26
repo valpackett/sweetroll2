@@ -46,13 +46,7 @@ defmodule Sweetroll2.Post.Feed do
   def sort_feed_entries(urls, posts) do
     now = DateTime.utc_now()
 
-    Enum.sort(
-      urls,
-      &(DateTime.compare(
-          posts[&1].published || now,
-          posts[&2].published || now
-        ) == :gt)
-    )
+    Enum.sort_by(urls, &(-DateTime.to_unix(posts[&1].published || now)))
   end
 
   def feed_page_count(entries) do
