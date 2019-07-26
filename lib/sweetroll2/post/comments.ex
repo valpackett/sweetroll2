@@ -19,6 +19,7 @@ defmodule Sweetroll2.Post.Comments do
       when is_list(comments) do
     Enum.reduce(comments, %{}, fn x, acc ->
       cond do
+        not is_map(x) -> acc
         # TODO reacji
         compare_property(x, "in-reply-to", url) -> Map.update(acc, :replies, [x], &[x | &1])
         compare_property(x, "like-of", url) -> Map.update(acc, :likes, [x], &[x | &1])
@@ -75,6 +76,11 @@ defmodule Sweetroll2.Post.Comments do
   defp get_url(s) when is_bitstring(s), do: s
 
   defp get_url(m) when is_map(m), do: lookup_property(m, "url")
+
+  defp get_url(x) do
+    Logger.warn("cannot get_url from #{inspect(x)}")
+    nil
+  end
 
   defp compare_property(x, prop, url) when is_bitstring(prop) and is_bitstring(url) do
     lookup_property(x, prop)
