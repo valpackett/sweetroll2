@@ -26,6 +26,10 @@ defmodule Sweetroll2.Job.Generate do
   end
 
   def gen_page(url, posts, urls_dyn) when is_map(posts) do
+    Process.flag(:min_heap_size, 131_072)
+    Process.flag(:min_bin_vheap_size, 131_072)
+    Process.flag(:priority, :low)
+
     path_dir = Path.join(dir(), url)
     {durl, params} = if Map.has_key?(urls_dyn, url), do: urls_dyn[url], else: {url, %{}}
 
@@ -61,6 +65,10 @@ defmodule Sweetroll2.Job.Generate do
   end
 
   def perform(urls: urls) do
+    Process.flag(:min_heap_size, 524_288)
+    Process.flag(:min_bin_vheap_size, 524_288)
+    Process.flag(:priority, :low)
+
     posts = Map.new(Memento.transaction!(fn -> Memento.Query.all(Post) end), &{&1.url, &1})
 
     result = gen_allowed_pages(urls, posts)
