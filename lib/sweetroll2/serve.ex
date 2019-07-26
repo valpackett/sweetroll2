@@ -88,6 +88,10 @@ defmodule Sweetroll2.Serve do
     end
   end
 
+  get "/__firehose__" do
+    SSE.stream(conn, {[:url_updated], %SSE.Chunk{data: ""}})
+  end
+
   get _ do
     conn =
       conn

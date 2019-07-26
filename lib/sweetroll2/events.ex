@@ -18,7 +18,7 @@ defmodule Sweetroll2.Events do
 
   @impl true
   def handle_cast({:url_updated, _id} = event_shadow, state) do
-    %{data: url} = EventBus.fetch_event(event_shadow)
+    %{data: %SSE.Chunk{data: url}} = EventBus.fetch_event(event_shadow)
 
     Job.Generate.remove_generated(url)
     Sweetroll2.Post.DynamicUrls.Cache.clear()
@@ -32,7 +32,7 @@ defmodule Sweetroll2.Events do
   @impl true
   def handle_cast({:notify_url_for_real, url}, state) do
     Logger.debug("finished debounce for url '#{url}', notifying event bus")
-    EventSource.notify %{topic: :url_updated}, do: url
+    EventSource.notify(%{topic: :url_updated}, do: %SSE.Chunk{data: url})
     {:noreply, Map.delete(state, url)}
   end
 

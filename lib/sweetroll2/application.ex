@@ -8,11 +8,12 @@ defmodule Sweetroll2.Application do
 
   def start(_type, _args) do
     server_opts =
-      case {System.get_env("SR2_SERVER_SOCKET"), System.get_env("SR2_SERVER_PORT")} do
-        {nil, nil} -> [port: 6969]
-        {nil, port} -> [port: String.to_integer(port)]
-        {sock, _} -> [ip: {:local, sock}, port: 0]
-      end
+      [protocol_options: [idle_timeout: 10 * 60000]] ++
+        case {System.get_env("SR2_SERVER_SOCKET"), System.get_env("SR2_SERVER_PORT")} do
+          {nil, nil} -> [port: 6969]
+          {nil, port} -> [port: String.to_integer(port)]
+          {sock, _} -> [ip: {:local, sock}, port: 0]
+        end
 
     children = [
       Plug.Cowboy.child_spec(scheme: :http, plug: Sweetroll2.Serve, options: server_opts),
