@@ -24,6 +24,7 @@ defmodule Sweetroll2.Events do
     Sweetroll2.Post.DynamicUrls.Cache.clear()
 
     Que.add(Job.Generate, urls: [url])
+    Que.add(Job.NotifyWebsub, url: Sweetroll2.canonical_home_url() <> url)
 
     EventBus.mark_as_completed({__MODULE__, event_shadow})
     {:noreply, state}

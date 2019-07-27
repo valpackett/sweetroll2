@@ -36,9 +36,11 @@
         if env["h2o.remaining_delegations"] == 5
           return [401, {}, ["Where do you think you're going??"]]
         end
-        return [399, {}, []]
+        return [399, {
+          "link" => "<#{env['rack.url_scheme']}://#{env['SERVER_NAME']}#{env['PATH_INFO']}>; rel=\"self\""
+        }, []]
       end
-  - header.add: 'link: </webmention>; rel="webmention", </micropub>; rel="micropub", </auth/authorize>; rel="authorization_endpoint", </auth/token>; rel="token_endpoint"'
+  - header.add: 'link: <https://pubsubhubbub.superfeedr.com/>; rel="hub", </webmention>; rel="webmention", </micropub>; rel="micropub", </auth/authorize>; rel="authorization_endpoint", </auth/token>; rel="token_endpoint"'
     header.add: "strict-transport-security: max-age=31536000"
     header.add: "feature-policy: unsized-media 'none'; sync-xhr 'none'; document-write 'none'"
     header.add: "referrer-policy: no-referrer-when-downgrade"

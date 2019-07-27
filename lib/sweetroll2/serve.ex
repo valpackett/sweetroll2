@@ -16,6 +16,7 @@ defmodule Sweetroll2.Serve do
   plug Plug.RequestId
   plug Plug.SSL, rewrite_on: [:x_forwarded_proto]
   plug Plug.Head
+  plug :add_host_to_process
   plug :add_links
 
   plug Plug.Static,
@@ -32,7 +33,6 @@ defmodule Sweetroll2.Serve do
   plug :fetch_session
   plug :skip_csrf_anon
   plug Plug.CSRFProtection
-  plug :add_host_to_process
   plug :dispatch
 
   forward "/auth", to: Auth.Serve
@@ -140,13 +140,22 @@ defmodule Sweetroll2.Serve do
 
   @link_header ExHttpLink.generate([
                  {"/webmention", {"rel", "webmention"}},
+                 {Job.NotifyWebsub.hub(), {"rel", "hub"}},
                  {"/micropub", {"rel", "micropub"}},
                  {"/auth/authorize", {"rel", "authorization_endpoint"}},
                  {"/auth/token", {"rel", "token_endpoint"}}
                ])
 
   defp add_links(conn, _opts) do
-    put_resp_header(conn, "Link", @link_header)
+    put_resp_header(
+      conn,
+      "link",
+      @link_header <>
+        ", " <>
+        ExHttpLink.generate([
+          {"#{Process.get(:our_home_url)}#{conn.request_path}", {"rel", "self"}}
+        ])
+    )
   end
 
   defp skip_csrf_anon(conn, _opts) do
