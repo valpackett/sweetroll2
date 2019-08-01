@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-	<%= head title: "Log In" %>
+	<%= head title: "Log In", cur_url: "/auth/authorize" %>
 	<body>
 		<header>
 			<h1>The Sweetroll2 Security Theater</h1>

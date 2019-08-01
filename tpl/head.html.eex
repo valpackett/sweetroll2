@@ -2,5 +2,7 @@
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<%= tag :link, rel: "stylesheet", href: asset("style.css") %>
+		<%= tag :link, rel: "canonical", href: Sweetroll2.canonical_home_url() <> @cur_url %>
+		<%= tag :link, rel: "webmention", href: Sweetroll2.canonical_home_url() <> "/webmention" %>
 		<title><%= @title %></title>
 	</head>
