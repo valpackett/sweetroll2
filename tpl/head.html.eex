@@ -1,8 +1,10 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title><%= @title %></title>
 		<%= tag :link, rel: "stylesheet", href: asset("style.css") %>
 		<%= tag :link, rel: "canonical", href: Sweetroll2.canonical_home_url() <> @cur_url %>
 		<%= tag :link, rel: "webmention", href: Sweetroll2.canonical_home_url() <> "/__webmention__" %>
-		<title><%= @title %></title>
+		<%= tag :link, rel: "openid.delegate", href: Sweetroll2.canonical_home_url() %>
+		<link href="https://openid.indieauth.com/openid" rel="openid.server">
 	</head>
