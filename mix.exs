@@ -13,7 +13,7 @@ defmodule Sweetroll2.MixProject do
 
   def application do
     [
-      extra_applications: [:logger, :httpotion, :timex, :event_bus],
+      extra_applications: [:logger, :httpotion, :timex, :event_bus, :con_cache],
       mod: {Sweetroll2.Application, []}
     ]
   end
@@ -40,6 +40,7 @@ defmodule Sweetroll2.MixProject do
       {:slugger, "~> 0.3.0"},
       {:file_system, git: "https://github.com/falood/file_system"},
       {:debounce, "~> 0.1.0"},
+      {:con_cache, "~> 0.13"},
       {:quantum, "~> 2.3"},
       {:memento, "~> 0.3.1"},
       {:que, "~> 0.10.0"},

@@ -30,6 +30,8 @@ defmodule Sweetroll2.Job.Compress do
     require Logger
     use GenServer
 
+    @asset_dir "priv/static"
+
     def start_link(args) do
       GenServer.start_link(__MODULE__, args)
     end
@@ -64,6 +66,9 @@ defmodule Sweetroll2.Job.Compress do
               true
           end
         end
+        rel_path = Path.relative_to(to_string(path), Path.absname(@asset_dir))
+        Logger.info("uncaching rev of '#{rel_path}'")
+        ConCache.delete(:asset_rev, rel_path)
       end
 
       {:noreply, state}

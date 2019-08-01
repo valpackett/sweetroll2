@@ -74,8 +74,12 @@ defmodule Sweetroll2.Render do
     end
   end
 
+  @asset_dir "priv/static"
+
   def asset(url) do
-    "/__as__/#{url}"
+    "/__as__/#{url}?vsn=#{ConCache.get_or_store(:asset_rev, url, fn() ->
+      :crypto.hash(:sha256, File.read!(Path.join(@asset_dir, url))) |> Base.url_encode64() |> String.slice(0, 24)
+    end)}"
   end
 
   def icon(data) do
