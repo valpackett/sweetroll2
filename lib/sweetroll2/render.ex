@@ -75,7 +75,7 @@ defmodule Sweetroll2.Render do
   end
 
   def asset(url) do
-    "/as/#{url}"
+    "/__as__/#{url}"
   end
 
   def icon(data) do

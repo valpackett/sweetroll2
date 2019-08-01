@@ -20,7 +20,7 @@ defmodule Sweetroll2.Serve do
   plug :add_links
 
   plug Plug.Static,
-    at: "/as",
+    at: "/__as__",
     from: :sweetroll2,
     cache_control_for_vsn_requests: "public, max-age=31536000, immutable",
     gzip: true,
@@ -35,16 +35,16 @@ defmodule Sweetroll2.Serve do
   plug Plug.CSRFProtection
   plug :dispatch
 
-  forward "/auth", to: Auth.Serve
+  forward "/__auth__", to: Auth.Serve
 
-  forward "/micropub",
+  forward "/__micropub__",
     to: PlugMicropub,
     init_opts: [
       handler: Sweetroll2.Micropub,
       json_encoder: Jason
     ]
 
-  post "/webmention" do
+  post "/__webmention__" do
     sourceu = URI.parse(conn.body_params["source"])
     targetu = URI.parse(conn.body_params["target"])
     posts = %Post.DbAsMap{}
@@ -139,11 +139,11 @@ defmodule Sweetroll2.Serve do
   end
 
   @link_header ExHttpLink.generate([
-                 {"/webmention", {"rel", "webmention"}},
+                 {"/__webmention__", {"rel", "webmention"}},
                  {Job.NotifyWebsub.hub(), {"rel", "hub"}},
-                 {"/micropub", {"rel", "micropub"}},
-                 {"/auth/authorize", {"rel", "authorization_endpoint"}},
-                 {"/auth/token", {"rel", "token_endpoint"}}
+                 {"/__micropub__", {"rel", "micropub"}},
+                 {"/__auth__/authorize", {"rel", "authorization_endpoint"}},
+                 {"/__auth__/token", {"rel", "token_endpoint"}}
                ])
 
   defp add_links(conn, _opts) do

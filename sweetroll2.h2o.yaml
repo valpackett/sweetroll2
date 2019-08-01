@@ -19,7 +19,7 @@
       end
   - proxy.preserve-host: ON
     proxy.reverse.url: "http://127.0.0.1:6969/"
-"/as/":
+"/__as__/":
   - mruby.handler: |
       lambda do |env|
         headers = {}
@@ -40,7 +40,7 @@
           "link" => "<#{env['rack.url_scheme']}://#{env['SERVER_NAME']}#{env['PATH_INFO']}>; rel=\"self\""
         }, []]
       end
-  - header.add: 'link: <https://pubsubhubbub.superfeedr.com/>; rel="hub", </webmention>; rel="webmention", </micropub>; rel="micropub", </auth/authorize>; rel="authorization_endpoint", </auth/token>; rel="token_endpoint"'
+  - header.add: 'link: <https://pubsubhubbub.superfeedr.com/>; rel="hub", </__webmention__>; rel="webmention", </__micropub__>; rel="micropub", </__auth__/authorize>; rel="authorization_endpoint", </__auth__/token>; rel="token_endpoint"'
     header.add: "strict-transport-security: max-age=31536000"
     header.add: "feature-policy: unsized-media 'none'; sync-xhr 'none'; document-write 'none'"
     header.add: "referrer-policy: no-referrer-when-downgrade"

@@ -44,8 +44,8 @@ defmodule Sweetroll2.Auth.Serve do
       conn
       |> put_resp_header(
         "Location",
-        "/auth/login?#{
-          URI.encode_query(%{"redirect_uri" => "/auth/authorize?" <> conn.query_string})
+        "/__auth__/login?#{
+          URI.encode_query(%{"redirect_uri" => "/__auth__/authorize?" <> conn.query_string})
         }"
       )
       |> resp(:found, "")

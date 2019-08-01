@@ -1,6 +1,6 @@
 <footer>
 	<%= if @logged_in do %>
-		<form method="POST" action="/auth/logout">
+		<form method="POST" action="/__auth__/logout">
 			<%= tag :input, hidden: true, type: "hidden", name: "_csrf_token", value: Plug.CSRFProtection.get_csrf_token() %>
 			<button type="submit">log out</button>
 		</form>
@@ -12,7 +12,7 @@
 
 <%= if @logged_in do %>
 	<style>micro-panel-toolbar { position: fixed; top: 0; width: 100%; } body { padding-top: 3rem; }</style>
-	<%= content_tag :"micro-panel-editor", hidden: true, micropub: "/micropub", defaultctype: "markdown", csrfheader: "x-csrf-token", csrftoken: Plug.CSRFProtection.get_csrf_token() do end %>
+	<%= content_tag :"micro-panel-editor", hidden: true, micropub: "/__micropub__", defaultctype: "markdown", csrfheader: "x-csrf-token", csrftoken: Plug.CSRFProtection.get_csrf_token() do end %>
 	<micro-panel-toolbar></micro-panel-toolbar>
-	<script defer src="/as/micro-panel-all.bundle.min.js"></script>
+	<%= tag :script, defer: true, href: asset("micro-panel-all.bundle.min.js") %>
 <% end %>
