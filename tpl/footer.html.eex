@@ -14,5 +14,5 @@
 	<style>micro-panel-toolbar { position: fixed; top: 0; width: 100%; } body { padding-top: 3rem; }</style>
 	<%= content_tag :"micro-panel-editor", hidden: true, micropub: "/__micropub__", defaultctype: "markdown", csrfheader: "x-csrf-token", csrftoken: Plug.CSRFProtection.get_csrf_token() do end %>
 	<micro-panel-toolbar></micro-panel-toolbar>
-	<%= content_tag :script, [defer: true, href: asset("micro-panel-all.bundle.min.js")], do: "" %>
+	<%= content_tag :script, [defer: true, src: asset("micro-panel-all.bundle.min.js")], do: "" %>
 <% end %>
