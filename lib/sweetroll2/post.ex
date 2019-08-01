@@ -175,4 +175,13 @@ defmodule Sweetroll2.Post do
 
   def as_url(s) when is_bitstring(s), do: s
   def as_url(m) when is_map(m), do: map_prop(m, "url", :url)
+
+  def contexts_for(props) do
+    (as_many(props["in-reply-to"]) ++
+       as_many(props["like-of"]) ++
+       as_many(props["repost-of"]) ++
+       as_many(props["quotation-of"]) ++ as_many(props["bookmark-of"]))
+    |> Enum.map(&as_url/1)
+    |> MapSet.new()
+  end
 end

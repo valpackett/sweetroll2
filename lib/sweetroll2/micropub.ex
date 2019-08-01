@@ -2,7 +2,7 @@ defmodule Sweetroll2.Micropub do
   @behaviour PlugMicropub.HandlerBehaviour
 
   require Logger
-  alias Sweetroll2.{Auth.Bearer, Auth.AccessToken, Events, Post}
+  alias Sweetroll2.{Auth.Bearer, Auth.AccessToken, Events, Post, Job}
   import Sweetroll2.Convert
 
   @impl true
@@ -37,7 +37,7 @@ defmodule Sweetroll2.Micropub do
 
       case result do
         {:ok, :created, url} ->
-          ctxs = contexts_for(properties)
+          ctxs = Post.contexts_for(properties)
           fetch_contexts(ctxs, url: url)
           Events.notify_urls_updated([url])
           {:ok, :created, url}
@@ -60,7 +60,7 @@ defmodule Sweetroll2.Micropub do
           post = Memento.Query.read(Post, url)
 
           # We want to e.g. notify posts that aren't mentioned anymore too
-          old_ctxs = contexts_for(post.props)
+          old_ctxs = Post.contexts_for(post.props)
 
           props =
             Enum.reduce(replace, post.props, fn {k, v}, props ->
@@ -85,7 +85,7 @@ defmodule Sweetroll2.Micropub do
                 Map.delete(props, k)
             end)
 
-          ctxs = contexts_for(props)
+          ctxs = Post.contexts_for(props)
           removed_ctxs = MapSet.difference(old_ctxs, ctxs)
 
           Memento.Query.write(%{post | props: props, updated: DateTime.utc_now()})
@@ -93,9 +93,14 @@ defmodule Sweetroll2.Micropub do
           {removed_ctxs, ctxs}
         end)
 
-      # TODO: send webmentions to removed_ctxs
       fetch_contexts(ctxs, url: url)
       Events.notify_urls_updated([url])
+
+      full_url = Process.get(:our_home_url) <> url
+      # TODO: use backups instead of calculating here
+      for target <- removed_ctxs do
+        Que.add(Job.SendWebmentions, source: full_url, target: target)
+      end
 
       :ok
     else
@@ -229,18 +234,9 @@ defmodule Sweetroll2.Micropub do
   defp category_for(%{"rsvp" => x}) when is_list(x) and length(x) != 0, do: "rsvp"
   defp category_for(_), do: "notes"
 
-  defp contexts_for(props) do
-    (as_many(props["in-reply-to"]) ++
-       as_many(props["like-of"]) ++
-       as_many(props["repost-of"]) ++
-       as_many(props["quotation-of"]) ++ as_many(props["bookmark-of"]))
-    |> Enum.map(&Post.as_url/1)
-    |> MapSet.new()
-  end
-
   defp fetch_contexts(ctxs, url: url) do
     for ctx_url <- ctxs do
-      Que.add(Sweetroll2.Job.Fetch,
+      Que.add(Job.Fetch,
         url: ctx_url,
         check_mention: nil,
         save_mention: nil,
