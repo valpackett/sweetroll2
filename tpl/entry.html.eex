@@ -42,6 +42,10 @@
 	<%= photo_rendered photo %>
 <% end %>
 
+<%= for video <- Markup.exclude_inlined_media(content_tree, "video", as_many(@entry.props["video"])) do %>
+	<%= video_rendered video %>
+<% end %>
+
 <%= if content_tree != [] do %>
 	<div class="e-content entry-txt">
 		<%= content_tree |> Markup.highlight_code |> inline_media_into_content(props: @entry.props) |> Markup.render_tree |> raw %>

@@ -339,7 +339,7 @@ defmodule Sweetroll2.Render do
         software = meta["Exif.Image.Software"]
         original = as_many(photo["source"]) |> Enum.find(& &1["original"])
 
-        if make || model || lens || aperture || shutter || iso || software || original do
+        t1if make || model || lens || aperture || shutter || iso || software || original do
           figcaption class: "entry-photo-meta" do
             tif make || model do
               icon(name: "device-camera", title: "Camera")
@@ -390,11 +390,61 @@ defmodule Sweetroll2.Render do
     end
   end
 
+  def video_rendered(video) do
+    use Taggart.HTML
+
+    figure class: "entry-video" do
+      responsive_container(video) do
+        cond do
+          is_bitstring(video) ->
+            video(class: "u-video", src: video)
+
+          is_map(video) && video["source"] ->
+            srcs = as_many(video["source"])
+            poster = srcs |> Enum.find(&String.starts_with?(&1["type"], "image"))
+
+            video poster: poster["src"],
+                  controls: video["controls"] || true,
+                  autoplay: video["autoplay"] || false,
+                  loop: video["loop"] || false,
+                  muted: video["muted"] || false,
+                  playsinline: video["playsinline"] || false,
+                  width: video["width"],
+                  height: video["height"] do
+              for src <- Enum.filter(srcs, &(!String.starts_with?(&1["type"], "image"))) do
+                source(
+                  src: src["src"],
+                  type: src["type"]
+                )
+              end
+
+              for track <- as_many(video["track"]) do
+                track(
+                  src: track["src"],
+                  kind: track["kind"],
+                  label: track["label"],
+                  srclang: track["srclang"],
+                  default: track["default"] || false
+                )
+              end
+            end
+
+          is_map(video) && is_bitstring(video["value"]) ->
+            video(class: "u-video", src: video["value"])
+
+          true ->
+            {:safe, "<!-- no video -->"}
+        end
+      end
+    end
+  end
+
   def inline_media_into_content(tree, props: props) do
     Markup.inline_media_into_content(
       tree,
       %{
-        "photo" => &photo_rendered/1
+        "photo" => &photo_rendered/1,
+        "video" => &video_rendered/1
       },
       %{
         "photo" => as_many(props["photo"]),
