@@ -14,6 +14,7 @@ defmodule Sweetroll2.Render do
   import Sweetroll2.Render.Tpl
   import Phoenix.HTML.Tag
   import Phoenix.HTML
+  require Logger
   require EEx
 
   deftpl :head, "tpl/head.html.eex"
@@ -74,12 +75,40 @@ defmodule Sweetroll2.Render do
     end
   end
 
+  defmacro tif(expr, do: block) do
+    quote do
+      if unquote(expr) do
+        taggart do
+          unquote(block)
+        end
+      else
+        []
+      end
+    end
+  end
+
+  # for returning one thing inside taggart
+  # but with local vars
+  defmacro t1if(expr, do: block) do
+    quote do
+      if unquote(expr) do
+        unquote(block)
+      else
+        []
+      end
+    end
+  end
+
   @asset_dir "priv/static"
 
   def asset(url) do
-    "/__as__/#{url}?vsn=#{ConCache.get_or_store(:asset_rev, url, fn() ->
-      :crypto.hash(:sha256, File.read!(Path.join(@asset_dir, url))) |> Base.url_encode64() |> String.slice(0, 24)
-    end)}"
+    "/__as__/#{url}?vsn=#{
+      ConCache.get_or_store(:asset_rev, url, fn ->
+        :crypto.hash(:sha256, File.read!(Path.join(@asset_dir, url)))
+        |> Base.url_encode64()
+        |> String.slice(0, 24)
+      end)
+    }"
   end
 
   def icon(data) do
@@ -226,6 +255,24 @@ defmodule Sweetroll2.Render do
 
   def responsive_container(_, do: body), do: body
 
+  defp parse_ratio(s) when is_bitstring(s) do
+    case String.split(s, "/") do
+      [x, y] ->
+        case {Integer.parse(x), Integer.parse(y)} do
+          {{x, _}, {y, _}} ->
+            [x, y]
+
+          _ ->
+            Logger.warn("could not parse ratio '#{s}'")
+            [0, 1]
+        end
+
+      _ ->
+        Logger.warn("could not parse ratio '#{s}'")
+        [0, 1]
+    end
+  end
+
   def photo_rendered(photo) do
     use Taggart.HTML
 
@@ -266,6 +313,78 @@ defmodule Sweetroll2.Render do
 
           true ->
             {:safe, "<!-- no img -->"}
+        end
+      end
+
+      if is_map(photo) && photo["meta"] do
+        meta = photo["meta"]
+        make = meta["Exif.Image.Make"]
+
+        model =
+          if meta["Exif.Image.Model"],
+            do: meta["Exif.Image.Model"] |> String.replace(make, "") |> String.trim(),
+            else: nil
+
+        lens = meta["Exif.Canon.LensModel"] || meta["Exif.Photo.LensModel"]
+        lens_make = meta["Exif.Canon.LensMake"] || meta["Exif.Photo.LensMake"]
+
+        lens_model =
+          if lens && lens_make,
+            do: lens |> String.replace(lens_make, "") |> String.trim(),
+            else: lens
+
+        aperture = meta["Exif.Image.FNumber"] || meta["Exif.Photo.FNumber"]
+        shutter = meta["Exif.Image.ExposureTime"] || meta["Exif.Photo.ExposureTime"]
+        iso = meta["Exif.Photo.ISOSpeedRatings"] || meta["Exif.Photo.ISOSpeed"]
+        software = meta["Exif.Image.Software"]
+        original = as_many(photo["source"]) |> Enum.find(& &1["original"])
+
+        if make || model || lens || aperture || shutter || iso || software || original do
+          figcaption class: "entry-photo-meta" do
+            tif make || model do
+              icon(name: "device-camera", title: "Camera")
+              t1if(make, do: span(class: "camera-make", do: make))
+              t1if(model, do: span(class: "camera-model", do: model))
+            end
+
+            tif lens_model do
+              icon(name: "telescope", title: "Lens")
+              t1if(lens_make, do: span(class: "lens-make", do: lens_make))
+              t1if(lens_model, do: span(class: "lens-model", do: lens_model))
+            end
+
+            tif aperture || shutter || iso do
+              icon(name: "eye", title: "Photo parameters")
+
+              t1if shutter do
+                [x, y] = parse_ratio(shutter)
+
+                span(
+                  class: "camera-shutter",
+                  do: if(x / y >= 0.3, do: "#{Float.round(x / y, 2)}s", else: shutter)
+                )
+              end
+
+              t1if aperture do
+                [x, y] = parse_ratio(aperture)
+                span(class: "camera-aperture", do: "ƒ/#{Float.round(x / y, 2)}")
+              end
+
+              t1if iso do
+                span(class: "camera-iso", do: "ISO #{iso}")
+              end
+            end
+
+            tif software do
+              icon(name: "paintcan", title: "Editing software")
+              span(class: "camera-software", do: software)
+            end
+
+            tif original do
+              icon(name: "desktop-download")
+              a(class: "camera-original", href: original["src"], do: "Download original")
+            end
+          end
         end
       end
     end

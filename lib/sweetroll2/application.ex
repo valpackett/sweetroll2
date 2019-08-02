@@ -18,7 +18,8 @@ defmodule Sweetroll2.Application do
     children = [
       Plug.Cowboy.child_spec(scheme: :http, plug: Sweetroll2.Serve, options: server_opts),
       Spec.worker(Sweetroll2.Application.Scheduler, []),
-      {ConCache, [name: :asset_rev, ttl_check_interval: :timer.minutes(1), global_ttl: :timer.minutes(60)]},
+      {ConCache,
+       [name: :asset_rev, ttl_check_interval: :timer.minutes(1), global_ttl: :timer.minutes(60)]},
       {Sweetroll2.Job.Compress.AssetWatcher, dirs: ["priv/static"]},
       Sweetroll2.Post.DynamicUrls.Cache,
       Sweetroll2.Events
