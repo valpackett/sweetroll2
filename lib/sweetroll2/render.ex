@@ -403,7 +403,8 @@ defmodule Sweetroll2.Render do
             srcs = as_many(video["source"])
             poster = srcs |> Enum.find(&String.starts_with?(&1["type"], "image"))
 
-            video poster: poster["src"],
+            video class: "u-video",
+                  poster: poster["src"],
                   controls: video["controls"] || true,
                   autoplay: video["autoplay"] || false,
                   loop: video["loop"] || false,
@@ -412,10 +413,7 @@ defmodule Sweetroll2.Render do
                   width: video["width"],
                   height: video["height"] do
               for src <- Enum.filter(srcs, &(!String.starts_with?(&1["type"], "image"))) do
-                source(
-                  src: src["src"],
-                  type: src["type"]
-                )
+                source(src: src["src"], type: src["type"])
               end
 
               for track <- as_many(video["track"]) do
@@ -439,12 +437,33 @@ defmodule Sweetroll2.Render do
     end
   end
 
+  def audio_rendered(audio) do
+    use Taggart.HTML
+
+    audio class: "u-audio entry-audio",
+          controls: audio["controls"] || true,
+          autoplay: audio["autoplay"] || false,
+          loop: audio["loop"] || false,
+          muted: audio["muted"] || false do
+      tif is_list(audio["source"]) or is_binary(audio["source"]) do
+        for src <- as_many(audio["source"]) do
+          source(src: src["src"], type: src["type"])
+        end
+      end
+
+      t1if is_binary(audio["value"]) do
+        source(src: audio["value"])
+      end
+    end
+  end
+
   def inline_media_into_content(tree, props: props) do
     Markup.inline_media_into_content(
       tree,
       %{
         "photo" => &photo_rendered/1,
-        "video" => &video_rendered/1
+        "video" => &video_rendered/1,
+        "audio" => &audio_rendered/1
       },
       %{
         "photo" => as_many(props["photo"]),

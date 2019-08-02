@@ -46,6 +46,10 @@
 	<%= video_rendered video %>
 <% end %>
 
+<%= for audio <- Markup.exclude_inlined_media(content_tree, "audio", as_many(@entry.props["audio"])) do %>
+	<%= audio_rendered audio %>
+<% end %>
+
 <%= if content_tree != [] do %>
 	<div class="e-content entry-txt">
 		<%= content_tree |> Markup.highlight_code |> inline_media_into_content(props: @entry.props) |> Markup.render_tree |> raw %>
