@@ -3,6 +3,8 @@ defmodule Sweetroll2.Events do
   A GenServer for automatic event handling.
   """
 
+  @debounce_ms 2000
+
   require Logger
   alias Sweetroll2.{Post, Job}
   use EventBus.EventSource
@@ -46,7 +48,10 @@ defmodule Sweetroll2.Events do
       {:noreply, state}
     else
       {:ok, pid} =
-        Debounce.start_link({GenServer, :cast, [__MODULE__, {:notify_url_for_real, url}]}, 420)
+        Debounce.start_link(
+          {GenServer, :cast, [__MODULE__, {:notify_url_for_real, url}]},
+          @debounce_ms
+        )
 
       Debounce.apply(pid)
       Logger.debug("started debounce for url '#{url}': #{inspect(pid)}")
