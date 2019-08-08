@@ -2,7 +2,7 @@ defmodule Sweetroll2.Micropub do
   @behaviour PlugMicropub.HandlerBehaviour
 
   require Logger
-  alias Sweetroll2.{Auth.Bearer, Auth.AccessToken, Events, Post, Job}
+  alias Sweetroll2.{Auth.Bearer, Auth.AccessToken, Events, Post, Markup, Job}
   import Sweetroll2.Convert
 
   @impl true
@@ -55,12 +55,16 @@ defmodule Sweetroll2.Micropub do
     if Bearer.is_allowed?(token, :update) do
       url = read_url(url)
 
-      {removed_ctxs, ctxs} =
+      ctxs =
         Memento.transaction!(fn ->
           post = Memento.Query.read(Post, url)
 
           # We want to e.g. notify posts that aren't mentioned anymore too
-          old_ctxs = Post.contexts_for(post.props)
+          all_old_ctxs =
+            MapSet.union(
+              Post.contexts_for(post.props),
+              Markup.contexts_for(as_one(post.props["content"]))
+            )
 
           props =
             Enum.reduce(replace, post.props, fn {k, v}, props ->
@@ -85,22 +89,32 @@ defmodule Sweetroll2.Micropub do
                 Map.delete(props, k)
             end)
 
-          ctxs = Post.contexts_for(props)
-          removed_ctxs = MapSet.difference(old_ctxs, ctxs)
+          ctxs_prop = Post.contexts_for(props)
+          ctxs_cont = Markup.contexts_for(as_one(props["content"]))
+
+          removed_ctxs = MapSet.difference(all_old_ctxs, MapSet.union(ctxs_prop, ctxs_cont))
+
+          props =
+            Map.update(
+              props,
+              "x-sr2-ctxs-removed",
+              MapSet.to_list(removed_ctxs),
+              &(MapSet.new(as_many(&1))
+                |> MapSet.union(removed_ctxs)
+                |> MapSet.difference(ctxs_prop)
+                |> MapSet.difference(ctxs_cont)
+                |> MapSet.to_list())
+            )
 
           Memento.Query.write(%{post | props: props, updated: DateTime.utc_now()})
 
-          {removed_ctxs, ctxs}
+          ctxs_prop
         end)
 
+      # the fetches also notify, and notifications are debounced,
+      # so in the ideal case (fast fetches), the actions (generate etc) will be taken only once
       fetch_contexts(ctxs, url: url)
       Events.notify_urls_updated([url])
-
-      full_url = Process.get(:our_home_url) <> url
-      # TODO: use backups instead of calculating here
-      for target <- removed_ctxs do
-        Que.add(Job.SendWebmentions, source: full_url, target: target)
-      end
 
       :ok
     else

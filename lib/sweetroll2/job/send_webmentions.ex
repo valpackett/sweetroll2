@@ -81,16 +81,18 @@ defmodule Sweetroll2.Job.SendWebmentions do
     post = %Post.DbAsMap{}[url]
 
     if post do
-      for target <- Post.contexts_for(post.props) do
+      for target <-
+            MapSet.union(
+              Post.contexts_for(post.props),
+              Markup.contexts_for(Convert.as_one(post.props["content"]))
+            ) do
         Que.add(__MODULE__, source: full_url, target: target)
       end
 
-      for link <-
-            Floki.find(
-              Markup.content_to_tree(Convert.as_one(post.props["content"])),
-              "a[href^=http]:not([rel~=nofollow])"
-            ) do
-        Que.add(__MODULE__, source: full_url, target: List.first(Floki.attribute(link, "href")))
+      # TODO: also move these to a different property so that we don't pester
+      # no-longer-mentioned sites with our removed mentions too much
+      for target <- post.props["x-sr2-ctxs-removed"] || [] do
+        Que.add(__MODULE__, source: full_url, target: target)
       end
     else
       Logger.info("no post for url #{inspect(url)}")

@@ -10,6 +10,12 @@ defmodule Sweetroll2.Markup do
 
   def render_tree(tree), do: Floki.raw_html(tree)
 
+  def contexts_for(content) do
+    Floki.find(content_to_tree(content), "a[href^=http]:not([rel~=nofollow])")
+    |> Stream.map(&List.first(Floki.attribute(&1, "href")))
+    |> MapSet.new()
+  end
+
   @doc """
   Parse a snippet of HTML without html/head/body tags into a tree.
   """
