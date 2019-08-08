@@ -240,7 +240,7 @@ defmodule Sweetroll2.Micropub do
         url: ctx_url,
         check_mention: nil,
         save_mention: nil,
-        notify_update: url
+        notify_update: [url]
       )
     end
   end

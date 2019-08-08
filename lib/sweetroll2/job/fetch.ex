@@ -64,6 +64,6 @@ defmodule Sweetroll2.Job.Fetch do
       end
     end)
 
-    Events.notify_urls_updated([notify_update])
+    Events.notify_urls_updated(notify_update)
   end
 end

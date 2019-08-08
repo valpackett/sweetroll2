@@ -81,7 +81,7 @@ defmodule Sweetroll2.Serve do
           url: conn.body_params["source"],
           check_mention: conn.body_params["target"],
           save_mention: targetu.path,
-          notify_update: targetu.path
+          notify_update: [targetu.path]
         )
 
         send_resp(conn, :accepted, "Accepted for processing")
