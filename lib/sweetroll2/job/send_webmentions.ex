@@ -60,7 +60,11 @@ defmodule Sweetroll2.Job.SendWebmentions do
   end
 
   def perform(source: source, target: target) do
+    Logger.info("sending Webmention: '#{target}' from '#{source}'")
+
     endpoint = discover(target, HTTPotion.get!(target))
+
+    Logger.info("endpoint '#{endpoint}' found for '#{target}'")
 
     res =
       HTTPotion.post!(endpoint,

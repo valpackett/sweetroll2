@@ -8,7 +8,7 @@ config :httpotion, :default_headers, "user-agent": "Sweetroll2 (HTTPotion/ibrows
 
 config :microformats2, atomize_keys: false, underscore_keys: false
 
-config :logger, :console, metadata: [:request_id]
+config :logger, :console, metadata: [:request_id, :job_id]
 
 config :floki, :html_parser, Floki.HTMLParser.Html5ever
 

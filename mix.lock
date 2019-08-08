@@ -46,7 +46,7 @@
   "plug_crypto": {:hex, :plug_crypto, "1.0.0", "18e49317d3fa343f24620ed22795ec29d4a5e602d52d1513ccea0b07d8ea7d4d", [:mix], [], "hexpm"},
   "plug_micropub": {:git, "https://github.com/bismark/plug_micropub", "c6976ac9510035a78a6b1d1fa2e469cb94aa3248", []},
   "quantum": {:hex, :quantum, "2.3.4", "72a0e8855e2adc101459eac8454787cb74ab4169de6ca50f670e72142d4960e9", [:mix], [{:calendar, "~> 0.17", [hex: :calendar, repo: "hexpm", optional: true]}, {:crontab, "~> 1.1", [hex: :crontab, repo: "hexpm", optional: false]}, {:gen_stage, "~> 0.12", [hex: :gen_stage, repo: "hexpm", optional: false]}, {:swarm, "~> 3.3", [hex: :swarm, repo: "hexpm", optional: false]}, {:timex, "~> 3.1", [hex: :timex, repo: "hexpm", optional: true]}], "hexpm"},
-  "que": {:hex, :que, "0.10.1", "788ed0ec92ed69bdf9cfb29bf41a94ca6355b8d44959bd0669cf706e557ac891", [:mix], [{:ex_utils, "~> 0.1.6", [hex: :ex_utils, repo: "hexpm", optional: false]}, {:memento, "~> 0.3.0", [hex: :memento, repo: "hexpm", optional: false]}], "hexpm"},
+  "que": {:git, "https://github.com/myfreeweb/que", "9598f88a3d7e744da47c3f42abb1f22962d42d16", [branch: "logger-meta"]},
   "ranch": {:hex, :ranch, "1.7.1", "6b1fab51b49196860b733a49c07604465a47bdb78aa10c1c16a3d199f7f8c881", [:rebar3], [], "hexpm"},
   "rustled_syntect": {:hex, :rustled_syntect, "0.1.1", "d2d5922a5ba52e7ab47b5a7ae34fcd52bb8bc308fa978f36280db99e64f42277", [:mix], [{:rustler, "~> 0.20.0", [hex: :rustler, repo: "hexpm", optional: false]}], "hexpm"},
   "rustler": {:hex, :rustler, "0.20.0", "6b2cc8149700a7b1df2226dbe273ec1f9449318cad3bd3b5b68125a4cf1f438b", [:mix], [], "hexpm"},

@@ -43,7 +43,7 @@ defmodule Sweetroll2.MixProject do
       {:con_cache, "~> 0.13"},
       {:quantum, "~> 2.3"},
       {:memento, "~> 0.3.1"},
-      {:que, "~> 0.10.0"},
+      {:que, git: "https://github.com/myfreeweb/que", branch: "logger-meta"},
       {:httpotion, git: "https://github.com/myfreeweb/httpotion", override: true},
       {:ssl_verify_fun, "~> 1.1", override: true},
       {:plug_cowboy, "~> 2.0"},
