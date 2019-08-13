@@ -317,7 +317,7 @@ defmodule Sweetroll2.Render do
         end
       end
 
-      if is_map(photo) && photo["meta"] do
+      t1if is_map(photo) && photo["meta"] do
         meta = photo["meta"]
         make = meta["Exif.Image.Make"]
 
