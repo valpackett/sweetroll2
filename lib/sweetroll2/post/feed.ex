@@ -43,6 +43,15 @@ defmodule Sweetroll2.Post.Feed do
     )
   end
 
+  def filter_feed_entries(feed = %Post{type: "x-inbox-feed"}, posts, local_urls) do
+    Stream.filter(
+      local_urls,
+      &(!(posts[&1].deleted || false) and String.starts_with?(&1, "/"))
+    )
+    |> Stream.flat_map(&as_many(posts[&1].props["comment"]))
+    |> Stream.filter(&(posts[&1] && !(posts[&1].deleted || false) && in_feed?(posts[&1], feed)))
+  end
+
   def sort_feed_entries(urls, posts) do
     now = DateTime.utc_now()
 

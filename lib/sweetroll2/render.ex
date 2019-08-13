@@ -49,7 +49,7 @@ defmodule Sweetroll2.Render do
         post = Post.Comments.inline_comments(post, posts)
         page_entry(entry: post, posts: posts, feed_urls: feed_urls, logged_in: logged_in)
 
-      post.type == "x-dynamic-feed" ->
+      post.type == "x-dynamic-feed" || post.type == "x-inbox-feed" ->
         page = params[:page] || 0
 
         children =
