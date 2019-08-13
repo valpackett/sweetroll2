@@ -74,7 +74,7 @@ defmodule Sweetroll2.Job.Generate do
     |> Enum.group_by(&elem(&1, 0))
   end
 
-  def perform(urls: urls) do
+  def perform(urls: urls, next_jobs: next_jobs) do
     Process.flag(:min_heap_size, 524_288)
     Process.flag(:min_bin_vheap_size, 524_288)
     Process.flag(:priority, :low)
@@ -86,6 +86,10 @@ defmodule Sweetroll2.Job.Generate do
 
     for {:ok, path} <- result.ok do
       Que.add(Compress, path: path)
+    end
+
+    for {mod, args} <- next_jobs do
+      Que.add(mod, args)
     end
   end
 

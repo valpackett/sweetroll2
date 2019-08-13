@@ -25,9 +25,13 @@ defmodule Sweetroll2.Events do
     Job.Generate.remove_generated(url)
     Sweetroll2.Post.DynamicUrls.Cache.clear()
 
-    Que.add(Job.Generate, urls: [url])
-    Que.add(Job.NotifyWebsub, url: Sweetroll2.canonical_home_url() <> url)
-    Que.add(Job.SendWebmentions, url: url, our_home_url: Sweetroll2.canonical_home_url())
+    Que.add(Job.Generate,
+      urls: [url],
+      next_jobs: [
+        {Job.NotifyWebsub, url: Sweetroll2.canonical_home_url() <> url},
+        {Job.SendWebmentions, url: url, our_home_url: Sweetroll2.canonical_home_url()}
+      ]
+    )
 
     EventBus.mark_as_completed({__MODULE__, event_shadow})
     {:noreply, state}
@@ -84,8 +88,8 @@ defmodule Sweetroll2.Events do
       GenServer.cast(__MODULE__, {:notify_url_req, url})
       aff = affected_urls(url)
 
-      Logger.info("potentially affected by '#{url}': #{inspect(aff)}",
-        event: %{affected_discovered: %{url: url, affected: urls}}
+      Logger.info("updating affected urls",
+        event: %{affected_discovered: %{url: url, affected: aff}}
       )
 
       notify_urls_updated(aff)
