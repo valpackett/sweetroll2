@@ -49,6 +49,7 @@ defmodule Sweetroll2.MixProject do
       {:timber, "~> 3.1"},
       {:timber_plug, "~> 1.0"},
       {:timber_exceptions, "~> 2.0"},
+      {:exceptional, "~> 2.1"},
       {:plug_cowboy, "~> 2.0"},
       {:sse, "~> 0.4"},
       {:event_bus, ">= 1.6.0"}

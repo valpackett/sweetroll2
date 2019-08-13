@@ -4,6 +4,7 @@ defmodule Sweetroll2.Job.Generate do
 
   require Logger
   alias Sweetroll2.{Post, Render, Job.Compress}
+  import Exceptional.{Raise, Normalize}
   use Que.Worker
 
   def dir(), do: System.get_env("SR2_STATIC_GEN_OUT_DIR") || @default_dir
@@ -35,31 +36,27 @@ defmodule Sweetroll2.Job.Generate do
     path_dir = Path.join(dir(), url)
     {durl, params} = if Map.has_key?(urls_dyn, url), do: urls_dyn[url], else: {url, %{}}
 
-    with {_, {:safe, data}} <-
-           {:render,
-            render_post(
-              post: posts[durl],
-              params: params,
-              posts: posts,
-              # all URLs is fine
-              local_urls: Map.keys(posts),
-              logged_in: false
-            )},
-         {_, :ok} <- {:mkdirp, File.mkdir_p(path_dir)},
-         path = Path.join(path_dir, "index.html"),
-         {_, :ok} <- {:write, File.write(path, data)},
-         _ =
-           Logger.info("generated #{url} -> #{path}",
-             event: %{generate_success: %{url: url, path: path}}
-           ),
-         do: {:ok, path},
-         else:
-           (e ->
-              Logger.error("could not generate #{url}: #{inspect(e)}",
-                event: %{generate_failure: %{url: url, error: inspect(e)}}
-              )
+    {:safe, data} =
+      render_post(
+        post: posts[durl],
+        params: params,
+        posts: posts,
+        # all URLs is fine
+        local_urls: Map.keys(posts),
+        logged_in: false
+      )
+      |> normalize
+      |> ensure!
 
-              {:error, url, e})
+    File.mkdir_p!(path_dir)
+    path = Path.join(path_dir, "index.html")
+    File.write!(path, data)
+
+    Logger.info("generated #{url} -> #{path}",
+      event: %{generate_success: %{url: url, path: path}}
+    )
+
+    path
   end
 
   def gen_allowed_pages(urls, posts) when is_map(posts) do
@@ -70,7 +67,6 @@ defmodule Sweetroll2.Job.Generate do
     if(urls == :all, do: Map.keys(posts) ++ Map.keys(urls_dyn), else: urls)
     |> Enum.filter(&(can_generate(&1, posts, urls_dyn) == :ok))
     |> Task.async_stream(&gen_page(&1, posts, urls_dyn, log_ctx), max_concurrency: @concurrency)
-    |> Stream.map(fn {:ok, x} -> x end)
     |> Enum.group_by(&elem(&1, 0))
   end
 
