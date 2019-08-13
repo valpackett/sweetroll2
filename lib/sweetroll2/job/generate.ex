@@ -4,7 +4,6 @@ defmodule Sweetroll2.Job.Generate do
 
   require Logger
   alias Sweetroll2.{Post, Render, Job.Compress}
-  import Exceptional.{Raise, Normalize}
   use Que.Worker
 
   def dir(), do: System.get_env("SR2_STATIC_GEN_OUT_DIR") || @default_dir
@@ -20,12 +19,6 @@ defmodule Sweetroll2.Job.Generate do
     end
   end
 
-  defp render_post(opts) do
-    Render.render_post(opts)
-  rescue
-    e -> {:error, e}
-  end
-
   def gen_page(url, posts, urls_dyn, log_ctx) when is_map(posts) do
     Process.flag(:min_heap_size, 131_072)
     Process.flag(:min_bin_vheap_size, 131_072)
@@ -37,7 +30,7 @@ defmodule Sweetroll2.Job.Generate do
     {durl, params} = if Map.has_key?(urls_dyn, url), do: urls_dyn[url], else: {url, %{}}
 
     {:safe, data} =
-      render_post(
+      Render.render_post(
         post: posts[durl],
         params: params,
         posts: posts,
@@ -45,8 +38,6 @@ defmodule Sweetroll2.Job.Generate do
         local_urls: Map.keys(posts),
         logged_in: false
       )
-      |> normalize
-      |> ensure!
 
     File.mkdir_p!(path_dir)
     path = Path.join(path_dir, "index.html")
