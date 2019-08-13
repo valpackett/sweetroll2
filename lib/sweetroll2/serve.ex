@@ -128,7 +128,7 @@ defmodule Sweetroll2.Serve do
             params: params,
             posts: posts,
             local_urls: urls_local,
-            logged_in: !is_nil(IO.inspect(Auth.Session.current_token(conn)))
+            logged_in: !is_nil(Auth.Session.current_token(conn))
           )
 
         send_resp(conn, :ok, data)
