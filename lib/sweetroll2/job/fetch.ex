@@ -45,11 +45,19 @@ defmodule Sweetroll2.Job.Fetch do
         save_mention: save_mention,
         notify_update: notify_update
       ) do
+    Timber.add_context(que: %{job_id: Logger.metadata()[:job_id]})
+
     {:ok, mf} = fetch(url, check_mention: check_mention)
 
     Memento.transaction!(fn ->
       post = Post.from_map(mf)
-      if post.url != url, do: Logger.warn("URL mismatch '#{post.url}' vs #{url}")
+
+      if post.url != url,
+        do:
+          Logger.warn("URL mismatch '#{post.url}' vs #{url}",
+            event: %{fetch_url_mismatch: %{post: post.url, requested: url}}
+          )
+
       Memento.Query.write(%{post | url: url})
 
       if !is_nil(save_mention) do

@@ -12,8 +12,9 @@ defmodule Sweetroll2.Serve do
   use Plug.ErrorHandler
 
   plug :fprofile
-  plug Plug.Logger
   plug Plug.RequestId
+  plug Timber.Plug.HTTPContext
+  plug Timber.Plug.Event
   plug Plug.SSL, rewrite_on: [:x_forwarded_proto]
   plug Plug.Head
   plug :add_host_to_process

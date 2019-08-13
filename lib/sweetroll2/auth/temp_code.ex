@@ -56,7 +56,10 @@ defmodule Sweetroll2.Auth.TempCode do
     end)
   rescue
     err ->
-      Logger.warn("tempcode #{code} not valid: #{inspect(err)}")
+      Logger.warn("tempcode not valid",
+        event: %{temp_code_not_valid: %{code: code, error: inspect(err)}}
+      )
+
       nil
   end
 end

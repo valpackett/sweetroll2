@@ -13,7 +13,10 @@ defmodule Sweetroll2.Job.SendWebmentions do
         links
 
       {:error, err} ->
-        Logger.warn("could not parse Link header #{inspect(s)}: #{inspect(err)}")
+        Logger.warn("could not parse Link header",
+          event: %{failed_link_header_parse: %{header: s, error: inspect(err)}}
+        )
+
         []
     end
   end
@@ -60,11 +63,15 @@ defmodule Sweetroll2.Job.SendWebmentions do
   end
 
   def perform(source: source, target: target) do
-    Logger.info("sending Webmention: '#{target}' from '#{source}'")
+    Timber.add_context(que: %{job_id: Logger.metadata()[:job_id]})
+
+    Logger.info("sending", event: %{webmention_start: %{source: source, target: target}})
 
     endpoint = discover(target, HTTPotion.get!(target))
 
-    Logger.info("endpoint '#{endpoint}' found for '#{target}'")
+    Logger.info("endpoint '#{endpoint}' found",
+      event: %{webmention_endpoint_discovered: %{endpoint: endpoint, for: target}}
+    )
 
     res =
       HTTPotion.post!(endpoint,
@@ -74,13 +81,15 @@ defmodule Sweetroll2.Job.SendWebmentions do
       )
 
     if HTTPotion.Response.success?(res) do
-      Logger.info("sent Webmention: #{inspect(res)}")
+      Logger.info("sent", event: %{webmention_success: res})
     else
-      Logger.warn("failed to send Webmention: #{inspect(res)}")
+      Logger.warn("failed to send", event: %{webmention_failure: res})
     end
   end
 
   def perform(url: url, our_home_url: our_home_url) do
+    Timber.add_context(que: %{job_id: Logger.metadata()[:job_id]})
+
     full_url = our_home_url <> url
     post = %Post.DbAsMap{}[url]
 
@@ -99,7 +108,9 @@ defmodule Sweetroll2.Job.SendWebmentions do
         Que.add(__MODULE__, source: full_url, target: target)
       end
     else
-      Logger.info("no post for url #{inspect(url)}")
+      Logger.info("no post for url #{inspect(url)}",
+        event: %{webmention_no_post: %{url: url, our_home_url: our_home_url}}
+      )
     end
   end
 end

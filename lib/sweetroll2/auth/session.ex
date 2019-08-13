@@ -67,7 +67,10 @@ defmodule Sweetroll2.Auth.Session do
     end)
   rescue
     err ->
-      Logger.warn("session #{token} not valid: #{inspect(err)}")
+      Logger.warn("session #{token} not valid: #{inspect(err)}",
+        event: %{session_token_not_valid: %{token: token, error: inspect(err)}}
+      )
+
       nil
   end
 

@@ -9,6 +9,8 @@ defmodule Sweetroll2.Job.NotifyWebsub do
   def hub(), do: System.get_env("SR2_WEBSUB_HUB") || @default_hub
 
   def perform(url: url) do
+    Timber.add_context(que: %{job_id: Logger.metadata()[:job_id]})
+
     res =
       HTTPotion.post!(hub(),
         headers: ["Content-Type": "application/x-www-form-urlencoded"],
@@ -16,9 +18,9 @@ defmodule Sweetroll2.Job.NotifyWebsub do
       )
 
     if HTTPotion.Response.success?(res) do
-      Logger.info("notified WebSub hub: #{inspect(res)}")
+      Logger.info("", event: %{websub_success: res})
     else
-      Logger.warn("failed to notify WebSub hub: #{inspect(res)}")
+      Logger.info("", event: %{websub_failure: res})
     end
   end
 end

@@ -35,7 +35,10 @@ defmodule Sweetroll2.Events do
 
   @impl true
   def handle_cast({:notify_url_for_real, url}, state) do
-    Logger.debug("finished debounce for url '#{url}', notifying event bus")
+    Logger.debug("finished debounce for url '#{url}', notifying event bus",
+      event: %{debounce_finished: %{url: url}}
+    )
+
     EventSource.notify(%{topic: :url_updated}, do: %SSE.Chunk{data: url})
     {:noreply, Map.delete(state, url)}
   end
@@ -44,7 +47,11 @@ defmodule Sweetroll2.Events do
   def handle_cast({:notify_url_req, url}, state) do
     if Map.has_key?(state, url) do
       Debounce.apply(state[url])
-      Logger.debug("reset debounce for url '#{url}': #{inspect(state[url])}")
+
+      Logger.debug("reset debounce for url '#{url}': #{inspect(state[url])}",
+        event: %{debounce_reset: %{url: url}}
+      )
+
       {:noreply, state}
     else
       {:ok, pid} =
@@ -54,7 +61,11 @@ defmodule Sweetroll2.Events do
         )
 
       Debounce.apply(pid)
-      Logger.debug("started debounce for url '#{url}': #{inspect(pid)}")
+
+      Logger.debug("started debounce for url '#{url}': #{inspect(pid)}",
+        event: %{debounce_started: %{url: url}}
+      )
+
       {:noreply, Map.put(state, url, pid)}
     end
   end
@@ -72,7 +83,11 @@ defmodule Sweetroll2.Events do
     for url <- urls do
       GenServer.cast(__MODULE__, {:notify_url_req, url})
       aff = affected_urls(url)
-      Logger.info("potentially affected by '#{url}': #{inspect(aff)}")
+
+      Logger.info("potentially affected by '#{url}': #{inspect(aff)}",
+        event: %{affected_discovered: %{url: url, affected: urls}}
+      )
+
       notify_urls_updated(aff)
     end
   end

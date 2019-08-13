@@ -55,7 +55,7 @@ defmodule Sweetroll2.Auth.AccessToken do
     end)
   rescue
     err ->
-      Logger.warn("accesstoken #{token} not valid: #{inspect(err)}")
+      Logger.warn("token not valid", event: %{access_token_not_valid: %{error: inspect(err)}})
       nil
   end
 

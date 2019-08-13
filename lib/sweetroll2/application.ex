@@ -7,6 +7,8 @@ defmodule Sweetroll2.Application do
   use Application
 
   def start(_type, _args) do
+    :ok = Logger.add_translator({Timber.Exceptions.Translator, :translate})
+
     server_opts =
       [protocol_options: [idle_timeout: 10 * 60000]] ++
         case {System.get_env("SR2_SERVER_SOCKET"), System.get_env("SR2_SERVER_PORT")} do

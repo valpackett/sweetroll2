@@ -17,10 +17,19 @@ defmodule Sweetroll2.Auth.Bearer do
   def is_allowed?(token = "T-" <> _, scope) do
     accesstoken = AccessToken.get_if_valid(token)
 
-    if !is_nil(accesstoken),
-      do:
-        Logger.info("auth: checking scope #{to_string(scope)} in #{inspect(accesstoken.scopes)}")
+    if accesstoken do
+      result = !is_nil(accesstoken) and (is_nil(scope) or to_string(scope) in accesstoken.scopes)
 
-    !is_nil(accesstoken) and (is_nil(scope) or to_string(scope) in accesstoken.scopes)
+      Logger.info("checking scope #{to_string(scope)}",
+        event: %{
+          access_token_scope_check: %{scope: scope, allowed: accesstoken.scopes, result: result}
+        }
+      )
+
+      result
+    else
+      Logger.info("no access token", event: %{access_token_not_found: %{}})
+      false
+    end
   end
 end

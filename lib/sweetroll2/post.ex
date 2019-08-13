@@ -53,7 +53,8 @@ defmodule Sweetroll2.Post do
 
         {:error, e} ->
           Logger.warn(
-            "could not parse published: '#{inspect(map_prop(map, "published", :published))}'"
+            "could not parse published: '#{inspect(map_prop(map, "published", :published))}'",
+            event: %{date_parse_failed: %{prop: "published", map: map}}
           )
 
           nil
@@ -65,7 +66,10 @@ defmodule Sweetroll2.Post do
           d
 
         {:error, e} ->
-          Logger.warn("could not parse updated: '#{inspect(map_prop(map, "updated", :updated))}'")
+          Logger.warn("could not parse updated: '#{inspect(map_prop(map, "updated", :updated))}'",
+            event: %{date_parse_failed: %{prop: "updated", map: map}}
+          )
+
           nil
       end
 

@@ -52,7 +52,8 @@ defmodule Sweetroll2.Markup do
   rescue
     CaseClauseError ->
       # https://github.com/rrrene/html_sanitize_ex/issues/28
-      Logger.warn("html sanitizer error, falling back to escaping")
+      Logger.warn("html sanitizer error, falling back to escaping", event: %{sanitizer_error: %{}})
+
       tree |> render_tree |> Plug.HTML.html_escape() |> text_to_tree
   end
 
@@ -71,7 +72,10 @@ defmodule Sweetroll2.Markup do
     hl_lang = Enum.find(clss, nil, &@langs[&1])
 
     if hl_lang do
-      Logger.debug("highlighting language #{hl_lang} => #{@langs[hl_lang]}")
+      Logger.debug("highlighting",
+        event: %{code_highlighter_found: %{hl: @langs[hl_lang], for: hl_lang}}
+      )
+
       # TODO: make RustledSyntect produce a parsed tree
       code_tree =
         content
@@ -85,7 +89,7 @@ defmodule Sweetroll2.Markup do
 
       {"pre", add_klass(p_attrs, "syntect"), {"code", c_attrs, code_tree}}
     else
-      Logger.debug("no known syntax language for #{inspect(clss)}")
+      Logger.debug("could not highlight", event: %{code_highlighter_not_found: %{classes: clss}})
       {"pre", p_attrs, {"code", c_attrs, content}}
     end
   end
@@ -136,7 +140,9 @@ defmodule Sweetroll2.Markup do
            # TODO: would be amazing to have taggart output to a tree directly
            else:
              (err ->
-                Logger.warn(" could not inline #{media_type}: #{inspect(err)}")
+                Logger.warn("could not inline #{media_type}",
+                  event: %{media_inlining_failure: %{type: media_type, error: inspect(err)}}
+                )
 
                 {"div", [{"class", "sweetroll2-error"}],
                  ["Media embedding failed.", {"pre", [], inspect(err)}]})

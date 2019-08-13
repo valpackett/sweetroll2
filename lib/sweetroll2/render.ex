@@ -263,12 +263,13 @@ defmodule Sweetroll2.Render do
             [x, y]
 
           _ ->
-            Logger.warn("could not parse ratio '#{s}'")
+            Logger.warn("could not parse ratio '#{s}'", event: %{ratio_parse_failed: %{string: s}})
+
             [0, 1]
         end
 
       _ ->
-        Logger.warn("could not parse ratio '#{s}'")
+        Logger.warn("could not parse ratio '#{s}'", event: %{ratio_parse_failed: %{string: s}})
         [0, 1]
     end
   end

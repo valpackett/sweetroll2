@@ -46,6 +46,9 @@ defmodule Sweetroll2.MixProject do
       {:que, git: "https://github.com/myfreeweb/que", branch: "logger-meta"},
       {:httpotion, git: "https://github.com/myfreeweb/httpotion", override: true},
       {:ssl_verify_fun, "~> 1.1", override: true},
+      {:timber, "~> 3.1"},
+      {:timber_plug, "~> 1.0"},
+      {:timber_exceptions, "~> 2.0"},
       {:plug_cowboy, "~> 2.0"},
       {:sse, "~> 0.4"},
       {:event_bus, ">= 1.6.0"}

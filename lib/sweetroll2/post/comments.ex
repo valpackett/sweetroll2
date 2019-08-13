@@ -39,14 +39,12 @@ defmodule Sweetroll2.Post.Comments do
   The inlined ones are Post structs, but other things in the array remain as-is.
   """
   def inline_comments(post = %Post{url: url, props: props}, posts) do
-    Logger.debug("inline comments: working on #{url}")
-
     comments =
       props["comment"]
       |> as_many()
       |> Enum.map(fn
         u when is_bitstring(u) ->
-          Logger.debug("inline comments: inlining #{u}")
+          Logger.debug("inlining", event: %{inlining_comment: %{comment: u, into: url}})
           posts[u]
 
         x ->
@@ -57,7 +55,6 @@ defmodule Sweetroll2.Post.Comments do
   end
 
   def inline_comments(post_url, posts) when is_bitstring(post_url) do
-    Logger.debug("inline comments: loading #{post_url}")
     res = posts[post_url]
     if res != post_url, do: inline_comments(res, posts), else: res
   end
@@ -78,7 +75,7 @@ defmodule Sweetroll2.Post.Comments do
   defp get_url(m) when is_map(m), do: lookup_property(m, "url")
 
   defp get_url(x) do
-    Logger.warn("cannot get_url from #{inspect(x)}")
+    Logger.warn("cannot get_url", event: %{get_url_unknown_type: %{thing: inspect(x)}})
     nil
   end
 

@@ -25,10 +25,12 @@ defmodule Sweetroll2.Job.Generate do
     e -> {:error, e}
   end
 
-  def gen_page(url, posts, urls_dyn) when is_map(posts) do
+  def gen_page(url, posts, urls_dyn, log_ctx) when is_map(posts) do
     Process.flag(:min_heap_size, 131_072)
     Process.flag(:min_bin_vheap_size, 131_072)
     Process.flag(:priority, :low)
+    Timber.LocalContext.save(log_ctx)
+    Timber.add_context(sr2_generator: %{url: url})
 
     path_dir = Path.join(dir(), url)
     {durl, params} = if Map.has_key?(urls_dyn, url), do: urls_dyn[url], else: {url, %{}}
@@ -46,20 +48,28 @@ defmodule Sweetroll2.Job.Generate do
          {_, :ok} <- {:mkdirp, File.mkdir_p(path_dir)},
          path = Path.join(path_dir, "index.html"),
          {_, :ok} <- {:write, File.write(path, data)},
-         _ = Logger.info("generated #{url} -> #{path}"),
+         _ =
+           Logger.info("generated #{url} -> #{path}",
+             event: %{generate_success: %{url: url, path: path}}
+           ),
          do: {:ok, path},
          else:
            (e ->
-              Logger.error("could not generate #{url}: #{inspect(e)}")
+              Logger.error("could not generate #{url}: #{inspect(e)}",
+                event: %{generate_failure: %{url: url, error: inspect(e)}}
+              )
+
               {:error, url, e})
   end
 
   def gen_allowed_pages(urls, posts) when is_map(posts) do
     urls_dyn = Post.DynamicUrls.dynamic_urls(posts, Post.urls_local())
 
+    log_ctx = Timber.LocalContext.load()
+
     if(urls == :all, do: Map.keys(posts) ++ Map.keys(urls_dyn), else: urls)
     |> Enum.filter(&(can_generate(&1, posts, urls_dyn) == :ok))
-    |> Task.async_stream(&gen_page(&1, posts, urls_dyn), max_concurrency: @concurrency)
+    |> Task.async_stream(&gen_page(&1, posts, urls_dyn, log_ctx), max_concurrency: @concurrency)
     |> Stream.map(fn {:ok, x} -> x end)
     |> Enum.group_by(&elem(&1, 0))
   end
@@ -68,6 +78,7 @@ defmodule Sweetroll2.Job.Generate do
     Process.flag(:min_heap_size, 524_288)
     Process.flag(:min_bin_vheap_size, 524_288)
     Process.flag(:priority, :low)
+    Timber.add_context(que: %{job_id: Logger.metadata()[:job_id]})
 
     posts = Map.new(Memento.transaction!(fn -> Memento.Query.all(Post) end), &{&1.url, &1})
 

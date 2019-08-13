@@ -8,7 +8,12 @@ config :httpotion, :default_headers, "user-agent": "Sweetroll2 (HTTPotion/ibrows
 
 config :microformats2, atomize_keys: false, underscore_keys: false
 
-config :logger, :console, metadata: [:request_id, :job_id]
+config :logger, :console,
+  format:
+    if(Mix.env() == :prod, do: {Timber.Formatter, :format}, else: {NiceLogFormatter, :format}),
+  colors: [enabled: false],
+  metadata: :all,
+  handle_sasl_reports: true
 
 config :floki, :html_parser, Floki.HTMLParser.Html5ever
 

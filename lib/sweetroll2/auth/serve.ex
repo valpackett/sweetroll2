@@ -51,7 +51,10 @@ defmodule Sweetroll2.Auth.Serve do
       |> resp(:found, "")
     else
       Logger.info(
-        "authorize request: #{inspect(conn.query_params)}, our home: #{Process.get(:our_home_url)}"
+        "authorize request",
+        event: %{
+          authorize_request: %{params: conn.query_params, our_home: Process.get(:our_home_url)}
+        }
       )
 
       {status, err} =
@@ -156,7 +159,8 @@ defmodule Sweetroll2.Auth.Serve do
           end
       end
 
-    if status == :bad_request, do: Logger.error(body)
+    if status == :bad_request,
+      do: Logger.error(body, event: %{authorization_failed: %{reason: body}})
 
     conn
     |> put_resp_content_type(if status == :ok, do: "application/json", else: "text/plain")
@@ -216,7 +220,8 @@ defmodule Sweetroll2.Auth.Serve do
           end
       end
 
-    if status == :bad_request, do: Logger.error(body)
+    if status == :bad_request,
+      do: Logger.error(body, event: %{token_grant_failed: %{reason: body}})
 
     conn
     |> put_resp_content_type(if status == :ok, do: "application/json", else: "text/plain")
