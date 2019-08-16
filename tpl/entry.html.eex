@@ -100,6 +100,12 @@
 			</span>
 		<% end %>
 	<% end %>
+
+	<%= if @logged_in do %>
+		<%= content_tag :"micro-panel-action", with: @entry.url do %>
+			<button>Edit</button>
+		<% end %>
+	<% end %>
 </div>
 
 <%= if @expand_comments do %>
