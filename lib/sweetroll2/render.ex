@@ -226,7 +226,6 @@ defmodule Sweetroll2.Render do
     use Taggart.HTML
 
     is_resp = is_integer(media["width"]) && is_integer(media["height"])
-    cls = if is_resp, do: "responsive-container", else: ""
 
     col =
       case as_one(
@@ -250,10 +249,14 @@ defmodule Sweetroll2.Render do
         do: "padding-bottom:#{media["height"] / media["width"] * 100}%",
         else: ""
 
-    div(class: cls, style: "#{bcg}#{pad}", do: body)
+    content_tag(
+      :"responsive-container",
+      [class: if(is_resp, do: "has-pad", else: nil), style: "#{bcg}#{pad}"],
+      do: body
+    )
   end
 
-  def responsive_container(_, do: body), do: body
+  def responsive_container(_, do: body), do: content_tag(:"responsive-container", [], do: body)
 
   defp parse_ratio(s) when is_bitstring(s) do
     case String.split(s, "/") do

@@ -9,7 +9,7 @@
 					<%= entry posts: @posts, cur_url: @feed.url, entry: entry, feed_urls: @feed_urls, expand_comments: false %>
 				</article>
 			<% end %>
-			<nav>
+			<nav class="feed-nav">
 				<%= if @cur_page > 0 do %>
 					<%= content_tag :a, href: Post.DynamicUrls.page_url(@feed.url, @cur_page - 1), rel: "prev" do %>
 						← newer entries

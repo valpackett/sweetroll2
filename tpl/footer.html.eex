@@ -1,17 +1,22 @@
-<footer>
+<footer id="site-footer">
+	powered by <a href="https://github.com/myfreeweb/sweetroll2">sweetroll2</a>
 	<%= if @logged_in do %>
-		<form method="POST" action="/__auth__/logout">
+		| <form method="POST" action="/__auth__/logout" style="display:inline">
 			<%= tag :input, hidden: true, type: "hidden", name: "_csrf_token", value: Plug.CSRFProtection.get_csrf_token() %>
 			<button type="submit">log out</button>
 		</form>
 	<% end %>
-	<div class="h-card p-author">
-		<a href="https://github.com/myfreeweb" rel="me" title="myfreeweb on GitHub"><%= icon name: "octoface" %>myfreeweb</a>
-	</div>
 </footer>
 
+<%= content_tag :script, [defer: true, src: asset("sr2.js")], do: "" %>
 <%= if @logged_in do %>
-	<style>micro-panel-toolbar { position: fixed; top: 0; width: 100%; } body { padding-top: 3rem; }</style>
+	<style>
+		/* NOTE: micro-panel/lit-element uses inline styles anyway, don't try to move this into the site styles for stricter CSP :D */
+		:root { --micro-panel-accent: #97e55b; --micro-panel-light-accent: #6dcc24bb; }
+		micro-panel { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
+		micro-panel-toolbar { position: fixed; top: 0; width: 100%; }
+		body { padding-top: calc(var(--lineh) * 3); }
+	</style>
 	<%= content_tag :"micro-panel-editor", hidden: true, micropub: "/__micropub__", defaultctype: "markdown", csrfheader: "x-csrf-token", csrftoken: Plug.CSRFProtection.get_csrf_token() do end %>
 	<micro-panel-toolbar></micro-panel-toolbar>
 	<%= content_tag :script, [defer: true, src: asset("micro-panel-all.bundle.min.js")], do: "" %>
