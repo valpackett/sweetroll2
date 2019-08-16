@@ -2,6 +2,8 @@ use Mix.Config
 
 config :mnesia, dir: 'priv/db/#{Mix.env()}/#{node()}'
 
+config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
+
 config :ibrowse, max_headers_size: 10240
 
 config :httpotion, :default_headers, "user-agent": "Sweetroll2 (HTTPotion/ibrowse)"

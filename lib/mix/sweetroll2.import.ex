@@ -16,6 +16,7 @@ defmodule Mix.Tasks.Sweetroll2.Import do
 
     Mix.shell().info("Ignoring domains #{inspect(domains)}")
     Memento.start()
+    Tzdata.EtsHolder.start_link()
 
     for path <- argv do
       Mix.shell().info("Importing #{path}")
