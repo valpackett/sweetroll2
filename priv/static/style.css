@@ -122,7 +122,7 @@ a:hover, a:focus { color: #fff; }
 
 p, pre, figure { margin: var(--lineh) 0; overflow: hidden; }
 h1, h2, h3, h4 { font-weight: 550; margin: var(--lineh) 0; }
-h1 { font-size: 1.602rem; }
+h1 { font-size: 1.602rem; line-height: calc(var(--lineh) * 2); }
 h2 { font-size: 1.424rem; }
 h3 { font-size: 1.266rem; }
 h4 { font-size: 1.125rem; }
