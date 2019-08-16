@@ -8,10 +8,15 @@ defmodule Sweetroll2.Micropub do
   @impl true
   def handle_create(type, properties, token) do
     if Bearer.is_allowed?(token, :create) do
-      cat = category_for(properties)
-      url = as_one(properties["url"]) || "/#{cat}/#{slug_for(properties)}"
+      {properties, url} =
+        if type == "entry" or type == "review" do
+          cat = category_for(properties)
 
-      properties = Map.update(properties, "category", ["_" <> cat], &["_" <> cat | &1])
+          {Map.update(properties, "category", ["_" <> cat], &["_" <> cat | &1]),
+           as_one(properties["url"]) || "/#{cat}/#{slug_for(properties)}"}
+        else
+          {properties, as_one(properties["url"]) || "/__wtf__/#{slug_for(properties)}"}
+        end
 
       clid = AccessToken.get_client_id(token)
 
