@@ -1,5 +1,5 @@
 	<h1 id="site-h1">
-		<a href="/" rel="home feed" type="text/html"><%= as_one(home(@posts).props["site-name"]) || as_one(home(@posts).props["name"]) %></a>
+		<a href="/" rel="home" type="text/html"><%= as_one(home(@posts).props["site-name"]) || as_one(home(@posts).props["name"]) %></a>
 	</h1>
 	<nav id="site-nav">
 		<%= for feed_url <- feed_urls_filter(@feed_urls, posts: @posts, show_prop: "show-in-nav", order_prop: "order-in-nav") do %>

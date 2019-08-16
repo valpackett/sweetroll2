@@ -211,6 +211,9 @@ article > figure { margin: 0; }
 #site-footer, .feed-nav { padding: 0 var(--hspac); }
 #site-footer { font-size: 0.889rem; margin: calc(var(--lineh) * 2) 0 var(--lineh); }
 
+.big-form { padding: var(--lineh) var(--hspac); }
+.big-form input, .big-form button { width: 100%; padding: 0 var(--hspac); margin: var(--lineh) 0; line-height: calc(var(--lineh) * 2); }
+
 @media screen and (min-width:40rem) {
 	body {
 		display: grid;

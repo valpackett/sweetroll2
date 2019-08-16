@@ -2,15 +2,9 @@
 <html lang="en">
 	<%= head title: "Log In", cur_url: "/__auth__/authorize" %>
 	<body>
-		<header>
-			<h1>The Sweetroll2 Security Theater</h1>
-		</header>
+		<h1 id="site-h1">the sweetroll2 security theater</h1>
 		<main>
-			<style>
-form { padding: 1rem; }
-input, button { width: 100%; margin: 0 0 1em; }
-			</style>
-			<div class="block-thingy">
+			<div class="block-thingy big-form">
 				<%= if @err do %>
 					<div class="login-error">
 						<%= @err %>
