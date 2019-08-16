@@ -15,7 +15,8 @@ defmodule Sweetroll2.Job.Compress do
     for file <- files do
       path = Path.join(@asset_dir, file)
 
-      if !File.dir?(path) and !String.ends_with?(path, ".br") and !String.ends_with?(path, ".gz") do
+      if !File.dir?(path) and !String.ends_with?(path, ".br") and !String.ends_with?(path, ".gz") and
+           !String.ends_with?(path, ".woff") and !String.ends_with?(path, ".woff2") do
         Que.add(Sweetroll2.Job.Compress, path: path)
       end
 
@@ -46,7 +47,8 @@ defmodule Sweetroll2.Job.Compress do
           {:file_event, watcher_pid, {path, events}},
           %{watcher_pid: watcher_pid} = state
         ) do
-      if !String.ends_with?(path, ".br") and !String.ends_with?(path, ".gz") do
+      if !String.ends_with?(path, ".br") and !String.ends_with?(path, ".gz") and
+           !String.ends_with?(path, ".woff") and !String.ends_with?(path, ".woff2") do
         for event <- events do
           case event do
             :created ->
