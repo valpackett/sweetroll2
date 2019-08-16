@@ -110,7 +110,7 @@ input, abbr, acronym, blockquote, code, kbd, q, samp, var, #site-h1 { hyphens: n
 abbr[title]:hover { cursor: help; }
 audio, video { width: 100%; }
 responsive-container { display: block; background-size: cover !important; background-repeat: no-repeat !important; width: 100%; position: relative; }
-responsive-container.has-pad > * { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+responsive-container.has-pad > *, responsive-container.has-pad picture img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 .icon { height: 1em; width: 1em; margin: 0 0.1em 0 0.01em; vertical-align: middle; shape-rendering: geometricprecision; fill: currentColor; }
 blockquote { border-left: 0.35rem solid #ddd; padding: 0 1rem; }
 audio[controls] { height: calc(var(--lineh) * 2); }
