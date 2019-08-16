@@ -188,4 +188,11 @@ defmodule Sweetroll2.Post do
     |> Enum.map(&as_url/1)
     |> MapSet.new()
   end
+
+  def filter_type(urls, posts, type) do
+    Stream.filter(urls, fn url ->
+      posts[url] && posts[url].type == type && !(posts[url].deleted || false) &&
+        String.starts_with?(url, "/")
+    end)
+  end
 end

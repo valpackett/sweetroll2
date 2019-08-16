@@ -42,12 +42,25 @@ defmodule Sweetroll2.Render do
         local_urls: local_urls,
         logged_in: logged_in
       ) do
-    feed_urls = Post.Feed.filter_feeds(local_urls, posts)
+    feed_urls = Post.filter_type(local_urls, posts, "x-dynamic-feed")
 
     cond do
       post.type == "entry" || post.type == "review" ->
         post = Post.Comments.inline_comments(post, posts)
         page_entry(entry: post, posts: posts, feed_urls: feed_urls, logged_in: logged_in)
+
+      post.type == "x-custom-page" ->
+        {:ok, html, _} =
+          Post.Page.get_template(post)
+          |> Post.Page.render(%{
+            page: post,
+            posts: posts,
+            logged_in: logged_in,
+            local_urls: local_urls,
+            feed_urls: feed_urls
+          })
+
+        {:safe, html}
 
       post.type == "x-dynamic-feed" || post.type == "x-inbox-feed" ->
         page = params[:page] || 0
@@ -535,4 +548,83 @@ defmodule Sweetroll2.Render do
   def filter_scheme(x = "http://" <> _), do: x
   def filter_scheme(x = "https://" <> _), do: x
   def filter_scheme(_), do: "#non_http_url_found"
+end
+
+defmodule Sweetroll2.Render.LiquidTags.Head do
+  alias Sweetroll2.Render
+
+  def parse(%Liquid.Tag{} = tag, %Liquid.Template{} = context) do
+    {tag, context}
+  end
+
+  def render(output, tag, context) do
+    {:safe, data} = Render.head(title: tag.markup, cur_url: context.assigns.page.url)
+    {[IO.iodata_to_binary(data)] ++ output, context}
+  end
+end
+
+defmodule Sweetroll2.Render.LiquidTags.Header do
+  alias Sweetroll2.Render
+
+  def parse(%Liquid.Tag{} = tag, %Liquid.Template{} = context) do
+    {tag, context}
+  end
+
+  def render(output, _tag, context) do
+    {:safe, data} =
+      Render.header(
+        posts: context.assigns.posts,
+        cur_url: context.assigns.page.url,
+        feed_urls: context.assigns.feed_urls
+      )
+
+    {[IO.iodata_to_binary(data)] ++ output, context}
+  end
+end
+
+defmodule Sweetroll2.Render.LiquidTags.Footer do
+  alias Sweetroll2.Render
+
+  def parse(%Liquid.Tag{} = tag, %Liquid.Template{} = context) do
+    {tag, context}
+  end
+
+  def render(output, _tag, context) do
+    {:safe, data} = Render.footer(logged_in: context.assigns.logged_in)
+    {[IO.iodata_to_binary(data)] ++ output, context}
+  end
+end
+
+defmodule Sweetroll2.Render.LiquidTags.FeedPreview do
+  alias Sweetroll2.{Render, Post}
+
+  def parse(%Liquid.Tag{} = tag, %Liquid.Template{} = context) do
+    {tag, context}
+  end
+
+  def render(output, tag, context) do
+    feed = context.assigns.posts[tag.markup]
+
+    children =
+      Post.Feed.filter_feed_entries(feed, context.assigns.posts, context.assigns.local_urls)
+      |> Post.Feed.sort_feed_entries(context.assigns.posts)
+      |> Enum.slice(0, 5)
+      |> Enum.map(&Post.Comments.inline_comments(&1, context.assigns.posts))
+
+    # TODO: adjustable number
+
+    {Enum.map(children, fn entry ->
+       {:safe, data} =
+         Render.entry(
+           posts: context.assigns.posts,
+           cur_url: context.assigns.page.url,
+           logged_in: context.assigns.logged_in,
+           entry: entry,
+           feed_urls: context.assigns.feed_urls,
+           expand_comments: false
+         )
+
+       IO.iodata_to_binary(["<article>", data, "</article>"])
+     end) ++ output, context}
+  end
 end

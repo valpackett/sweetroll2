@@ -23,7 +23,8 @@ defmodule Sweetroll2.Events do
     %{data: %SSE.Chunk{data: url}} = EventBus.fetch_event(event_shadow)
 
     Job.Generate.remove_generated(url)
-    Sweetroll2.Post.DynamicUrls.Cache.clear()
+    Post.DynamicUrls.Cache.clear()
+    Post.Page.clear_cached_template(url: url)
 
     Que.add(Job.Generate,
       urls: [url],
@@ -104,9 +105,18 @@ defmodule Sweetroll2.Events do
     else
       local_urls = Post.urls_local()
 
-      Post.Feed.filter_feeds(local_urls, posts)
-      |> Stream.filter(&Post.Feed.in_feed?(posts[url], posts[&1]))
-      |> Enum.flat_map(
+      aff_feeds =
+        Post.filter_type(local_urls, posts, "x-dynamic-feed")
+        |> Enum.filter(&Post.Feed.in_feed?(posts[url], posts[&1]))
+
+      aff_pages =
+        Post.filter_type(local_urls, posts, "x-custom-page")
+        |> Enum.filter(fn page_url ->
+          Enum.any?(Post.Page.used_feeds(posts[page_url]), &(&1 == url))
+        end)
+
+      Enum.flat_map(
+        aff_feeds ++ aff_pages,
         &[&1 | Map.keys(Post.DynamicUrls.dynamic_urls_for(posts[&1], posts, local_urls))]
       )
     end

@@ -19,6 +19,14 @@ config :logger, :console,
 
 config :floki, :html_parser, Floki.HTMLParser.Html5ever
 
+config :liquid,
+  extra_tags: %{
+    head: {Sweetroll2.Render.LiquidTags.Head, Liquid.Tag},
+    header: {Sweetroll2.Render.LiquidTags.Header, Liquid.Tag},
+    footer: {Sweetroll2.Render.LiquidTags.Footer, Liquid.Tag},
+    feedpreview: {Sweetroll2.Render.LiquidTags.FeedPreview, Liquid.Tag}
+  }
+
 config :event_bus, topics: [:url_updated], id_generator: EventBus.Util.Base62
 
 config :sweetroll2, Sweetroll2.Application.Scheduler,

@@ -13,7 +13,7 @@ defmodule Sweetroll2.MixProject do
 
   def application do
     [
-      extra_applications: [:logger, :httpotion, :timex, :event_bus, :con_cache],
+      extra_applications: [:logger, :httpotion, :timex, :event_bus, :con_cache, :liquid],
       mod: {Sweetroll2.Application, []}
     ]
   end
@@ -34,7 +34,7 @@ defmodule Sweetroll2.MixProject do
       {:microformats2,
        git: "https://github.com/myfreeweb/microformats2-elixir", branch: "no-underscores"},
       {:plug_micropub, git: "https://github.com/bismark/plug_micropub"},
-      {:ex_http_link, "~> 0.1.1"},
+      {:ex_http_link, "~> 0.1.2"},
       {:argon2_elixir, "~> 2.0"},
       {:nanoid, "~> 2.0.1"},
       {:slugger, "~> 0.3.0"},
@@ -43,6 +43,8 @@ defmodule Sweetroll2.MixProject do
       {:con_cache, "~> 0.13"},
       {:quantum, "~> 2.3"},
       {:memento, "~> 0.3.1"},
+      {:liquid, "~> 0.9"},
+      {:nimble_parsec, "~> 0.5", override: true},
       {:que, git: "https://github.com/myfreeweb/que", branch: "logger-meta"},
       {:httpotion, git: "https://github.com/myfreeweb/httpotion", override: true},
       {:ssl_verify_fun, "~> 1.1", override: true},
