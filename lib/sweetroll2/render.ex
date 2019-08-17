@@ -627,7 +627,7 @@ defmodule Sweetroll2.Render.LiquidTags.FeedPreview do
            expand_comments: false
          )
 
-       IO.iodata_to_binary(["<article>", data, "</article>"])
+       IO.iodata_to_binary([~S[<article class="h-entry">], data, "</article>"])
      end) ++ output, context}
   end
 end
