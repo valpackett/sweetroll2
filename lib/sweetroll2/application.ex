@@ -59,6 +59,7 @@ defmodule Sweetroll2.Application do
     Memento.stop()
     Memento.Schema.create(nodes)
     Memento.start()
+    Que.Persistence.Mnesia.setup!()
     Memento.Table.create!(Sweetroll2.Post, disc_copies: nodes)
     Memento.Table.create!(Sweetroll2.Auth.Session, disc_copies: nodes)
     Memento.Table.create!(Sweetroll2.Auth.TempCode, disc_copies: nodes)
