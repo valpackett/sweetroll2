@@ -51,7 +51,7 @@ defmodule Sweetroll2.Job.Generate do
   end
 
   def gen_allowed_pages(urls, posts) when is_map(posts) do
-    urls_dyn = Post.DynamicUrls.dynamic_urls(posts, Post.urls_local())
+    urls_dyn = Post.DynamicUrls.dynamic_urls_with(posts, Post.urls_local())
 
     log_ctx = Timber.LocalContext.load()
 

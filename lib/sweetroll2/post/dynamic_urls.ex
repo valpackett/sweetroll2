@@ -36,31 +36,14 @@ defmodule Sweetroll2.Post.DynamicUrls do
 
   def dynamic_urls_for(_, _, _), do: %{}
 
-  def dynamic_urls(posts, local_urls) do
+  def dynamic_urls_with(posts, local_urls) do
     Stream.map(local_urls, &dynamic_urls_for(posts[&1], posts, local_urls))
     |> Enum.reduce(&Map.merge/2)
   end
 
-  defmodule Cache do
-    use Agent
-    alias Sweetroll2.Post
+  def dynamic_urls_raw, do: dynamic_urls_with(%Post.DbAsMap{}, Post.urls_local())
 
-    def start_link(_) do
-      Agent.start_link(fn -> nil end, name: __MODULE__)
-    end
+  def dynamic_urls, do: ConCache.get_or_store(:misc, :dynamic_urls, &dynamic_urls_raw/0)
 
-    def dynamic_urls() do
-      if result = Agent.get(__MODULE__, & &1) do
-        result
-      else
-        result = Post.DynamicUrls.dynamic_urls(%Post.DbAsMap{}, Post.urls_local())
-        Agent.update(__MODULE__, fn _ -> result end)
-        result
-      end
-    end
-
-    def clear() do
-      Agent.update(__MODULE__, fn _ -> nil end)
-    end
-  end
+  def clear_cached_urls, do: ConCache.delete(:misc, :dynamic_urls)
 end

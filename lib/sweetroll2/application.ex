@@ -44,7 +44,6 @@ defmodule Sweetroll2.Application do
         id: :cache_misc
       ),
       {Sweetroll2.Job.Compress.AssetWatcher, dirs: ["priv/static"]},
-      Sweetroll2.Post.DynamicUrls.Cache,
       Sweetroll2.Events
     ]
 

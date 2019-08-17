@@ -24,7 +24,7 @@ defmodule Sweetroll2.Events do
 
     Job.Generate.remove_generated(url)
     Post.Tags.clear_cached_tags()
-    Post.DynamicUrls.Cache.clear()
+    Post.DynamicUrls.clear_cached_urls()
     Post.Page.clear_cached_template(url: url)
 
     Que.add(Job.Generate,
