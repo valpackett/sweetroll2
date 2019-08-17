@@ -61,8 +61,7 @@
 	<%= time_permalink @entry, rel: "bookmark" %>
 
 	in
-	<%= for feed_url <- feed_urls_filter(@feed_urls, posts: @posts, show_prop: "show-in-post", order_prop: "order-in-post") do %>
-		<% feed = @posts[feed_url] %>
+	<%= for feed <- Post.Tags.feeds_get_with_tags(feed_urls_filter(@feed_urls, posts: @posts, show_prop: "show-in-post", order_prop: "order-in-post"), posts: @posts) do %>
 		<%= if Post.Feed.in_feed?(@entry, feed) do %>
 			<%= content_tag :a, href: feed.url, rel: "feed", type: "text/html", class: (if feed.url == @cur_url, do: "current", else: "") do %>
 				<%= as_one feed.props["name"] %>

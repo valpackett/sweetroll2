@@ -3,6 +3,8 @@ defmodule Sweetroll2.Post.DynamicUrls do
   Rules for special post types that create more than one URL. Currently:
 
   - dynamic feeds are paginated, so they create `feed_url/pageN` for their pages
+  - the tag feeds are paginated, so you get `tag_url/TAG/pageN`
+    NOTE: the `tag_url/TAG` rule is also replicated in Post.Tags.feeds_get_with_tags
   """
 
   alias Sweetroll2.Post
@@ -13,10 +15,24 @@ defmodule Sweetroll2.Post.DynamicUrls do
   def dynamic_urls_for(post = %Post{type: post_type}, posts, local_urls)
       when post_type == "x-dynamic-feed" or post_type == "x-inbox-feed" do
     cnt = Post.Feed.feed_page_count(Post.Feed.filter_feed_entries(post, posts, local_urls))
-    Map.new(1..cnt, &{page_url(post.url, &1), {post.url, %{page: &1}}})
+    Map.new(1..(cnt - 1), &{page_url(post.url, &1), {post.url, %{page: &1}}})
   end
 
-  # TODO def dynamic_urls_for(post = %__MODULE__{type: "x-dynamic-tag-feed"}, posts, local_urls) do end
+  def dynamic_urls_for(post = %Post{type: "x-dynamic-tag-feed"}, posts, local_urls) do
+    Stream.map(Post.Tags.all_tags(), fn tag ->
+      cnt =
+        Post.Tags.subst_tag(post, tag)
+        |> Post.Feed.filter_feed_entries(posts, local_urls)
+        |> Post.Feed.feed_page_count()
+
+      # NOTE: starting from zero as just the tag itself is also dynamic
+      Map.new(
+        0..(cnt - 1),
+        &{page_url("#{post.url}/#{tag}", &1), {post.url, %{tag: tag, page: &1}}}
+      )
+    end)
+    |> Enum.reduce(&Map.merge/2)
+  end
 
   def dynamic_urls_for(_, _, _), do: %{}
 

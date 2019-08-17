@@ -23,6 +23,7 @@ defmodule Sweetroll2.Events do
     %{data: %SSE.Chunk{data: url}} = EventBus.fetch_event(event_shadow)
 
     Job.Generate.remove_generated(url)
+    Post.Tags.clear_cached_tags()
     Post.DynamicUrls.Cache.clear()
     Post.Page.clear_cached_template(url: url)
 
@@ -85,6 +86,9 @@ defmodule Sweetroll2.Events do
   end
 
   def notify_urls_updated(urls) when is_list(urls) do
+    # to include currently added tags
+    Post.Tags.clear_cached_tags()
+
     for url <- urls do
       GenServer.cast(__MODULE__, {:notify_url_req, url})
       aff = affected_urls(url)
@@ -105,19 +109,32 @@ defmodule Sweetroll2.Events do
     else
       local_urls = Post.urls_local()
 
-      aff_feeds =
-        Post.filter_type(local_urls, posts, "x-dynamic-feed")
-        |> Enum.filter(&Post.Feed.in_feed?(posts[url], posts[&1]))
+      # TODO: use a previous copy of the post to find feeds that formerly contained it!!
+      # NOTE: tags can only be handled here, but dynamic_urls_for below should get their pages (!)
+      #       due to substitution and type change via feeds_get_with_tags
+      # TODO: actually confirm that that works
 
-      aff_pages =
+      aff_feeds =
+        Post.filter_type(local_urls, posts, ["x-dynamic-feed", "x-dynamic-tag-feed"])
+        |> Post.Tags.feeds_get_with_tags(posts: posts)
+        |> Enum.filter(&Post.Feed.in_feed?(posts[url], &1))
+
+      aff_feeds_map = Map.new(aff_feeds, &{&1.url, &1})
+
+      aff_page_urls =
         Post.filter_type(local_urls, posts, "x-custom-page")
         |> Enum.filter(fn page_url ->
           Enum.any?(Post.Page.used_feeds(posts[page_url]), &(&1 == url))
         end)
 
       Enum.flat_map(
-        aff_feeds ++ aff_pages,
-        &[&1 | Map.keys(Post.DynamicUrls.dynamic_urls_for(posts[&1], posts, local_urls))]
+        Enum.map(aff_feeds, & &1.url) ++ aff_page_urls,
+        &[
+          &1
+          | Map.keys(
+              Post.DynamicUrls.dynamic_urls_for(aff_feeds_map[&1] || posts[&1], posts, local_urls)
+            )
+        ]
       )
     end
   end

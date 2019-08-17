@@ -189,9 +189,16 @@ defmodule Sweetroll2.Post do
     |> MapSet.new()
   end
 
-  def filter_type(urls, posts, type) do
+  def filter_type(urls, posts, type) when is_binary(type) do
     Stream.filter(urls, fn url ->
       posts[url] && posts[url].type == type && !(posts[url].deleted || false) &&
+        String.starts_with?(url, "/")
+    end)
+  end
+
+  def filter_type(urls, posts, types) when is_list(types) do
+    Stream.filter(urls, fn url ->
+      posts[url] && Enum.any?(types, &(posts[url].type == &1)) && !(posts[url].deleted || false) &&
         String.starts_with?(url, "/")
     end)
   end

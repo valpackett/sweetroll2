@@ -28,7 +28,8 @@ defmodule Sweetroll2.Post.Feed do
       not matches_filters?(post, as_many(feed.props["unfilter"]))
   end
 
-  def filter_feed_entries(feed = %Post{type: "x-dynamic-feed"}, posts, local_urls) do
+  def filter_feed_entries(feed = %Post{type: type}, posts, local_urls)
+      when type == "x-dynamic-feed" or type == "x-dynamic-tag-feed" do
     Stream.filter(
       local_urls,
       &(!(posts[&1].deleted || false) and String.starts_with?(&1, "/") and

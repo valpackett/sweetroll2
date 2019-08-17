@@ -42,7 +42,7 @@ defmodule Sweetroll2.Render do
         local_urls: local_urls,
         logged_in: logged_in
       ) do
-    feed_urls = Post.filter_type(local_urls, posts, "x-dynamic-feed")
+    feed_urls = Post.filter_type(local_urls, posts, ["x-dynamic-feed", "x-dynamic-tag-feed"])
 
     cond do
       post.type == "entry" || post.type == "review" ->
@@ -62,8 +62,11 @@ defmodule Sweetroll2.Render do
 
         {:safe, html}
 
-      post.type == "x-dynamic-feed" || post.type == "x-inbox-feed" ->
+      post.type == "x-dynamic-feed" || post.type == "x-dynamic-tag-feed" ||
+          post.type == "x-inbox-feed" ->
         page = params[:page] || 0
+
+        post = if params[:tag], do: Post.Tags.subst_tag(post, params[:tag]), else: post
 
         children =
           Post.Feed.filter_feed_entries(post, posts, local_urls)

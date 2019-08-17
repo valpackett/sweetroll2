@@ -34,6 +34,15 @@ defmodule Sweetroll2.Application do
          ]},
         id: :cache_tpl
       ),
+      Supervisor.child_spec(
+        {ConCache,
+         [
+           name: :misc,
+           ttl_check_interval: :timer.minutes(30),
+           global_ttl: :timer.hours(12)
+         ]},
+        id: :cache_misc
+      ),
       {Sweetroll2.Job.Compress.AssetWatcher, dirs: ["priv/static"]},
       Sweetroll2.Post.DynamicUrls.Cache,
       Sweetroll2.Events
