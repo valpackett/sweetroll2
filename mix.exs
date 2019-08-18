@@ -13,7 +13,7 @@ defmodule Sweetroll2.MixProject do
 
   def application do
     [
-      extra_applications: [:logger, :httpotion, :timex, :event_bus, :con_cache, :liquid],
+      extra_applications: [:logger, :timex, :event_bus, :con_cache, :liquid],
       mod: {Sweetroll2.Application, []}
     ]
   end
@@ -46,8 +46,9 @@ defmodule Sweetroll2.MixProject do
       {:liquid, "~> 0.9"},
       {:nimble_parsec, "~> 0.5", override: true},
       {:que, git: "https://github.com/myfreeweb/que", branch: "logger-meta"},
-      {:httpotion, git: "https://github.com/myfreeweb/httpotion", override: true},
       {:ssl_verify_fun, "~> 1.1", override: true},
+      {:hackney, "~> 1.15"},
+      {:tesla, "~> 1.2"},
       {:hammer, "~> 6.0"},
       {:timber, "~> 3.1"},
       {:timber_plug, "~> 1.0"},

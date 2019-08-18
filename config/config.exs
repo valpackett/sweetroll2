@@ -4,10 +4,6 @@ config :mnesia, dir: 'priv/db/#{Mix.env()}/#{node()}'
 
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 
-config :ibrowse, max_headers_size: 10240
-
-config :httpotion, :default_headers, "user-agent": "Sweetroll2 (HTTPotion/ibrowse)"
-
 config :microformats2, atomize_keys: false, underscore_keys: false
 
 config :logger, :console,

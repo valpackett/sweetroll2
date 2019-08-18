@@ -1,5 +1,5 @@
 defmodule Sweetroll2.Job.Fetch do
-  alias Sweetroll2.{Events, Post, Convert}
+  alias Sweetroll2.{Events, Post, Convert, HttpClient}
   require Logger
   use Que.Worker, concurrency: 4
 
@@ -22,7 +22,7 @@ defmodule Sweetroll2.Job.Fetch do
 
       true ->
         # TODO handle 410 Gone
-        resp = HTTPotion.get!(url)
+        resp = HttpClient.get!(url, headers: [{"accept", "text/html"}])
         html = Floki.parse(resp.body)
 
         if check_mention == nil ||

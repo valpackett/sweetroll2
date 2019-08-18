@@ -1,5 +1,5 @@
 defmodule Sweetroll2.Job.SendWebmentions do
-  alias Sweetroll2.{Post, Markup, Convert}
+  alias Sweetroll2.{Post, Markup, Convert, HttpClient}
   require Logger
   use Que.Worker, concurrency: 4
 
@@ -39,9 +39,11 @@ defmodule Sweetroll2.Job.SendWebmentions do
     el && List.first(Floki.attribute(el, "href"))
   end
 
-  def discover(base, %HTTPotion.Response{body: body, headers: headers}) when is_binary(base) do
+  def discover(base, resp = %Tesla.Env{body: body}) when is_binary(base) do
     # TODO: HTML base tag??
-    link = find_http_link(parse_http_links(headers[:link])) || find_html_link(Floki.parse(body))
+    link =
+      find_http_link(parse_http_links(Tesla.get_headers(resp, "link"))) ||
+        find_html_link(Floki.parse(body))
 
     cond do
       not is_binary(link) ->
@@ -67,23 +69,18 @@ defmodule Sweetroll2.Job.SendWebmentions do
 
     Logger.info("sending", event: %{webmention_start: %{source: source, target: target}})
 
-    endpoint = discover(target, HTTPotion.get!(target))
+    endpoint = discover(target, HttpClient.get!(target))
 
     Logger.info("endpoint '#{endpoint}' found",
       event: %{webmention_endpoint_discovered: %{endpoint: endpoint, for: target}}
     )
 
-    res =
-      HTTPotion.post!(endpoint,
-        headers: ["Content-Type": "application/x-www-form-urlencoded"],
-        body: Plug.Conn.Query.encode(%{source: source, target: target}),
-        follow_redirects: true
-      )
+    resp = HttpClient.post!(endpoint, %{source: source, target: target})
 
-    if HTTPotion.Response.success?(res) do
-      Logger.info("sent", event: %{webmention_success: res})
+    if resp.status >= 200 and resp.status < 300 do
+      Logger.info("sent", event: %{webmention_success: resp})
     else
-      Logger.warn("failed to send", event: %{webmention_failure: res})
+      Logger.warn("failed to send", event: %{webmention_failure: resp})
     end
   end
 
