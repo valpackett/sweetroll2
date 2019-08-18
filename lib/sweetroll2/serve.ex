@@ -13,6 +13,7 @@ defmodule Sweetroll2.Serve do
 
   plug :fprofile
   plug Plug.RequestId
+  plug RemoteIp
   plug Timber.Plug.HTTPContext
   plug Timber.Plug.Event
   plug Plug.SSL, rewrite_on: [:x_forwarded_proto]
@@ -73,6 +74,12 @@ defmodule Sweetroll2.Serve do
           :bad_request,
           "Target parameter not on our host (must be on '#{Process.get(:our_home_url)}')"
         )
+
+      match?(
+        {:deny, _},
+        Hammer.check_rate("wm:#{conn.remote_ip |> :inet.ntoa()}", 10 * 60_000, 10)
+      ) ->
+        send_resp(conn, :too_many_requests, "Your IP address is rate limited")
 
       is_nil(posts[targetu.path]) || posts[targetu.path].deleted ->
         send_resp(conn, :bad_request, "Target post does not exist")
