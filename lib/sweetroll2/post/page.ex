@@ -23,7 +23,7 @@ defmodule Sweetroll2.Post.Page do
   def used_feeds(%Liquid.Template{root: root}), do: used_feeds(root)
 
   def used_feeds(%Liquid.Block{nodelist: nodelist}),
-    do: Enum.flat_map(IO.inspect(nodelist), &used_feeds/1)
+    do: Enum.flat_map(nodelist, &used_feeds/1)
 
   def used_feeds(%Liquid.Tag{name: :feedpreview, markup: markup}), do: [markup]
   def used_feeds(_), do: []
