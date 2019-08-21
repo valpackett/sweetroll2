@@ -17,4 +17,19 @@ hosts:
     file.send-compressed: ON
     file.dirlisting: OFF
     paths:
-      <<: !file sweetroll2.h2o.yaml
+      "/":
+        - reproxy: ON
+          mruby.handler-file: mrb/root.rb
+        - proxy.preserve-host: ON
+          proxy.reverse.url: "http://127.0.0.1:6969/"
+      "/__as__/":
+        - mruby.handler-file: mrb/as.rb
+        - header.add: "x-content-type-options: nosniff"
+          file.dir: priv/static/
+      "/__out__/":
+        - mruby.handler-file: mrb/out.rb
+        - header.add: 'link: <https://pubsubhubbub.superfeedr.com/>; rel="hub", </__webmention__>; rel="webmention", </__micropub__>; rel="micropub", </__auth__/authorize>; rel="authorization_endpoint", </__auth__/token>; rel="token_endpoint"'
+          header.add: "strict-transport-security: max-age=31536000"
+          header.add: "feature-policy: unsized-media 'none'; sync-xhr 'none'; document-write 'none'"
+          header.add: "referrer-policy: no-referrer-when-downgrade"
+          file.dir: out/
