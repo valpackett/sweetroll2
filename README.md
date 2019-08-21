@@ -43,7 +43,7 @@ Environment variables:
 - `SR2_PASSWORD_HASH`: Argon2 hash of the admin password (REQUIRED, e.g. `$argon2id$v=19$m=…`)
 - `SR2_CANONICAL_HOME_URL`: scheme and hostname (NO SLASH) of the website (REQUIRED, e.g. `https://example.com`)
 - `SR2_WEBSUB_HUB`: URL of the WebSub hub to use (default `https://pubsubhubbub.superfeedr.com/`) (make sure to also modify in h2o settings for static files!!)
-- `SR2_STATIC_GEN_OUT_DIR`: where to write static HTML (default `out`)
+- `SR2_STATIC_GEN_OUT_DIR`: where to write static HTML (default `out`; also the h2o scripts use it!)
 
 ## License
 
