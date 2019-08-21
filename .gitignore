@@ -43,3 +43,11 @@ fprof.trace
 
 # Debug assets
 /priv/static/*.js.map
+
+# Home dir stuff
+/.hex
+/.mix
+/.cargo
+
+# Erlang node stuff
+.erlang.cookie
