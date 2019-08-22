@@ -27,5 +27,6 @@
 		</main>
 
 		<%= footer logged_in: @logged_in %>
+		<data class="u-author" value="/"></data>
 	</body>
 </html>
