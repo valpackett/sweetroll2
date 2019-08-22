@@ -4,6 +4,8 @@ defmodule Sweetroll2.Job.SendWebmentions do
   use Que.Worker, concurrency: 4
 
   defp parse_http_links(nil), do: []
+  defp parse_http_links([]), do: []
+  defp parse_http_links(""), do: []
 
   defp parse_http_links(l) when is_list(l), do: parse_http_links(Enum.join(l, ","))
 
