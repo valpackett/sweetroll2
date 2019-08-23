@@ -57,12 +57,8 @@ defmodule Sweetroll2.Job.SendWebmentions do
       String.starts_with?(link, "http") ->
         link
 
-      String.starts_with?(link, "/") ->
-        URI.merge(base, link) |> URI.to_string()
-
       true ->
-        Logger.warn("rel discovery: weird case #{inspect(link)}")
-        nil
+        URI.merge(base, link) |> URI.to_string()
     end
   end
 
