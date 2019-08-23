@@ -87,7 +87,7 @@ defmodule Sweetroll2.Job.Generate do
     File.rm(Path.join(path_dir, "index.html.br"))
   end
 
-  def enqueue_all() do
-    Que.add(__MODULE__, urls: :all)
+  def enqueue_all(next_jobs \\ []) do
+    Que.add(__MODULE__, urls: :all, next_jobs: next_jobs)
   end
 end
