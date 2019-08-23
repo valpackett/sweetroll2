@@ -46,7 +46,7 @@ defmodule Sweetroll2.Micropub do
           ctxs = Post.contexts_for(properties)
           fetch_contexts(ctxs, url: url)
           Events.notify_urls_updated([url])
-          {:ok, :created, url}
+          {:ok, :created, Process.get(:our_home_url) <> url}
 
         x ->
           x
