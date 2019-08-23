@@ -49,7 +49,7 @@ defmodule Sweetroll2.MixProject do
       {:que, git: "https://github.com/myfreeweb/que", branch: "logger-meta"},
       {:ssl_verify_fun, "~> 1.1", override: true},
       {:hackney, "~> 1.15"},
-      {:tesla, "~> 1.2"},
+      {:tesla, git: "https://github.com/myfreeweb/tesla", branch: "rel-redir"},
       {:hammer, "~> 6.0"},
       {:timber, "~> 3.1"},
       {:timber_plug, "~> 1.0"},
