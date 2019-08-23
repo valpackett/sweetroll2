@@ -1,6 +1,7 @@
 defmodule Sweetroll2.Job.Fetch do
   alias Sweetroll2.{Events, Post, Convert, HttpClient}
   require Logger
+  import ExEarlyRet
   use Que.Worker, concurrency: 4
 
   def href_matches?({_, attrs, _}, url) do
@@ -9,33 +10,28 @@ defmodule Sweetroll2.Job.Fetch do
     |> Enum.all?(fn {_, v} -> v == url end)
   end
 
-  def fetch(url, check_mention: check_mention) do
+  defearlyret fetch(url, check_mention: check_mention) do
     u = URI.parse(url)
 
-    cond do
-      u.scheme != "http" && u.scheme != "https" ->
-        {:non_http_scheme, u.scheme}
+    ret_if u.scheme != "http" && u.scheme != "https", do: {:non_http_scheme, u.scheme}
 
-      # TODO: check IP address ranges too.. or just ban IP addreses
-      u.host == nil || u.host == "localhost" ->
-        {:local_host, u.host}
+    # TODO: check IP address ranges too.. or just ban IP addreses
+    ret_if u.host == nil || u.host == "localhost", do: {:local_host, u.host}
 
-      true ->
-        # TODO handle 410 Gone
-        resp = HttpClient.get!(url, headers: [{"accept", "text/html"}])
-        html = Floki.parse(resp.body)
+    # TODO handle 410 Gone
+    resp = HttpClient.get!(url, headers: [{"accept", "text/html"}])
+    html = Floki.parse(resp.body)
 
-        if check_mention == nil ||
-             Enum.any?(Floki.find(html, "a"), &href_matches?(&1, check_mention)) do
-          mf =
-            Microformats2.parse(html, url)
-            |> Convert.find_mf_with_url(url)
-            |> Convert.simplify()
+    if check_mention == nil ||
+         Enum.any?(Floki.find(html, "a"), &href_matches?(&1, check_mention)) do
+      mf =
+        Microformats2.parse(html, url)
+        |> Convert.find_mf_with_url(url)
+        |> Convert.simplify()
 
-          {:ok, mf}
-        else
-          {:no_mention, check_mention}
-        end
+      {:ok, mf}
+    else
+      {:no_mention, check_mention}
     end
   end
 

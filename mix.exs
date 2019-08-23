@@ -20,6 +20,7 @@ defmodule Sweetroll2.MixProject do
 
   defp deps do
     [
+      {:ex_early_ret, "~> 0.1"},
       {:timex, "~> 3.5"},
       {:date_time_parser, "~> 0.1.2"},
       {:jason, "~> 1.1"},

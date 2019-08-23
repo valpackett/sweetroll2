@@ -1,5 +1,6 @@
 defmodule Sweetroll2.Auth.Serve do
   require Logger
+  import ExEarlyRet
   alias Sweetroll2.{Render, Auth.Session, Auth.TempCode, Auth.AccessToken}
   use Plug.Router
 
@@ -120,43 +121,35 @@ defmodule Sweetroll2.Auth.Serve do
 
   post "/authorize" do
     {status, body} =
-      cond do
-        is_nil(conn.body_params["redirect_uri"]) or
-            !String.starts_with?(conn.body_params["redirect_uri"], "http") ->
-          {:bad_request, "No valid redirect URI"}
+      earlyret do
+        redir = conn.body_params["redirect_uri"]
 
-        is_nil(conn.body_params["client_id"]) ->
-          {:bad_request, "No client ID"}
+        ret_if is_nil(redir) or !String.starts_with?(redir, "http"),
+          do: {:bad_request, "No valid redirect URI"}
 
-        is_nil(conn.body_params["code"]) ->
-          {:bad_request, "No code"}
+        clid = conn.body_params["client_id"]
 
-        true ->
-          tempcode = TempCode.get_if_valid(conn.body_params["code"])
+        ret_if is_nil(clid), do: {:bad_request, "No client ID"}
 
-          cond do
-            is_nil(tempcode) ->
-              {:bad_request, "Code is not valid"}
+        ret_if is_nil(conn.body_params["code"]), do: {:bad_request, "No code"}
 
-            tempcode.redirect_uri != conn.body_params["redirect_uri"] ->
-              {:bad_request,
-               "redirect_uri does not match: '#{conn.body_params["redirect_uri"]}' vs '#{
-                 tempcode.redirect_uri
-               }'"}
+        tempcode = TempCode.get_if_valid(conn.body_params["code"])
 
-            tempcode.client_id != conn.body_params["client_id"] ->
-              {:bad_request,
-               "client_id does not match: '#{conn.body_params["client_id"]}' vs '#{
-                 tempcode.client_id
-               }'"}
+        ret_if is_nil(tempcode), do: {:bad_request, "Code is not valid"}
 
-            true ->
-              TempCode.use(tempcode.code)
+        ret_if tempcode.redirect_uri != redir,
+          do:
+            {:bad_request,
+             "redirect_uri does not match: '#{redir}' vs '#{tempcode.redirect_uri}'"}
 
-              Jason.encode(%{
-                me: Process.get(:our_home_url)
-              })
-          end
+        ret_if tempcode.client_id != clid,
+          do: {:bad_request, "client_id does not match: '#{clid}' vs '#{tempcode.client_id}'"}
+
+        TempCode.use(tempcode.code)
+
+        Jason.encode(%{
+          me: Process.get(:our_home_url)
+        })
       end
 
     if status == :bad_request,
@@ -171,53 +164,44 @@ defmodule Sweetroll2.Auth.Serve do
 
   post "/token" do
     {status, body} =
-      cond do
-        conn.body_params["grant_type"] != "authorization_code" ->
-          {:bad_request, "No/unknown grant type"}
+      earlyret do
+        ret_if conn.body_params["grant_type"] != "authorization_code",
+          do: {:bad_request, "No/unknown grant type"}
 
-        me_param(conn) != Process.get(:our_home_url) ->
-          {:bad_request, "Wrong host"}
+        ret_if me_param(conn) != Process.get(:our_home_url), do: {:bad_request, "Wrong host"}
 
-        is_nil(conn.body_params["redirect_uri"]) or
-            !String.starts_with?(conn.body_params["redirect_uri"], "http") ->
-          {:bad_request, "No valid redirect URI"}
+        redir = conn.body_params["redirect_uri"]
 
-        is_nil(conn.body_params["client_id"]) ->
-          {:bad_request, "No client ID"}
+        ret_if is_nil(redir) or !String.starts_with?(redir, "http"),
+          do: {:bad_request, "No valid redirect URI"}
 
-        is_nil(conn.body_params["code"]) ->
-          {:bad_request, "No code"}
+        clid = conn.body_params["client_id"]
 
-        true ->
-          tempcode = TempCode.get_if_valid(conn.body_params["code"])
+        ret_if is_nil(clid), do: {:bad_request, "No client ID"}
 
-          cond do
-            is_nil(tempcode) ->
-              {:bad_request, "Code is not valid"}
+        ret_if is_nil(conn.body_params["code"]), do: {:bad_request, "No code"}
 
-            tempcode.redirect_uri != conn.body_params["redirect_uri"] ->
-              {:bad_request,
-               "redirect_uri does not match: '#{conn.body_params["redirect_uri"]}' vs '#{
-                 tempcode.redirect_uri
-               }'"}
+        tempcode = TempCode.get_if_valid(conn.body_params["code"])
 
-            tempcode.client_id != conn.body_params["client_id"] ->
-              {:bad_request,
-               "client_id does not match: '#{conn.body_params["client_id"]}' vs '#{
-                 tempcode.client_id
-               }'"}
+        ret_if is_nil(tempcode), do: {:bad_request, "Code is not valid"}
 
-            true ->
-              TempCode.use(tempcode.code)
-              token = AccessToken.create(tempcode)
+        ret_if tempcode.redirect_uri != redir,
+          do:
+            {:bad_request,
+             "redirect_uri does not match: '#{redir}' vs '#{tempcode.redirect_uri}'"}
 
-              Jason.encode(%{
-                token_type: "Bearer",
-                access_token: token,
-                me: Process.get(:our_home_url),
-                scope: Enum.join(tempcode.scopes, " ")
-              })
-          end
+        ret_if tempcode.client_id != clid,
+          do: {:bad_request, "client_id does not match: '#{clid}' vs '#{tempcode.client_id}'"}
+
+        TempCode.use(tempcode.code)
+        token = AccessToken.create(tempcode)
+
+        Jason.encode(%{
+          token_type: "Bearer",
+          access_token: token,
+          me: Process.get(:our_home_url),
+          scope: Enum.join(tempcode.scopes, " ")
+        })
       end
 
     if status == :bad_request,

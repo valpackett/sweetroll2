@@ -2,6 +2,7 @@ defmodule Sweetroll2.Micropub do
   @behaviour PlugMicropub.HandlerBehaviour
 
   require Logger
+  import ExEarlyRet
   alias Sweetroll2.{Auth.Bearer, Auth.AccessToken, Events, Post, Markup, Job}
   import Sweetroll2.Convert
 
@@ -173,30 +174,23 @@ defmodule Sweetroll2.Micropub do
   end
 
   @impl true
-  def handle_source_query(url, _filter_properties, token) do
+  defearlyret handle_source_query(url, _filter_properties, token) do
+    ret_if not Bearer.is_allowed?(token), do: {:error, :insufficient_scope, :unauthorized}
+
     # TODO: filter properties
     # XXX: duplication of Serve/get_ logic
-    if Bearer.is_allowed?(token) do
-      url = read_url(url)
-      urls_local = Post.urls_local()
-      posts = %Post.DbAsMap{}
+    url = read_url(url)
+    urls_local = Post.urls_local()
+    posts = %Post.DbAsMap{}
 
-      cond do
-        !(url in urls_local) ->
-          {:error, :insufficient_scope, :not_local}
+    # XXX: why not
+    ret_if !(url in urls_local), do: {:error, :insufficient_scope, :not_local}
 
-        !("*" in (posts[url].acl || ["*"])) ->
-          {:error, :insufficient_scope, :not_allowed}
+    ret_if !("*" in (posts[url].acl || ["*"])), do: {:error, :insufficient_scope, :not_allowed}
 
-        posts[url].deleted ->
-          {:error, :insufficient_scope, :deleted}
+    ret_if posts[url].deleted, do: {:error, :insufficient_scope, :deleted}
 
-        true ->
-          {:ok, Post.to_full_map(posts[url])}
-      end
-    else
-      {:error, :insufficient_scope, :unauthorized}
-    end
+    {:ok, Post.to_full_map(posts[url])}
   end
 
   @impl true
