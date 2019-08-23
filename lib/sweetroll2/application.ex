@@ -100,6 +100,20 @@ defmodule Sweetroll2.Application do
       })
 
       Memento.Query.write(%Sweetroll2.Post{
+        url: "/tag",
+        type: "x-dynamic-tag-feed",
+        props: %{
+          "name" => ~S[#{tag}],
+          "feed-settings" => [
+            %{"show-in-nav" => false, "show-in-post" => true, "order-in-post" => 69}
+          ],
+          "filter" => [
+            %{"category" => ["{tag}"]}
+          ]
+        }
+      })
+
+      Memento.Query.write(%Sweetroll2.Post{
         url: "/posts",
         type: "x-dynamic-feed",
         props: %{
