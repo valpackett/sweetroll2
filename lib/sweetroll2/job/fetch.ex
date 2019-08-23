@@ -109,6 +109,20 @@ defmodule Sweetroll2.Job.Fetch do
             Memento.Query.write(%{post | props: props})
           end
         end)
+
+      {:no_mention, _} ->
+        if !is_nil(save_mention) do
+          Memento.transaction!(fn ->
+            post = Memento.Query.read(Post, save_mention)
+
+            props =
+              Map.update(post.props, "comment", [], fn comm ->
+                Enum.filter(comm, &(&1 != url))
+              end)
+
+            Memento.Query.write(%{post | props: props})
+          end)
+        end
     end
 
     Events.notify_urls_updated(notify_update)
