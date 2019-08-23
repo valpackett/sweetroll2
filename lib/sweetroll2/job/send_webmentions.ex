@@ -41,7 +41,7 @@ defmodule Sweetroll2.Job.SendWebmentions do
     el && List.first(Floki.attribute(el, "href"))
   end
 
-  def discover(base, resp = %Tesla.Env{body: body}) when is_binary(base) do
+  def discover(resp = %Tesla.Env{url: url, body: body}) do
     # TODO: HTML base tag??
     link =
       find_http_link(parse_http_links(Tesla.get_headers(resp, "link"))) ||
@@ -52,13 +52,13 @@ defmodule Sweetroll2.Job.SendWebmentions do
         nil
 
       link == "" ->
-        base
+        url
 
       String.starts_with?(link, "http") ->
         link
 
       true ->
-        URI.merge(base, link) |> URI.to_string()
+        URI.merge(url, link) |> URI.to_string()
     end
   end
 
@@ -67,7 +67,7 @@ defmodule Sweetroll2.Job.SendWebmentions do
 
     Logger.info("sending", event: %{webmention_start: %{source: source, target: target}})
 
-    endpoint = discover(target, HttpClient.get!(target))
+    endpoint = discover(HttpClient.get!(target))
 
     Logger.info("endpoint '#{endpoint}' found",
       event: %{webmention_endpoint_discovered: %{endpoint: endpoint, for: target}}
