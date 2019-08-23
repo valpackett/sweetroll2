@@ -53,6 +53,7 @@ defmodule Sweetroll2.Render do
         {:ok, html, _} =
           Post.Page.get_template(post)
           |> Post.Page.render(%{
+            "canonical_home_url" => Sweetroll2.canonical_home_url(),
             page: post,
             posts: posts,
             logged_in: logged_in,

@@ -81,6 +81,7 @@ defmodule Sweetroll2.Application do
 		{% header %}
 		<main>
 			<div class="block-thingy h-card">
+				<data class="u-url u-uid" value="{{ canonical_home_url }}"></data>
 				<h1 class="entry-txt">Hello</h1>
 				<p class="entry-txt">
 					Congratulations, <span class="p-name">new Sweetroll2 user</span>! Please customize this page by logging in and clicking Edit.
