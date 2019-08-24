@@ -6,7 +6,7 @@ defmodule Sweetroll2.Job.Generate do
   alias Sweetroll2.{Post, Render, Job.Compress}
   use Que.Worker
 
-  def dir(), do: System.get_env("SR2_STATIC_GEN_OUT_DIR") || @default_dir
+  def dir, do: System.get_env("SR2_STATIC_GEN_OUT_DIR") || @default_dir
 
   def can_generate(url, posts, urls_dyn) when is_map(posts) do
     {durl, _} = if Map.has_key?(urls_dyn, url), do: urls_dyn[url], else: {url, nil}

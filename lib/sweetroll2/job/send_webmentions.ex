@@ -41,7 +41,7 @@ defmodule Sweetroll2.Job.SendWebmentions do
     el && List.first(Floki.attribute(el, "href"))
   end
 
-  def discover(resp = %Tesla.Env{url: url, body: body}) do
+  def discover(%Tesla.Env{url: url, body: body} = resp) do
     # TODO: HTML base tag??
     link =
       find_http_link(parse_http_links(Tesla.get_headers(resp, "link"))) ||

@@ -21,7 +21,7 @@ defmodule Sweetroll2.HttpClient do
     encode: &Plug.Conn.Query.encode/1,
     decode: &Plug.Conn.Query.decode/1
 
-  defp default_cert_bundle() do
+  defp default_cert_bundle do
     cond do
       File.exists?("/etc/ssl/cert.pem") -> "/etc/ssl/cert.pem"
       File.exists?("/etc/pki/tls/cert.pem") -> "/etc/pki/tls/cert.pem"

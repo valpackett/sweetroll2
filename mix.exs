@@ -58,7 +58,8 @@ defmodule Sweetroll2.MixProject do
       {:plug_cowboy, "~> 2.0"},
       {:remote_ip, "~> 0.1.0"},
       {:sse, "~> 0.4"},
-      {:event_bus, ">= 1.6.0"}
+      {:event_bus, ">= 1.6.0"},
+      {:credo, "~> 1.1", only: [:dev], runtime: false}
     ]
   end
 end

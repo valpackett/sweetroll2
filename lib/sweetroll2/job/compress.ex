@@ -79,7 +79,7 @@ defmodule Sweetroll2.Job.Compress do
 
     def handle_info({:file_event, watcher_pid, :stop}, %{watcher_pid: watcher_pid} = state) do
       Logger.error("FS watcher stopped")
-      Process.sleep(10000)
+      Process.sleep(10_000)
       {:stop, :watcher_stopped, state}
     end
   end

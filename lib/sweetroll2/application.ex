@@ -10,7 +10,7 @@ defmodule Sweetroll2.Application do
     :ok = Logger.add_translator({Timber.Exceptions.Translator, :translate})
 
     server_opts =
-      [protocol_options: [idle_timeout: 10 * 60000]] ++
+      [protocol_options: [idle_timeout: 10 * 60_000]] ++
         case {System.get_env("SR2_SERVER_SOCKET"), System.get_env("SR2_SERVER_PORT")} do
           {nil, nil} -> [port: 6969]
           {nil, port} -> [port: String.to_integer(port)]
@@ -74,6 +74,7 @@ defmodule Sweetroll2.Application do
         props: %{
           "name" => "Home",
           "site-name" => "a new sweetroll2 website",
+          # credo:disable-for-lines:22
           "content" => [%{"html" => ~S[<!DOCTYPE html>
 <html lang="en">
 	{% head %}

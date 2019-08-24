@@ -12,23 +12,23 @@ defmodule Sweetroll2.Post.Feed do
   import Sweetroll2.Convert
   alias Sweetroll2.Post
 
-  def matches_filter?(post = %Post{}, filter) do
+  def matches_filter?(%Post{} = post, filter) do
     Enum.all?(filter, fn {k, v} ->
       vals = as_many(post.props[k])
       Enum.all?(as_many(v), &Enum.member?(vals, &1))
     end)
   end
 
-  def matches_filters?(post = %Post{}, filters) do
+  def matches_filters?(%Post{} = post, filters) do
     Enum.any?(filters, &matches_filter?(post, &1))
   end
 
-  def in_feed?(post = %Post{}, feed = %Post{}) do
+  def in_feed?(%Post{} = post, %Post{} = feed) do
     matches_filters?(post, as_many(feed.props["filter"])) and
       not matches_filters?(post, as_many(feed.props["unfilter"]))
   end
 
-  def filter_feed_entries(feed = %Post{type: type}, posts, local_urls)
+  def filter_feed_entries(%Post{type: type} = feed, posts, local_urls)
       when type == "x-dynamic-feed" or type == "x-dynamic-tag-feed" do
     Stream.filter(
       local_urls,
@@ -37,7 +37,7 @@ defmodule Sweetroll2.Post.Feed do
     )
   end
 
-  def filter_feed_entries(feed = %Post{type: "x-inbox-feed"}, posts, local_urls) do
+  def filter_feed_entries(%Post{type: "x-inbox-feed"} = feed, posts, local_urls) do
     Stream.filter(
       local_urls,
       &(!(posts[&1].deleted || false) and String.starts_with?(&1, "/"))

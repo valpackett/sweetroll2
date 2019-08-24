@@ -7,7 +7,7 @@ defmodule Sweetroll2.Job.NotifyWebsub do
   use Que.Worker, concurrency: 4
   alias Sweetroll2.HttpClient
 
-  def hub(), do: System.get_env("SR2_WEBSUB_HUB") || @default_hub
+  def hub, do: System.get_env("SR2_WEBSUB_HUB") || @default_hub
 
   def perform(url: url) do
     Timber.add_context(que: %{job_id: Logger.metadata()[:job_id]})

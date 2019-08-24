@@ -12,13 +12,13 @@ defmodule Sweetroll2.Post.DynamicUrls do
   def page_url(url, 0), do: url
   def page_url(url, page), do: String.replace_leading("#{url}/page#{page}", "//", "/")
 
-  def dynamic_urls_for(post = %Post{type: post_type}, posts, local_urls)
+  def dynamic_urls_for(%Post{type: post_type} = post, posts, local_urls)
       when post_type == "x-dynamic-feed" or post_type == "x-inbox-feed" do
     cnt = Post.Feed.feed_page_count(Post.Feed.filter_feed_entries(post, posts, local_urls))
     Map.new(1..(cnt - 1), &{page_url(post.url, &1), {post.url, %{page: &1}}})
   end
 
-  def dynamic_urls_for(post = %Post{type: "x-dynamic-tag-feed"}, posts, local_urls) do
+  def dynamic_urls_for(%Post{type: "x-dynamic-tag-feed"} = post, posts, local_urls) do
     Stream.map(Post.Tags.all_tags(), fn tag ->
       cnt =
         Post.Tags.subst_tag(post, tag)

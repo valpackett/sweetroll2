@@ -38,7 +38,7 @@ defmodule Sweetroll2.Post.Comments do
 
   The inlined ones are Post structs, but other things in the array remain as-is.
   """
-  def inline_comments(post = %Post{url: url, props: props}, posts) do
+  def inline_comments(%Post{url: url, props: props} = post, posts) do
     comments =
       props["comment"]
       |> as_many()

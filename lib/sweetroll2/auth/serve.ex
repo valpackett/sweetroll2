@@ -1,7 +1,7 @@
 defmodule Sweetroll2.Auth.Serve do
   require Logger
   import ExEarlyRet
-  alias Sweetroll2.{Render, Auth.Session, Auth.TempCode, Auth.AccessToken}
+  alias Sweetroll2.{Auth.AccessToken, Auth.Session, Auth.TempCode, Render}
   use Plug.Router
 
   plug :match

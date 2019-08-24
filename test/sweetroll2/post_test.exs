@@ -59,7 +59,7 @@ defmodule Sweetroll2.PostTest do
                    "whatever",
                    :lol,
                    nil,
-                   69420
+                   69_420
                  ]
                }
              }) == %{

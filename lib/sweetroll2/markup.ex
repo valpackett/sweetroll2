@@ -134,18 +134,19 @@ defmodule Sweetroll2.Markup do
            medias = as_many(props[media_type]),
            _ = Logger.debug(" #{media_type} media of this type: #{Enum.count(medias)}"),
            {_, _, _, media} when is_map(media) <-
-             {:no_media_id, media_type, id, Enum.find(medias, &(&1["id"] == id))},
-           _ = Logger.debug(" #{media_type} found object for id: #{id}"),
-           do: media |> rend.() |> PH.safe_to_string() |> html_part_to_tree,
-           # TODO: would be amazing to have taggart output to a tree directly
-           else:
-             (err ->
-                Logger.warn("could not inline #{media_type}",
-                  event: %{media_inlining_failure: %{type: media_type, error: inspect(err)}}
-                )
+             {:no_media_id, media_type, id, Enum.find(medias, &(&1["id"] == id))} do
+        _ = Logger.debug(" #{media_type} found object for id: #{id}")
+        media |> rend.() |> PH.safe_to_string() |> html_part_to_tree
+        # TODO: would be amazing to have taggart output to a tree directly
+      else
+        err ->
+          Logger.warn("could not inline #{media_type}",
+            event: %{media_inlining_failure: %{type: media_type, error: inspect(err)}}
+          )
 
-                {"div", [{"class", "sweetroll2-error"}],
-                 ["Media embedding failed.", {"pre", [], inspect(err)}]})
+          {"div", [{"class", "sweetroll2-error"}],
+           ["Media embedding failed.", {"pre", [], inspect(err)}]}
+      end
     else
       {tag, attrs, inline_media_into_content(content, renderers, props)}
     end
@@ -188,7 +189,7 @@ defmodule Sweetroll2.Markup do
         x -> x
       end)
     else
-      attrs ++ [{"class", val}]
+      [{"class", val} | attrs]
     end
   end
 

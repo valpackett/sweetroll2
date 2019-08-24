@@ -33,7 +33,7 @@ defmodule Sweetroll2.Post.Tags do
       iex> Sweetroll2.Post.Tags.subst_tag(%Post{type: "x-dynamic-tag-feed", url: "/tg", props: %{"name" => "_{tag}_", "filter" => [%{"category" => ["{tag}"]}]}}, "memes")
       %Post{type: "x-dynamic-feed", url: "/tg/memes", props: %{"name" => "_memes_", "filter" => [%{"category" => ["memes"]}]}}
   """
-  def subst_tag(post = %Post{url: url, props: props}, tag) do
+  def subst_tag(%Post{url: url, props: props} = post, tag) do
     props =
       props
       |> Map.update("name", tag, &String.replace(Convert.as_one(&1), "{tag}", tag))

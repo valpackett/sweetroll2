@@ -9,12 +9,12 @@ defmodule Sweetroll2.Auth.Bearer do
 
   def is_allowed?(token, scope \\ nil)
 
-  def is_allowed?(token = "C-" <> _, _) do
+  def is_allowed?("C-" <> _ = token, _) do
     # Cookie sessions can do anything
     !is_nil(Session.get_if_valid(token))
   end
 
-  def is_allowed?(token = "T-" <> _, scope) do
+  def is_allowed?("T-" <> _ = token, scope) do
     accesstoken = AccessToken.get_if_valid(token)
 
     if accesstoken do

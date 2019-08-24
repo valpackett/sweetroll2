@@ -10,8 +10,7 @@ end
 
 defmodule Sweetroll2.Render do
   alias Sweetroll2.{Post, Markup}
-  import Sweetroll2.Convert
-  import Sweetroll2.Render.Tpl
+  import Sweetroll2.{Convert, Render.Tpl}
   import Phoenix.HTML.Tag
   import Phoenix.HTML
   require Logger
@@ -502,7 +501,7 @@ defmodule Sweetroll2.Render do
     end
   end
 
-  def to_cite(entry = %Post{}, posts: _), do: Post.to_map(entry) |> simplify
+  def to_cite(%Post{} = entry, posts: _), do: Post.to_map(entry) |> simplify
 
   def to_cite(entry, posts: _) when is_map(entry), do: simplify(entry)
 
@@ -549,8 +548,8 @@ defmodule Sweetroll2.Render do
     end)
   end
 
-  def filter_scheme(x = "http://" <> _), do: x
-  def filter_scheme(x = "https://" <> _), do: x
+  def filter_scheme("http://" <> _ = x), do: x
+  def filter_scheme("https://" <> _ = x), do: x
   def filter_scheme(_), do: "#non_http_url_found"
 end
 
