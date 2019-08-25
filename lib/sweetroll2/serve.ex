@@ -114,25 +114,23 @@ defmodule Sweetroll2.Serve do
     url = conn.request_path
     posts = %Post.DbAsMap{}
     urls_local = Post.urls_local()
-    urls_dyn = Post.DynamicUrls.dynamic_urls()
-    {durl, params} = if Map.has_key?(urls_dyn, url), do: urls_dyn[url], else: {url, %{}}
+    post = Post.Generative.lookup(url, posts, urls_local)
 
     cond do
-      !(durl in urls_local) ->
+      !post ->
         send_resp(conn, 404, "Page not found")
 
-      !("*" in (posts[durl].acl || ["*"])) ->
+      !("*" in (post.acl || ["*"])) ->
         send_resp(conn, 401, "Unauthorized")
 
-      posts[durl].deleted ->
+      post.deleted ->
         send_resp(conn, 410, "Gone")
 
       true ->
         # NOTE: chunking without special considerations would break CSRF tokens
         {:safe, data} =
           Render.render_post(
-            post: posts[durl],
-            params: params,
+            post: post,
             posts: posts,
             local_urls: urls_local,
             logged_in: !is_nil(Auth.Session.current_token(conn))

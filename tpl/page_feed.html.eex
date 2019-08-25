@@ -7,19 +7,19 @@
 		<main>
 			<%= for entry <- @feed.children do %>
 				<article class="h-entry">
-					<%= entry posts: @posts, cur_url: @feed.url, logged_in: @logged_in, entry: entry, feed_urls: @feed_urls, expand_comments: false %>
+					<%= entry posts: @posts, cur_url: @feed.url, logged_in: @logged_in, entry: entry, feed_urls: @feed_urls, local_urls: @local_urls, expand_comments: false %>
 				</article>
 			<% end %>
 
 			<nav class="feed-nav">
-				<%= if @cur_page > 0 do %>
-					<%= content_tag :a, href: Post.DynamicUrls.page_url(@feed.url, @cur_page - 1), rel: "prev" do %>
+				<%= if @feed.props["x-cur-page"] > 0 do %>
+					<%= content_tag :a, href: Post.Generative.Feed.page_url(@feed.props["x-feed-base-url"], @feed.props["x-cur-page"] - 1), rel: "prev" do %>
 						← newer entries
 					<% end %>
 				<% end %>
 
-				<%= if @cur_page < @page_count - 1 do %>
-					<%= content_tag :a, href: Post.DynamicUrls.page_url(@feed.url, @cur_page + 1), rel: "next" do %>
+				<%= if @feed.props["x-cur-page"] < @feed.props["x-page-count"] - 1 do %>
+					<%= content_tag :a, href: Post.Generative.Feed.page_url(@feed.props["x-feed-base-url"], @feed.props["x-cur-page"] + 1), rel: "next" do %>
 						earlier entries →
 					<% end %>
 				<% end %>

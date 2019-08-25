@@ -8,18 +8,16 @@ defmodule Sweetroll2.Job.Generate do
 
   def dir, do: System.get_env("SR2_STATIC_GEN_OUT_DIR") || @default_dir
 
-  def can_generate(url, posts, urls_dyn) when is_map(posts) do
-    {durl, _} = if Map.has_key?(urls_dyn, url), do: urls_dyn[url], else: {url, nil}
-
+  def can_generate(url, posts, local_urls) when is_map(posts) do
     cond do
-      !String.starts_with?(durl, "/") -> :nonlocal
-      !Map.has_key?(posts, durl) -> :nonexistent
-      !("*" in (posts[durl].acl || ["*"])) -> :nonpublic
+      !String.starts_with?(url, "/") -> :nonlocal
+      url not in local_urls -> :nonexistent
+      !("*" in (Post.Generative.lookup(url, posts, local_urls).acl || ["*"])) -> :nonpublic
       true -> :ok
     end
   end
 
-  def gen_page(url, posts, urls_dyn, log_ctx) when is_map(posts) do
+  def gen_page(url, posts, local_urls, log_ctx) when is_map(posts) do
     Process.flag(:min_heap_size, 131_072)
     Process.flag(:min_bin_vheap_size, 131_072)
     Process.flag(:priority, :low)
@@ -27,15 +25,13 @@ defmodule Sweetroll2.Job.Generate do
     Timber.add_context(sr2_generator: %{url: url})
 
     path_dir = Path.join(dir(), url)
-    {durl, params} = if Map.has_key?(urls_dyn, url), do: urls_dyn[url], else: {url, %{}}
 
     {:safe, data} =
       Render.render_post(
-        post: posts[durl],
-        params: params,
+        post: Post.Generative.lookup(url, posts, local_urls),
         posts: posts,
         # all URLs is fine
-        local_urls: Map.keys(posts),
+        local_urls: local_urls,
         logged_in: false
       )
 
@@ -51,13 +47,15 @@ defmodule Sweetroll2.Job.Generate do
   end
 
   def gen_allowed_pages(urls, posts) when is_map(posts) do
-    urls_dyn = Post.DynamicUrls.dynamic_urls_with(posts, Post.urls_local())
+    local_urls = Post.urls_local()
+    urls_dyn = Post.Generative.list_generated_urls(local_urls, posts, local_urls)
+    all_local_urls = local_urls ++ urls_dyn
 
     log_ctx = Timber.LocalContext.load()
 
-    if(urls == :all, do: Map.keys(posts) ++ Map.keys(urls_dyn), else: urls)
-    |> Enum.filter(&(can_generate(&1, posts, urls_dyn) == :ok))
-    |> Task.async_stream(&gen_page(&1, posts, urls_dyn, log_ctx), max_concurrency: @concurrency)
+    if(urls == :all, do: all_local_urls, else: urls)
+    |> Enum.filter(&(can_generate(&1, posts, all_local_urls) == :ok))
+    |> Task.async_stream(&gen_page(&1, posts, local_urls, log_ctx), max_concurrency: @concurrency)
     |> Enum.group_by(&elem(&1, 0))
   end
 

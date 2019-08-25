@@ -5,7 +5,7 @@
 		<%= header posts: @posts, cur_url: @entry.url, feed_urls: @feed_urls %>
 		<main>
 			<article>
-				<%= entry posts: @posts, cur_url: @entry.url, logged_in: @logged_in, entry: @entry, feed_urls: @feed_urls, expand_comments: true %>
+				<%= entry posts: @posts, cur_url: @entry.url, logged_in: @logged_in, entry: @entry, local_urls: @local_urls, feed_urls: @feed_urls, expand_comments: true %>
 			</article>
 		</main>
 		<%= footer logged_in: @logged_in %>

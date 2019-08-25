@@ -23,8 +23,6 @@ defmodule Sweetroll2.Events do
     %{data: %SSE.Chunk{data: url}} = EventBus.fetch_event(event_shadow)
 
     Job.Generate.remove_generated(url)
-    Post.Tags.clear_cached_tags()
-    Post.DynamicUrls.clear_cached_urls()
     Post.Page.clear_cached_template(url: url)
 
     Que.add(Job.Generate,
@@ -86,9 +84,6 @@ defmodule Sweetroll2.Events do
   end
 
   def notify_urls_updated(urls) when is_list(urls) do
-    # to include currently added tags
-    Post.Tags.clear_cached_tags()
-
     for url <- urls do
       GenServer.cast(__MODULE__, {:notify_url_req, url})
       aff = affected_urls(url)
@@ -110,16 +105,11 @@ defmodule Sweetroll2.Events do
       local_urls = Post.urls_local()
 
       # TODO: use a previous copy of the post to find feeds that formerly contained it!!
-      # NOTE: tags can only be handled here, but dynamic_urls_for below should get their pages (!)
-      #       due to substitution and type change via feeds_get_with_tags
-      # TODO: actually confirm that that works
 
       aff_feeds =
         Post.filter_type(local_urls, posts, ["x-dynamic-feed", "x-dynamic-tag-feed"])
-        |> Post.Tags.feeds_get_with_tags(posts: posts)
-        |> Enum.filter(&Post.Feed.in_feed?(posts[url], &1))
-
-      aff_feeds_map = Map.new(aff_feeds, &{&1.url, &1})
+        |> Post.Generative.Tag.feeds_get_with_tags(posts: posts, local_urls: local_urls)
+        |> Enum.filter(&Post.Generative.Feed.in_feed?(posts[url], &1))
 
       aff_page_urls =
         Post.filter_type(local_urls, posts, "x-custom-page")
@@ -128,14 +118,9 @@ defmodule Sweetroll2.Events do
         end)
 
       Enum.flat_map(
-        Enum.map(aff_feeds, & &1.url) ++ aff_page_urls,
-        &[
-          &1
-          | Map.keys(
-              Post.DynamicUrls.dynamic_urls_for(aff_feeds_map[&1] || posts[&1], posts, local_urls)
-            )
-        ]
-      )
+        aff_feeds,
+        &[&1.url | Post.Generative.child_urls_rec(&1, posts, local_urls)]
+      ) ++ aff_page_urls ++ Post.Generative.child_urls_rec(posts[url], posts, local_urls)
     end
   end
 end

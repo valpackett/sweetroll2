@@ -1,8 +1,9 @@
 defmodule Sweetroll2.PostTest do
   use ExUnit.Case, async: true
-  alias Sweetroll2.{Post, Post.Feed, Post.Comments}
-  doctest Sweetroll2.Post
-  doctest Sweetroll2.Post.Tags
+  alias Sweetroll2.{Post, Post.Generative, Post.Generative.Feed, Post.Comments}
+  doctest Post
+  doctest Generative
+  doctest Feed
 
   describe "Feed.matches_filter?" do
     test "true when matches" do

@@ -36,7 +36,6 @@ defmodule Sweetroll2.Render do
   """
   def render_post(
         post: post = %Post{},
-        params: params,
         posts: posts,
         local_urls: local_urls,
         logged_in: logged_in
@@ -46,7 +45,26 @@ defmodule Sweetroll2.Render do
     cond do
       post.type == "entry" || post.type == "review" ->
         post = Post.Comments.inline_comments(post, posts)
-        page_entry(entry: post, posts: posts, feed_urls: feed_urls, logged_in: logged_in)
+
+        page_entry(
+          entry: post,
+          posts: posts,
+          local_urls: local_urls,
+          feed_urls: feed_urls,
+          logged_in: logged_in
+        )
+
+      post.type == "feed" ->
+        page_feed(
+          feed: %{
+            post
+            | children: Enum.map(post.children, &Post.Comments.inline_comments(&1, posts))
+          },
+          posts: posts,
+          local_urls: local_urls,
+          feed_urls: feed_urls,
+          logged_in: logged_in
+        )
 
       post.type == "x-custom-page" ->
         {:ok, html, _} =
@@ -61,30 +79,6 @@ defmodule Sweetroll2.Render do
           })
 
         {:safe, html}
-
-      post.type == "x-dynamic-feed" || post.type == "x-dynamic-tag-feed" ||
-          post.type == "x-inbox-feed" ->
-        page = params[:page] || 0
-
-        post = if params[:tag], do: Post.Tags.subst_tag(post, params[:tag]), else: post
-
-        children =
-          Post.Feed.filter_feed_entries(post, posts, local_urls)
-          |> Post.Feed.sort_feed_entries(posts)
-
-        page_children =
-          Enum.slice(children, page * 10, 10)
-          |> Enum.map(&Post.Comments.inline_comments(&1, posts))
-
-        page_feed(
-          feed: %{post | children: page_children},
-          posts: posts,
-          feed_urls: feed_urls,
-          per_page: 10,
-          page_count: Post.Feed.feed_page_count(children),
-          cur_page: page,
-          logged_in: logged_in
-        )
 
       true ->
         {:error, :unknown_type, post.type}
@@ -606,11 +600,15 @@ defmodule Sweetroll2.Render.LiquidTags.FeedPreview do
   end
 
   def render(output, tag, context) do
-    feed = context.assigns.posts[tag.markup]
+    feed =
+      Sweetroll2.Post.Generative.lookup(
+        tag.markup,
+        context.assigns.posts,
+        context.assigns.local_urls
+      )
 
     children =
-      Post.Feed.filter_feed_entries(feed, context.assigns.posts, context.assigns.local_urls)
-      |> Post.Feed.sort_feed_entries(context.assigns.posts)
+      (feed.children || [])
       |> Enum.slice(0, 5)
       |> Enum.map(&Post.Comments.inline_comments(&1, context.assigns.posts))
 
@@ -624,6 +622,7 @@ defmodule Sweetroll2.Render.LiquidTags.FeedPreview do
            logged_in: context.assigns.logged_in,
            entry: entry,
            feed_urls: context.assigns.feed_urls,
+           local_urls: context.assigns.local_urls,
            expand_comments: false
          )
 
