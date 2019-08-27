@@ -124,9 +124,13 @@ defmodule Sweetroll2.Post.Generative do
     generator && lookup_rec(generator, suffix, posts, local_urls)
   end
 
-  defp lookup_rec(%Post{type: type} = post, _, _, _)
+  defp lookup_rec(%Post{type: type} = post, "", _, _)
        when type != "x-dynamic-feed" and type != "x-dynamic-tag-feed",
        do: post
+
+  defp lookup_rec(%Post{type: type}, _, _, _)
+       when type != "x-dynamic-feed" and type != "x-dynamic-tag-feed",
+       do: nil
 
   defp lookup_rec(%Post{} = generator, url_suffix, posts, local_urls) do
     case parse_url_segment(generator, url_suffix) do
