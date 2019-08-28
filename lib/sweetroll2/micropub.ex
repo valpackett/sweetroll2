@@ -230,7 +230,7 @@ defmodule Sweetroll2.Micropub do
       if is_bitstring(name) && String.length(name) > 5 do
         Slugger.slugify(name)
       else
-        to_string(DateTime.utc_now()) |> String.replace(" ", "-")
+        Timex.format!(DateTime.utc_now(), "{ISOdate}-{h24}-{m}-{s}")
       end
     end
   end
