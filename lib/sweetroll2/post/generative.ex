@@ -150,6 +150,9 @@ defmodule Sweetroll2.Post.Generative do
       iex> Sweetroll2.Post.Generative.find_first_matching_prefix([""], [], %{"/" => 1})
       {1, ""}
 
+      iex> Sweetroll2.Post.Generative.find_first_matching_prefix(["page1"], [], %{"/" => 1})
+      {1, "/page1"}
+
       iex> Sweetroll2.Post.Generative.find_first_matching_prefix(["one"], [], %{"/one" => 1})
       {1, ""}
 
@@ -162,15 +165,15 @@ defmodule Sweetroll2.Post.Generative do
       iex> Sweetroll2.Post.Generative.find_first_matching_prefix(["memes", "page69"], [], %{"/tag" => :tagpage})
       nil
   """
-  def find_first_matching_prefix([], _, _), do: nil
-
   def find_first_matching_prefix(l, r, posts) do
     if post = posts["/#{Enum.join(l, "/")}"] do
       r_path = if Enum.empty?(r), do: "", else: "/" <> Enum.join(r, "/")
       {post, r_path}
     else
-      {ll, [rr]} = Enum.split(l, -1)
-      find_first_matching_prefix(ll, [rr | r], posts)
+      case Enum.split(l, -1) do
+        {ll, [rr]} -> find_first_matching_prefix(ll, [rr | r], posts)
+        _ -> nil
+      end
     end
   end
 end
