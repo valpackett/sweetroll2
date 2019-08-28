@@ -93,6 +93,8 @@ defmodule Sweetroll2.Post do
           |> Map.delete(:acl)
           |> Map.delete("children")
           |> Map.delete(:children)
+          |> Map.delete("tsv")
+          |> Map.delete(:tsv)
         )
         |> Map.delete("url")
         |> Map.delete(:url)
