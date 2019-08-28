@@ -22,7 +22,8 @@ defmodule Sweetroll2.MixProject do
     [
       {:ex_early_ret, "~> 0.1"},
       {:timex, "~> 3.5"},
-      {:date_time_parser, "~> 0.1.2"},
+      {:date_time_parser,
+       git: "https://github.com/myfreeweb/date_time_parser", branch: "long-microsec"},
       {:jason, "~> 1.1"},
       {:earmark, "~> 1.3"},
       {:phoenix_html, "~> 2.13"},

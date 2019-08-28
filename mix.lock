@@ -10,7 +10,7 @@
   "cowlib": {:hex, :cowlib, "2.7.3", "a7ffcd0917e6d50b4d5fb28e9e2085a0ceb3c97dea310505f7460ff5ed764ce9", [:rebar3], [], "hexpm"},
   "credo": {:hex, :credo, "1.1.3", "bf31887b8914a4b7e1810ae2b5aab7c657698abbf4cca6a2335a094d57995168", [:mix], [{:bunt, "~> 0.2.0", [hex: :bunt, repo: "hexpm", optional: false]}, {:jason, "~> 1.0", [hex: :jason, repo: "hexpm", optional: false]}], "hexpm"},
   "crontab": {:hex, :crontab, "1.1.7", "b9219f0bdc8678b94143655a8f229716c5810c0636a4489f98c0956137e53985", [:mix], [{:ecto, "~> 1.0 or ~> 2.0 or ~> 3.0", [hex: :ecto, repo: "hexpm", optional: true]}], "hexpm"},
-  "date_time_parser": {:hex, :date_time_parser, "0.1.3", "3c22371bfd4de22e6eea7d91d35c9e3b8570a30e14425375bcd78135a8687e3f", [:mix], [{:nimble_parsec, "~> 0.5.0", [hex: :nimble_parsec, repo: "hexpm", optional: false]}, {:timex, "~> 3.2", [hex: :timex, repo: "hexpm", optional: false]}], "hexpm"},
+  "date_time_parser": {:git, "https://github.com/myfreeweb/date_time_parser", "f50fc2f69dd0592eeb4171658326e51e4514c25f", [branch: "long-microsec"]},
   "db_connection": {:hex, :db_connection, "2.0.6", "bde2f85d047969c5b5800cb8f4b3ed6316c8cb11487afedac4aa5f93fd39abfa", [:mix], [{:connection, "~> 1.0.2", [hex: :connection, repo: "hexpm", optional: false]}], "hexpm"},
   "debounce": {:hex, :debounce, "0.1.1", "51e76a43b375d925dcdb7f0a1e74536551f5c2f6f5a33041c9443fc17999a760", [:mix], [], "hexpm"},
   "decimal": {:hex, :decimal, "1.7.0", "30d6b52c88541f9a66637359ddf85016df9eb266170d53105f02e4a67e00c5aa", [:mix], [], "hexpm"},
