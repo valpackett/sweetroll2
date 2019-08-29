@@ -16,6 +16,9 @@ defmodule Sweetroll2.Post.Generative do
   def apply_args(%Post{type: "x-dynamic-feed"} = post, args, posts, local_urls),
     do: Post.Generative.Feed.apply_args(post, args, posts, local_urls)
 
+  def apply_args(%Post{type: "x-paginated-feed"} = post, args, posts, local_urls),
+    do: Post.Generative.Pagination.apply_args(post, args, posts, local_urls)
+
   def apply_args(%Post{type: "x-dynamic-tag-feed"} = post, args, posts, local_urls),
     do: Post.Generative.Tag.apply_args(post, args, posts, local_urls)
 
@@ -24,6 +27,9 @@ defmodule Sweetroll2.Post.Generative do
   def child_urls(%Post{type: "x-dynamic-feed"} = post, posts, local_urls),
     do: Post.Generative.Feed.child_urls(post, posts, local_urls)
 
+  def child_urls(%Post{type: "x-paginated-feed"} = post, posts, local_urls),
+    do: Post.Generative.Pagination.child_urls(post, posts, local_urls)
+
   def child_urls(%Post{type: "x-dynamic-tag-feed"} = post, posts, local_urls),
     do: Post.Generative.Tag.child_urls(post, posts, local_urls)
 
@@ -31,6 +37,9 @@ defmodule Sweetroll2.Post.Generative do
 
   def parse_url_segment(%Post{type: "x-dynamic-feed"} = post, seg),
     do: Post.Generative.Feed.parse_url_segment(post, seg)
+
+  def parse_url_segment(%Post{type: "x-paginated-feed"} = post, seg),
+    do: Post.Generative.Pagination.parse_url_segment(post, seg)
 
   def parse_url_segment(%Post{type: "x-dynamic-tag-feed"} = post, seg),
     do: Post.Generative.Tag.parse_url_segment(post, seg)

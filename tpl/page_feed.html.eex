@@ -13,13 +13,13 @@
 
 			<nav class="feed-nav">
 				<%= if @feed.props["x-cur-page"] > 0 do %>
-					<%= content_tag :a, href: Post.Generative.Feed.page_url(@feed.props["x-feed-base-url"], @feed.props["x-cur-page"] - 1), rel: "prev" do %>
+					<%= content_tag :a, href: Post.Generative.Pagination.page_url(@feed.props["x-feed-base-url"], @feed.props["x-cur-page"] - 1), rel: "prev" do %>
 						← newer entries
 					<% end %>
 				<% end %>
 
 				<%= if @feed.props["x-cur-page"] < @feed.props["x-page-count"] - 1 do %>
-					<%= content_tag :a, href: Post.Generative.Feed.page_url(@feed.props["x-feed-base-url"], @feed.props["x-cur-page"] + 1), rel: "next" do %>
+					<%= content_tag :a, href: Post.Generative.Pagination.page_url(@feed.props["x-feed-base-url"], @feed.props["x-cur-page"] + 1), rel: "next" do %>
 						earlier entries →
 					<% end %>
 				<% end %>
