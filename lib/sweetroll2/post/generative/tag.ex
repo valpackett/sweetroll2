@@ -55,10 +55,10 @@ defmodule Sweetroll2.Post.Generative.Tag do
 
   @impl true
   @doc """
-      iex> Sweetroll2.Post.Generative.Tag.parse_url_segment(nil, "/whatevs")
+      iex> Tag.parse_url_segment(nil, "/whatevs")
       {"", %{tag: "whatevs"}}
 
-      iex> Sweetroll2.Post.Generative.Tag.parse_url_segment(nil, "/hello%20world/page69")
+      iex> Tag.parse_url_segment(nil, "/hello%20world/page69")
       {"/page69", %{tag: "hello%20world"}}
   """
 

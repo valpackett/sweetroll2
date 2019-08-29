@@ -95,10 +95,10 @@ defmodule Sweetroll2.Post.Generative.Feed do
 
   @impl true
   @doc """
-      iex> Sweetroll2.Post.Generative.Feed.parse_url_segment(nil, "/page123")
+      iex> Feed.parse_url_segment(nil, "/page123")
       {"", %{page: 123}}
 
-      iex> Sweetroll2.Post.Generative.Feed.parse_url_segment(nil, "/page1/what")
+      iex> Feed.parse_url_segment(nil, "/page1/what")
       {"/what", %{page: 1}}
   """
   def parse_url_segment(_, ""), do: {"", %{page: 0}}
