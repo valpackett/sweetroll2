@@ -5,39 +5,6 @@ defmodule Sweetroll2.PostTest do
   doctest Generative
   doctest Feed
 
-  describe "Feed.matches_filter?" do
-    test "true when matches" do
-      assert Feed.matches_filter?(%Post{props: %{"category" => "test", "x" => "y"}}, %{
-               "category" => "test"
-             })
-
-      assert Feed.matches_filter?(%Post{props: %{"category" => "test", "x" => "y"}}, %{
-               "category" => ["test"]
-             })
-
-      assert Feed.matches_filter?(%Post{props: %{"category" => ["test"], "x" => "y"}}, %{
-               "category" => "test"
-             })
-
-      assert Feed.matches_filter?(%Post{props: %{"category" => ["test"], "x" => "y"}}, %{
-               "category" => ["test"]
-             })
-    end
-
-    test "false when doesn't match" do
-      assert not Feed.matches_filter?(%Post{props: %{"category" => [], "x" => "y"}}, %{
-               "category" => "test"
-             })
-
-      assert not Feed.matches_filter?(%Post{props: %{"category" => [], "x" => "y"}}, %{
-               "category" => ["test"]
-             })
-
-      assert not Feed.matches_filter?(%Post{props: %{"x" => "y"}}, %{"category" => "test"})
-      assert not Feed.matches_filter?(%Post{props: %{"x" => "y"}}, %{"category" => ["test"]})
-    end
-  end
-
   describe "Comments.separate_comments" do
     test "does not fail on no comments" do
       assert Comments.separate_comments(%Post{props: %{"comments" => []}}) == %{}

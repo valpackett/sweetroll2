@@ -50,6 +50,22 @@ defmodule Sweetroll2.Post.Generative.Feed do
     )
   end
 
+  @doc """
+      iex> Feed.matches_filter?(%Post{props: %{"category" => "test", "x" => "y"}}, %{"category" => "test"})
+      true
+
+      iex> Feed.matches_filter?(%Post{props: %{"category" => ["test", "memes"], "what" => "ever"}}, %{"category" => "test"})
+      true
+
+      iex> Feed.matches_filter?(%Post{props: %{"category" => ["test"], "ping" => "pong"}}, %{"category" => ["test"]})
+      true
+
+      iex> Feed.matches_filter?(%Post{props: %{"category" => [], "ping" => "pong"}}, %{"category" => ["test"]})
+      false
+
+      iex> Feed.matches_filter?(%Post{props: %{"aaa" => "bbb"}}, %{"category" => ["test"]})
+      false
+  """
   def matches_filter?(%Post{} = post, filter) do
     Enum.all?(filter, fn {k, v} ->
       vals = Convert.as_many(post.props[k])
