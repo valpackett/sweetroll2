@@ -19,7 +19,9 @@ defmodule Sweetroll2.RenderTest do
             }
           },
           posts: %{},
-          feed_urls: []
+          feed_urls: [],
+          local_urls: [],
+          logged_in: false
         )
 
       assert Enum.uniq(props["url"]) == ["http://localhost/hello"]
