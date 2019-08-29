@@ -183,11 +183,6 @@ defmodule Sweetroll2.Micropub do
     urls_local = Post.urls_local()
     posts = %Post.DbAsMap{}
 
-    # XXX: why not
-    ret_if !(url in urls_local), do: {:error, :insufficient_scope, :not_local}
-
-    ret_if !("*" in (posts[url].acl || ["*"])), do: {:error, :insufficient_scope, :not_allowed}
-
     ret_if posts[url].deleted, do: {:error, :insufficient_scope, :deleted}
 
     {:ok, Post.to_full_map(posts[url])}
