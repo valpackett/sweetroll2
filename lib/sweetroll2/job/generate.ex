@@ -69,7 +69,7 @@ defmodule Sweetroll2.Job.Generate do
 
     result = gen_allowed_pages(urls, posts)
 
-    for {:ok, path} <- result.ok do
+    for {:ok, path} <- result[:ok] || [] do
       Que.add(Compress, path: path)
     end
 
