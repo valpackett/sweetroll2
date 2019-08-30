@@ -66,6 +66,14 @@ defmodule Sweetroll2.Application do
     Memento.Table.create!(Sweetroll2.Auth.AccessToken, disc_copies: nodes)
   end
 
+  def drop! do
+    Memento.Table.delete(Sweetroll2.Post)
+    Memento.Table.delete(Sweetroll2.Auth.Session)
+    Memento.Table.delete(Sweetroll2.Auth.TempCode)
+    Memento.Table.delete(Sweetroll2.Auth.AccessToken)
+    Memento.Table.delete(Que.Persistence.Mnesia.DB.Jobs)
+  end
+
   def bootstrap! do
     Memento.transaction!(fn ->
       Memento.Query.write(%Sweetroll2.Post{
