@@ -112,15 +112,16 @@ defmodule Sweetroll2.Serve do
       |> put_resp_header("X-XSS-Protection", "1; mode=block")
 
     url = conn.request_path
+    logged_in = !is_nil(Auth.Session.current_token(conn))
     posts = %Post.DbAsMap{}
-    urls_local = Post.urls_local()
+    urls_local = if logged_in, do: Post.urls_local(), else: Post.urls_local_public()
     post = Post.Generative.lookup(url, posts, urls_local)
 
     cond do
       !post ->
         send_resp(conn, 404, "Page not found")
 
-      !("*" in (post.acl || ["*"])) ->
+      post.status != :published and not logged_in ->
         send_resp(conn, 401, "Unauthorized")
 
       post.deleted ->
@@ -133,7 +134,7 @@ defmodule Sweetroll2.Serve do
             post: post,
             posts: posts,
             local_urls: urls_local,
-            logged_in: !is_nil(Auth.Session.current_token(conn))
+            logged_in: logged_in
           )
 
         send_resp(conn, :ok, data)

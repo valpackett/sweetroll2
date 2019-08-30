@@ -76,7 +76,7 @@ defmodule Sweetroll2.Job.Fetch do
                 event: %{fetch_url_mismatch: %{post: post.url, requested: url}}
               )
 
-          Memento.Query.write(%{post | url: url})
+          Memento.Query.write(%{post | url: url, status: :fetched})
 
           if !is_nil(save_mention) do
             post = Memento.Query.read(Post, save_mention)

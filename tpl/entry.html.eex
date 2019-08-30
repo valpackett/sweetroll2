@@ -69,9 +69,9 @@
 		<% end %>
 	<% end %>
 
-	<%= if @entry.props["client-id"] do %>
+	<%= if as_one(@entry.props["client-id"]) do %>
 		using
-		<%= client_id @entry.props["client-id"] %>
+		<%= client_id as_one(@entry.props["client-id"]) %>
 	<% end %>
 
 	<%= if @entry.updated do %>

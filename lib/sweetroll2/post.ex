@@ -4,6 +4,7 @@ defmodule Sweetroll2.Post do
 
   Fields and conventions:
 
+  - `status` is `:fetched` | `:published` | `:draft` | `:private`
   - `type` is the mf2 type without the `h-` prefix, and each entry has one type
     (practically there was no need for multiple types ever in sweetroll 1)
   - `props` are the "meat" of the post, the mf2 properties (with string keys) expect the special ones:
@@ -15,11 +16,26 @@ defmodule Sweetroll2.Post do
   require Logger
 
   use Memento.Table,
-    attributes: [:url, :deleted, :published, :updated, :acl, :type, :props, :children]
+    attributes: [:url, :deleted, :published, :updated, :status, :type, :props, :children]
 
   def urls_local do
-    :mnesia.dirty_select(__MODULE__, [{:"$1", [], [{:element, 2, :"$1"}]}])
-    |> Enum.filter(&String.starts_with?(&1, "/"))
+    :mnesia.dirty_select(__MODULE__, [
+      {
+        {__MODULE__, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8"},
+        [{:"/=", :"$5", :fetched}],
+        [:"$1"]
+      }
+    ])
+  end
+
+  def urls_local_public do
+    :mnesia.dirty_select(__MODULE__, [
+      {
+        {__MODULE__, :"$1", :"$2", :"$3", :"$4", :"$5", :"$6", :"$7", :"$8"},
+        [{:==, :"$5", :published}],
+        [:"$1"]
+      }
+    ])
   end
 
   def import_json_lines(text, local_domains \\ ["http://localhost", "https://localhost"]) do
@@ -30,7 +46,15 @@ defmodule Sweetroll2.Post do
       |> Stream.map(&Jason.decode!/1)
       |> Stream.map(&__MODULE__.from_map/1)
       |> Stream.map(fn post ->
-        %{post | url: Enum.reduce(local_domains, post.url, &String.replace_prefix(&2, &1, ""))}
+        url = Enum.reduce(local_domains, post.url, &String.replace_prefix(&2, &1, ""))
+
+        %{
+          post
+          | url: url,
+            status:
+              post.status ||
+                if(String.starts_with?(url, "/"), do: :published, else: :fetched)
+        }
       end)
       |> Enum.each(&Memento.Query.write/1)
     end)
@@ -102,6 +126,8 @@ defmodule Sweetroll2.Post do
         |> Map.delete(:published)
         |> Map.delete("updated")
         |> Map.delete(:updated)
+        |> Map.delete("status")
+        |> Map.delete(:status)
         |> Map.update(
           "category",
           [],
@@ -112,7 +138,7 @@ defmodule Sweetroll2.Post do
       deleted: map["deleted"] || map[:deleted],
       published: published,
       updated: updated,
-      acl: map["acl"] || map[:acl],
+      status: valid_status(map_prop(map, "status", :status)),
       children: map["children"] || map[:children]
     }
   end
@@ -121,13 +147,13 @@ defmodule Sweetroll2.Post do
   Converts a Post struct to a "simplified" (jf2-ish) map.
   """
   def to_map(%__MODULE__{
+        status: status,
         props: props,
         url: url,
         type: type,
         deleted: deleted,
         published: published,
         updated: updated,
-        acl: acl,
         children: children
       }) do
     props
@@ -135,8 +161,8 @@ defmodule Sweetroll2.Post do
     |> Map.put("url", url)
     |> Map.put("type", type)
     |> Map.put("deleted", deleted)
-    |> Map.put("acl", acl)
     |> Map.put("children", children)
+    |> Map.put("status", to_string(status))
   end
 
   def to_map(x) when is_map(x), do: x
@@ -145,20 +171,20 @@ defmodule Sweetroll2.Post do
   Converts a Post struct to a "full" (mf2-source-ish) map.
   """
   def to_full_map(%__MODULE__{
+        status: status,
         props: props,
         url: url,
         type: type,
         # deleted: deleted,
         published: published,
         updated: updated,
-        acl: acl,
         children: children
       }) do
     props =
       props
       |> add_dates(published: published, updated: updated)
       |> Map.put("url", url)
-      |> Map.put("acl", acl)
+      |> Map.put("status", as_many(to_string(status)))
 
     %{
       type: as_many("h-" <> type),
@@ -209,4 +235,11 @@ defmodule Sweetroll2.Post do
         String.starts_with?(url, "/")
     end)
   end
+
+  def valid_status([x]), do: valid_status(x)
+  def valid_status("fetched"), do: :fetched
+  def valid_status("published"), do: :published
+  def valid_status("draft"), do: :draft
+  def valid_status("private"), do: :private
+  def valid_status(_), do: nil
 end

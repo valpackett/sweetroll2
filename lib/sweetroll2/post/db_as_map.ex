@@ -21,13 +21,13 @@ defmodule Sweetroll2.Post.DbAsMap do
     else
       case :mnesia.dirty_read(Sweetroll2.Post, key) do
         # Memento.Query.Data.load is too dynamic -> too slow
-        [{Sweetroll2.Post, url, deleted, published, updated, acl, type, props, children} | _] ->
+        [{Sweetroll2.Post, url, deleted, published, updated, status, type, props, children} | _] ->
           post = %Sweetroll2.Post{
             url: url,
             deleted: deleted,
             published: published,
             updated: updated,
-            acl: acl,
+            status: status,
             type: type,
             props: props,
             children: children

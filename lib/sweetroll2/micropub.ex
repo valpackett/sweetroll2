@@ -30,8 +30,9 @@ defmodule Sweetroll2.Micropub do
           old_post = Memento.Query.read(Post, url)
 
           if is_nil(old_post) or old_post.deleted do
-            %{Post.from_map(params) | acl: ["*"]}
+            Post.from_map(params)
             |> Map.update(:published, DateTime.utc_now(), &(&1 || DateTime.utc_now()))
+            |> Map.update(:status, :published, &(&1 || :published))
             |> Memento.Query.write()
 
             {:ok, :created, url}
@@ -112,7 +113,12 @@ defmodule Sweetroll2.Micropub do
                 |> MapSet.to_list())
             )
 
-          Memento.Query.write(%{post | props: props, updated: DateTime.utc_now()})
+          Memento.Query.write(%{
+            post
+            | props: props |> Map.delete("status"),
+              updated: DateTime.utc_now(),
+              status: Post.valid_status(props["status"])
+          })
 
           ctxs_prop
         end)

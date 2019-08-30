@@ -27,8 +27,7 @@ defmodule Sweetroll2.Post.Generative.Feed do
     |> Pagination.child_urls(posts, local_urls)
   end
 
-  def filter_feed_entries(%Post{type: type} = feed, posts, local_urls)
-      when type == "x-dynamic-feed" or type == "x-dynamic-tag-feed" do
+  def filter_feed_entries(%Post{type: "x-dynamic-feed"} = feed, posts, local_urls) do
     Stream.filter(
       local_urls,
       &(not is_nil(posts[&1]) and !(posts[&1].deleted || false) and String.starts_with?(&1, "/") and

@@ -12,7 +12,7 @@ defmodule Sweetroll2.Job.Generate do
     cond do
       !String.starts_with?(url, "/") -> :nonlocal
       url not in local_urls -> :nonexistent
-      !("*" in (Post.Generative.lookup(url, posts, local_urls).acl || ["*"])) -> :nonpublic
+      Post.Generative.lookup(url, posts, local_urls).status != :published -> :nonpublic
       true -> :ok
     end
   end
@@ -47,7 +47,7 @@ defmodule Sweetroll2.Job.Generate do
   end
 
   def gen_allowed_pages(urls, posts) when is_map(posts) do
-    local_urls = Post.urls_local()
+    local_urls = Post.urls_local_public()
     urls_dyn = Post.Generative.list_generated_urls(local_urls, posts, local_urls)
     all_local_urls = local_urls ++ urls_dyn
 
