@@ -56,7 +56,7 @@ defmodule Sweetroll2.Job.Fetch do
               true -> nil
             end
 
-          if author_url and is_binary(author_url) and
+          if !is_nil(author_url) and is_binary(author_url) and
                String.starts_with?(author_url, "http") do
             Que.add(__MODULE__,
               url: author_url,
