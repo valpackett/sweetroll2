@@ -41,6 +41,8 @@ defmodule Sweetroll2.Render do
         logged_in: logged_in
       ) do
     feed_urls = Post.filter_type(local_urls, posts, ["x-dynamic-feed", "x-dynamic-tag-feed"])
+    feeds_with_tags = feed_urls_filter(feed_urls, posts: posts, show_prop: "show-in-post", order_prop: "order-in-post")
+                      |> Post.Generative.Tag.feeds_get_with_tags(posts: posts, local_urls: local_urls)
 
     cond do
       post.type == "entry" || post.type == "review" ->
@@ -51,6 +53,7 @@ defmodule Sweetroll2.Render do
           posts: posts,
           local_urls: local_urls,
           feed_urls: feed_urls,
+          feeds_with_tags: feeds_with_tags,
           logged_in: logged_in
         )
 
@@ -63,6 +66,7 @@ defmodule Sweetroll2.Render do
           posts: posts,
           local_urls: local_urls,
           feed_urls: feed_urls,
+          feeds_with_tags: feeds_with_tags,
           logged_in: logged_in
         )
 
@@ -75,7 +79,8 @@ defmodule Sweetroll2.Render do
             posts: posts,
             logged_in: logged_in,
             local_urls: local_urls,
-            feed_urls: feed_urls
+            feed_urls: feed_urls,
+            feeds_with_tags: feeds_with_tags
           })
 
         {:safe, html}
@@ -622,6 +627,7 @@ defmodule Sweetroll2.Render.LiquidTags.FeedPreview do
            logged_in: context.assigns.logged_in,
            entry: entry,
            feed_urls: context.assigns.feed_urls,
+           feeds_with_tags: context.assigns.feeds_with_tags,
            local_urls: context.assigns.local_urls,
            expand_comments: false
          )

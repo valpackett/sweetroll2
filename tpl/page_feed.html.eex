@@ -7,7 +7,7 @@
 		<main>
 			<%= for entry <- @feed.children do %>
 				<article class="h-entry">
-					<%= entry posts: @posts, cur_url: @feed.url, logged_in: @logged_in, entry: entry, feed_urls: @feed_urls, local_urls: @local_urls, expand_comments: false %>
+					<%= entry posts: @posts, cur_url: @feed.url, logged_in: @logged_in, entry: entry, feeds_with_tags: @feeds_with_tags, local_urls: @local_urls, expand_comments: false %>
 				</article>
 			<% end %>
 
