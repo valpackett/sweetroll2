@@ -41,8 +41,14 @@ defmodule Sweetroll2.Render do
         logged_in: logged_in
       ) do
     feed_urls = Post.filter_type(local_urls, posts, ["x-dynamic-feed", "x-dynamic-tag-feed"])
-    feeds_with_tags = feed_urls_filter(feed_urls, posts: posts, show_prop: "show-in-post", order_prop: "order-in-post")
-                      |> Post.Generative.Tag.feeds_get_with_tags(posts: posts, local_urls: local_urls)
+
+    feeds_with_tags =
+      feed_urls_filter(feed_urls,
+        posts: posts,
+        show_prop: "show-in-post",
+        order_prop: "order-in-post"
+      )
+      |> Post.Generative.Tag.feeds_get_with_tags(posts: posts, local_urls: local_urls)
 
     cond do
       post.type == "entry" || post.type == "review" ->
@@ -619,20 +625,21 @@ defmodule Sweetroll2.Render.LiquidTags.FeedPreview do
 
     # TODO: adjustable number
 
-    {Enum.map(children, fn entry ->
-       {:safe, data} =
-         Render.entry(
-           posts: context.assigns.posts,
-           cur_url: context.assigns.page.url,
-           logged_in: context.assigns.logged_in,
-           entry: entry,
-           feed_urls: context.assigns.feed_urls,
-           feeds_with_tags: context.assigns.feeds_with_tags,
-           local_urls: context.assigns.local_urls,
-           expand_comments: false
-         )
+    {(Enum.map(children, fn entry ->
+        {:safe, data} =
+          Render.entry(
+            posts: context.assigns.posts,
+            cur_url: context.assigns.page.url,
+            logged_in: context.assigns.logged_in,
+            entry: entry,
+            feed_urls: context.assigns.feed_urls,
+            feeds_with_tags: context.assigns.feeds_with_tags,
+            local_urls: context.assigns.local_urls,
+            expand_comments: false
+          )
 
-       IO.iodata_to_binary([~S[<article class="h-entry">], data, "</article>"])
-     end) ++ output, context}
+        IO.iodata_to_binary([~S[<article class="h-entry">], data, "</article>"])
+      end)
+      |> Enum.reverse()) ++ output, context}
   end
 end
