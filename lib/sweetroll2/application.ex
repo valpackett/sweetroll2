@@ -78,6 +78,7 @@ defmodule Sweetroll2.Application do
     Memento.transaction!(fn ->
       Memento.Query.write(%Sweetroll2.Post{
         url: "/",
+        status: :published,
         type: "x-custom-page",
         props: %{
           "name" => "Home",
@@ -110,6 +111,7 @@ defmodule Sweetroll2.Application do
 
       Memento.Query.write(%Sweetroll2.Post{
         url: "/tag",
+        status: :published,
         type: "x-dynamic-tag-feed",
         props: %{
           "name" => ~S[#{tag}],
@@ -124,6 +126,7 @@ defmodule Sweetroll2.Application do
 
       Memento.Query.write(%Sweetroll2.Post{
         url: "/posts",
+        status: :published,
         type: "x-dynamic-feed",
         props: %{
           "name" => "Posts",
@@ -145,6 +148,7 @@ defmodule Sweetroll2.Application do
 
       Memento.Query.write(%Sweetroll2.Post{
         url: "/notes",
+        status: :published,
         type: "x-dynamic-feed",
         props: %{
           "name" => "Notes",
@@ -162,6 +166,7 @@ defmodule Sweetroll2.Application do
 
       Memento.Query.write(%Sweetroll2.Post{
         url: "/replies",
+        status: :published,
         type: "x-dynamic-feed",
         props: %{
           "name" => "Replies",
@@ -179,6 +184,7 @@ defmodule Sweetroll2.Application do
 
       Memento.Query.write(%Sweetroll2.Post{
         url: "/likes",
+        status: :published,
         type: "x-dynamic-feed",
         props: %{
           "name" => "Likes",
@@ -196,6 +202,7 @@ defmodule Sweetroll2.Application do
 
       Memento.Query.write(%Sweetroll2.Post{
         url: "/rsvp",
+        status: :published,
         type: "x-dynamic-feed",
         props: %{
           "name" => "RSVPs",
@@ -213,6 +220,7 @@ defmodule Sweetroll2.Application do
 
       Memento.Query.write(%Sweetroll2.Post{
         url: "/photos",
+        status: :published,
         type: "x-dynamic-feed",
         props: %{
           "name" => "Photos",
@@ -235,6 +243,7 @@ defmodule Sweetroll2.Application do
 
       Memento.Query.write(%Sweetroll2.Post{
         url: "/kb",
+        status: :published,
         type: "x-dynamic-feed",
         props: %{
           "name" => "KB",
@@ -259,6 +268,7 @@ defmodule Sweetroll2.Application do
 
       Memento.Query.write(%Sweetroll2.Post{
         url: "/bookmarks",
+        status: :published,
         type: "x-dynamic-feed",
         props: %{
           "name" => "Bookmarks",
@@ -278,6 +288,7 @@ defmodule Sweetroll2.Application do
 
       Memento.Query.write(%Sweetroll2.Post{
         url: "/notes/#{to_string(now) |> String.replace(" ", "-")}",
+        status: :published,
         type: "entry",
         published: now,
         props: %{
