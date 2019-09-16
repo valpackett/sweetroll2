@@ -80,7 +80,6 @@ sub {
 html {
 	font: 15px/22px "Inter", system-ui, sans-serif, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 	font-weight: 400;
-	letter-spacing: -0.004em;
 	background: #33414C;
 	color: #fefefe;
 	background-blend-mode: overlay;
@@ -115,7 +114,10 @@ responsive-container.has-pad > *, responsive-container.has-pad picture img { pos
 blockquote { border-left: 0.35rem solid #ddd; padding: 0 1rem; }
 audio[controls] { height: calc(var(--lineh) * 2); }
 
-main { margin-top: calc(var(--lineh) * 2); }
+main {
+	margin-top: calc(var(--lineh) * 2);
+	letter-spacing: -0.004em;
+}
 body { min-height: 100vh; }
 a { color: #f7fdfe; transition: color ease 0.2s; }
 a:hover, a:focus { color: #fff; }
@@ -129,6 +131,7 @@ h4 { font-size: 1.125rem; }
 
 #site-h1 {
 	font-size: 2.281rem;
+	letter-spacing: -0.007em;
 	font-weight: 900;
 	line-height: calc(var(--lineh) * 3);
 	margin: var(--lineh) var(--hspac);
