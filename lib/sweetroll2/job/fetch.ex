@@ -70,6 +70,12 @@ defmodule Sweetroll2.Job.Fetch do
         Memento.transaction!(fn ->
           post = Post.from_map(mf)
 
+          url = cond do
+            url <> "/" == post.url -> url <> "/"
+            String.trim_trailing(url, "/") == post.url -> String.trim_trailing(url, "/")
+            true -> url
+          end
+
           if post.url != url,
             do:
               Logger.warn("URL mismatch '#{post.url}' vs #{url}",
