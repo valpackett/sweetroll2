@@ -131,7 +131,7 @@ defmodule Sweetroll2.Post do
         |> Map.update(
           "category",
           [],
-          &Enum.filter(&1, fn x -> is_binary(x) and String.length(x) > 0 end)
+          &Enum.filter(as_many(&1), fn x -> is_binary(x) and String.length(x) > 0 end)
         ),
       url: if(is_binary(url), do: url, else: "___WTF"),
       type: String.replace_prefix(as_one(map["type"] || map[:type]), "h-", ""),
