@@ -6,7 +6,7 @@ defmodule Sweetroll2.Job.NotifyWebsub do
 
   require Logger
   use Que.Worker, concurrency: 4
-  alias Sweetroll2.HttpClient
+  alias Sweetroll2.{Convert, HttpClient}
 
   def hub, do: System.get_env("SR2_WEBSUB_HUB") || @default_hub
   def granary, do: System.get_env("SR2_GRANARY") || @default_granary
@@ -38,9 +38,9 @@ defmodule Sweetroll2.Job.NotifyWebsub do
     resp = HttpClient.post!(hub(), %{"hub.mode": "publish", "hub.url": url})
 
     if resp.status >= 200 and resp.status < 300 do
-      Logger.info("", event: %{websub_success: Map.from_struct(resp)})
+      Logger.info("", event: %{websub_success: Convert.resp2log(resp)})
     else
-      Logger.info("", event: %{websub_failure: Map.from_struct(resp)})
+      Logger.info("", event: %{websub_failure: Convert.resp2log(resp)})
     end
   end
 end

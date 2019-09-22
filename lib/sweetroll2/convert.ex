@@ -36,4 +36,6 @@ defmodule Sweetroll2.Convert do
       url in (item["properties"]["url"] || [])
     end) || List.first(items)
   end
+
+  def resp2log(x), do: Map.from_struct(x) |> Map.delete(:__client__)
 end
