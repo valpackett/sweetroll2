@@ -15,7 +15,8 @@ defmodule Mix.Tasks.Sweetroll2.Import do
       end)
 
     Mix.shell().info("Ignoring domains #{inspect(domains)}")
-    Memento.start()
+    :ok = Memento.start()
+    :ok = :mnesia.wait_for_tables([Sweetroll2.Post], 1000)
     Tzdata.EtsHolder.start_link()
 
     for path <- argv do

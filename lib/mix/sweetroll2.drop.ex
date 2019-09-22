@@ -6,8 +6,20 @@ defmodule Mix.Tasks.Sweetroll2.Drop do
   @impl Mix.Task
   @doc false
   def run(_) do
-    Memento.start()
-    Process.sleep(500)
+    :ok = Memento.start()
+
+    :ok =
+      :mnesia.wait_for_tables(
+        [
+          Sweetroll2.Post,
+          Sweetroll2.Auth.Session,
+          Sweetroll2.Auth.TempCode,
+          Sweetroll2.Auth.AccessToken,
+          Que.Persistence.Mnesia.DB.Jobs
+        ],
+        1000
+      )
+
     Sweetroll2.Application.drop!()
   end
 end

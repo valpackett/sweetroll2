@@ -7,8 +7,7 @@ defmodule Mix.Tasks.Sweetroll2.Bootstrap do
   @doc false
   def run(_) do
     :ok = Memento.start()
-    # XXX: why do we need to wait for mnesia to pick up the db??
-    Process.sleep(500)
+    :ok = :mnesia.wait_for_tables([Sweetroll2.Post], 1000)
 
     Sweetroll2.Application.bootstrap!()
   end
