@@ -33,3 +33,13 @@ hosts:
           header.add: "feature-policy: unsized-media 'none'; sync-xhr 'none'; document-write 'none'"
           header.add: "referrer-policy: no-referrer-when-downgrade"
           file.dir: out/
+      # https://github.com/snarfed/bridgy/issues/878 → https://issuetracker.google.com/issues/112277350
+      "/__crapp_engine__/":
+        - mruby.handler-file: mrb/out.rb
+        - header.add: 'link: <https://pubsubhubbub.superfeedr.com/>; rel="hub", </__webmention__>; rel="webmention", </__micropub__>; rel="micropub", </__auth__/authorize>; rel="authorization_endpoint", </__auth__/token>; rel="token_endpoint"'
+          header.add: "strict-transport-security: max-age=31536000"
+          header.add: "feature-policy: unsized-media 'none'; sync-xhr 'none'; document-write 'none'"
+          header.add: "referrer-policy: no-referrer-when-downgrade"
+          compress: OFF
+          file.send-compressed: OFF
+          file.dir: out/
