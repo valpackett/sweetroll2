@@ -28,7 +28,7 @@ defmodule Sweetroll2.Events do
     Que.add(Job.Generate,
       urls: [url],
       next_jobs: [
-        {Job.NotifyWebsub, url: Sweetroll2.canonical_home_url() <> url},
+        {Job.NotifyWebsub, home: Sweetroll2.canonical_home_url(), url: url},
         {Job.SendWebmentions, url: url, our_home_url: Sweetroll2.canonical_home_url()}
       ]
     )

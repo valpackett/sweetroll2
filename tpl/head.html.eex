@@ -5,6 +5,9 @@
 		<%= tag :link, rel: "stylesheet", href: asset("style.css") %>
 		<%= tag :link, rel: "canonical", href: Sweetroll2.canonical_home_url() <> @cur_url %>
 		<%= tag :link, rel: "webmention", href: Sweetroll2.canonical_home_url() <> "/__webmention__" %>
+		<%= for {rel, type, url} <- Sweetroll2.Job.NotifyWebsub.granary_urls(home: Sweetroll2.canonical_home_url(), url: @cur_url) do %>
+			<%= tag :link, rel: rel, type: type, href: url %>
+		<% end %>
 		<%= tag :link, rel: "openid.delegate", href: Sweetroll2.canonical_home_url() %>
 		<link href="https://openid.indieauth.com/openid" rel="openid.server">
 	</head>
