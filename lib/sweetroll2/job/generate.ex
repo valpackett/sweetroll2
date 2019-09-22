@@ -37,13 +37,25 @@ defmodule Sweetroll2.Job.Generate do
 
     File.mkdir_p!(path_dir)
     path = Path.join(path_dir, "index.html")
-    File.write!(path, data)
+
+    # have to convert to compare with existing
+    data = IO.iodata_to_binary(data)
+
+    status =
+      if File.read(path) != {:ok, data} do
+        File.rm("#{path}.gz")
+        File.rm("#{path}.br")
+        File.write!(path, data)
+        :updated
+      else
+        :same
+      end
 
     Logger.info("generated #{url} -> #{path}",
-      event: %{generate_success: %{url: url, path: path}}
+      event: %{generate_success: %{url: url, path: path, status: status}}
     )
 
-    path
+    {status, path}
   end
 
   def gen_allowed_pages(urls, posts) when is_map(posts) do
@@ -69,8 +81,8 @@ defmodule Sweetroll2.Job.Generate do
 
     result = gen_allowed_pages(urls, posts)
 
-    for {:ok, path} <- result[:ok] || [] do
-      Que.add(Compress, path: path)
+    for {:ok, {status, path}} <- result[:ok] || [] do
+      if status != :same, do: Que.add(Compress, path: path)
     end
 
     for {mod, args} <- next_jobs do
