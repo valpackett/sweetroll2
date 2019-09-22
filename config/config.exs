@@ -36,6 +36,7 @@ config :sweetroll2, Sweetroll2.Application.Scheduler,
       if(Mix.env() == :prod,
         do: [
           {"@reboot", {Sweetroll2.Job.Generate, :enqueue_all, []}},
+          {"0 */2 * * *", {Sweetroll2.Job.Backup, :enqueue, []}},
           {"0 */6 * * *", {Sweetroll2.Job.Generate, :enqueue_all, []}}
         ],
         else: []

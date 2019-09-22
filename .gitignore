@@ -37,6 +37,12 @@ fprof.trace
 # Database
 /priv/db
 
+# Backups
+/priv/backup
+
+# Hooks
+/priv/hooks
+
 # Compressed assets
 /priv/static/*.br
 /priv/static/*.gz
