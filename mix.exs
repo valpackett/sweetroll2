@@ -13,7 +13,7 @@ defmodule Sweetroll2.MixProject do
 
   def application do
     [
-      extra_applications: [:logger, :timex, :event_bus, :con_cache, :liquid],
+      extra_applications: [:logger],
       mod: {Sweetroll2.Application, []}
     ]
   end
