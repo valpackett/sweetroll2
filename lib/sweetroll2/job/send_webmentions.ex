@@ -76,9 +76,9 @@ defmodule Sweetroll2.Job.SendWebmentions do
     resp = HttpClient.post!(endpoint, %{source: source, target: target})
 
     if resp.status >= 200 and resp.status < 300 do
-      Logger.info("sent", event: %{webmention_success: resp})
+      Logger.info("sent", event: %{webmention_success: Map.from_struct(resp)})
     else
-      Logger.warn("failed to send", event: %{webmention_failure: resp})
+      Logger.warn("failed to send", event: %{webmention_failure: Map.from_struct(resp)})
     end
   end
 

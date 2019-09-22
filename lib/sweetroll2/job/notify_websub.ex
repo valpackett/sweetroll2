@@ -15,9 +15,9 @@ defmodule Sweetroll2.Job.NotifyWebsub do
     resp = HttpClient.post!(hub(), %{"hub.mode": "publish", "hub.url": url})
 
     if resp.status >= 200 and resp.status < 300 do
-      Logger.info("", event: %{websub_success: resp})
+      Logger.info("", event: %{websub_success: Map.from_struct(resp)})
     else
-      Logger.info("", event: %{websub_failure: resp})
+      Logger.info("", event: %{websub_failure: Map.from_struct(resp)})
     end
   end
 end
