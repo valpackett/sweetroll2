@@ -70,11 +70,12 @@ defmodule Sweetroll2.Job.Fetch do
         Memento.transaction!(fn ->
           post = Post.from_map(mf)
 
-          purl = cond do
-            post.url <> "/" == url -> post.url <> "/"
-            String.trim_trailing(post.url, "/") == url -> String.trim_trailing(post.url, "/")
-            true -> post.url
-          end
+          purl =
+            cond do
+              post.url <> "/" == url -> post.url <> "/"
+              String.trim_trailing(post.url, "/") == url -> String.trim_trailing(post.url, "/")
+              true -> post.url
+            end
 
           post = %{post | url: purl}
 
