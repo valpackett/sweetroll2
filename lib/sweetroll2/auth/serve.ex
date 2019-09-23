@@ -46,7 +46,7 @@ defmodule Sweetroll2.Auth.Serve do
 
     conn
     |> Session.drop_cookie()
-    |> put_resp_header("Location", conn.body_params["redirect_uri"] || "/")
+    |> put_resp_header("Location", (conn.body_params && conn.body_params["redirect_uri"]) || "/")
     |> resp(:found, "")
   end
 

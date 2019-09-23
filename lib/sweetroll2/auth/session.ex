@@ -11,8 +11,9 @@ defmodule Sweetroll2.Auth.Session do
   """
   @behaviour Plug
 
-  @cookie_key "wheeeee"
   @expiration 31_557_600
+  @cookie_opts [max_age: @expiration, http_only: true, extra: "SameSite=Strict"]
+  # NOTE: Plug automatically sets Secure
 
   require Logger
   alias Plug.Conn
@@ -42,7 +43,10 @@ defmodule Sweetroll2.Auth.Session do
   def revoke(token) do
     Memento.transaction!(fn ->
       session = Memento.Query.read(__MODULE__, token)
-      Memento.Query.write(%{session | revoked: true})
+
+      if session do
+        Memento.Query.write(%{session | revoked: true})
+      end
     end)
   end
 
@@ -74,13 +78,15 @@ defmodule Sweetroll2.Auth.Session do
       nil
   end
 
-  # TODO: secure option when https, other options
+  def cookie_key(%{scheme: :https}), do: "__Host-wheeeee"
+  def cookie_key(_), do: "wheeeee"
+
   def set_cookie(conn, token) do
-    Conn.put_resp_cookie(conn, @cookie_key, token, http_only: true, max_age: @expiration)
+    Conn.put_resp_cookie(conn, cookie_key(conn), token, @cookie_opts)
   end
 
   def drop_cookie(conn) do
-    Conn.delete_resp_cookie(conn, @cookie_key, http_only: true, max_age: @expiration)
+    Conn.delete_resp_cookie(conn, cookie_key(conn), @cookie_opts)
   end
 
   @doc "Gets the current session token after it was validated (don't forget to fetch_session!)"
@@ -96,7 +102,7 @@ defmodule Sweetroll2.Auth.Session do
     Conn.put_private(conn, :plug_session_fetch, fn conn ->
       conn = Conn.fetch_cookies(conn)
 
-      if (token = conn.cookies[@cookie_key]) && token != "" do
+      if (token = conn.cookies[cookie_key(conn)]) && token != "" do
         if session = get_if_valid(token) do
           conn
           |> Conn.put_private(:sr2_session_token, token)
