@@ -130,7 +130,7 @@
 
 	<%= if w_replies[:replies] do %>
 		<div class="entry-replies">
-			<%= for reply <- w_replies[:replies] do %>
+			<%= for reply <- Enum.reverse(w_replies[:replies]) do %>
 				<%= cite cite: to_cite(reply, posts: @posts), posts: @posts, prop: "comment" %>
 			<% end %>
 		</div>
