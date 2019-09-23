@@ -8,10 +8,9 @@
 	<% end %>
 </footer>
 
-<%= content_tag :script, [defer: true, src: asset("sr2.js")], do: "" %>
+<%= content_tag :script, [defer: true, nonce: @csp_nonce, src: asset("sr2.js")], do: "" %>
 <%= if @logged_in do %>
 	<style>
-		/* NOTE: micro-panel/lit-element uses inline styles anyway, don't try to move this into the site styles for stricter CSP :D */
 		:root { --micro-panel-accent: #97e55b; --micro-panel-light-accent: #6dcc24bb; }
 		micro-panel { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
 		micro-panel-toolbar { position: fixed; top: 0; width: 100%; }
@@ -19,5 +18,5 @@
 	</style>
 	<%= content_tag :"micro-panel-editor", hidden: true, micropub: "/__micropub__", defaultctype: "markdown", csrfheader: "x-csrf-token", csrftoken: Plug.CSRFProtection.get_csrf_token() do end %>
 	<micro-panel-toolbar></micro-panel-toolbar>
-	<%= content_tag :script, [defer: true, src: asset("micro-panel-all.bundle.min.js")], do: "" %>
+	<%= content_tag :script, [defer: true, nonce: @csp_nonce, src: asset("micro-panel-all.bundle.min.js")], do: "" %>
 <% end %>

@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-	<%= head title: "Log In", cur_url: "/__auth__/login" %>
+	<%= head title: "Log In", cur_url: "/__auth__/login", csp_nonce: @csp_nonce %>
 	<body>
 		<h1 id="site-h1">the sweetroll2 security theater</h1>
 		<main>

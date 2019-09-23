@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-	<%= head title: "#{post_title(@feed)} / #{home(@posts).props["name"]}", cur_url: @feed.url %>
+	<%= head title: "#{post_title(@feed)} / #{home(@posts).props["name"]}", cur_url: @feed.url, csp_nonce: @csp_nonce %>
 	<body class="h-feed">
 		<%= header posts: @posts, cur_url: @feed.url, feed_urls: @feed_urls %>
 
@@ -26,7 +26,7 @@
 			</nav>
 		</main>
 
-		<%= footer logged_in: @logged_in %>
+		<%= footer logged_in: @logged_in, csp_nonce: @csp_nonce %>
 		<%= content_tag :data, class: "u-author", value: Sweetroll2.canonical_home_url() do %><% end %>
 	</body>
 </html>

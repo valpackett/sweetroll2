@@ -1,6 +1,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src data: https: 'self'; media-src https: 'self'; script-src 'self' 'strict-dynamic' 'nonce-<%= @csp_nonce %>'; object-src 'none'; base-uri 'none'">
 		<title><%= @title %></title>
 		<%= tag :link, rel: "stylesheet", href: asset("style.css") %>
 		<%= tag :link, rel: "canonical", href: Sweetroll2.canonical_home_url() <> @cur_url %>

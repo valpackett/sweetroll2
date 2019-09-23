@@ -60,7 +60,8 @@ defmodule Sweetroll2.Render do
           local_urls: local_urls,
           feed_urls: feed_urls,
           feeds_with_tags: feeds_with_tags,
-          logged_in: logged_in
+          logged_in: logged_in,
+          csp_nonce: :crypto.strong_rand_bytes(24) |> Base.url_encode64()
         )
 
       post.type == "feed" ->
@@ -73,13 +74,15 @@ defmodule Sweetroll2.Render do
           local_urls: local_urls,
           feed_urls: feed_urls,
           feeds_with_tags: feeds_with_tags,
-          logged_in: logged_in
+          logged_in: logged_in,
+          csp_nonce: :crypto.strong_rand_bytes(24) |> Base.url_encode64()
         )
 
       post.type == "x-custom-page" ->
         {:ok, html, _} =
           Post.Page.get_template(post)
           |> Post.Page.render(%{
+            "csp_nonce" => :crypto.strong_rand_bytes(24) |> Base.url_encode64(),
             "canonical_home_url" => Sweetroll2.canonical_home_url(),
             page: post,
             posts: posts,
@@ -566,7 +569,13 @@ defmodule Sweetroll2.Render.LiquidTags.Head do
   end
 
   def render(output, tag, context) do
-    {:safe, data} = Render.head(title: tag.markup, cur_url: context.assigns.page.url)
+    {:safe, data} =
+      Render.head(
+        title: tag.markup,
+        cur_url: context.assigns.page.url,
+        csp_nonce: context.assigns["csp_nonce"]
+      )
+
     {[IO.iodata_to_binary(data)] ++ output, context}
   end
 end
@@ -598,7 +607,12 @@ defmodule Sweetroll2.Render.LiquidTags.Footer do
   end
 
   def render(output, _tag, context) do
-    {:safe, data} = Render.footer(logged_in: context.assigns.logged_in)
+    {:safe, data} =
+      Render.footer(
+        logged_in: context.assigns.logged_in,
+        csp_nonce: context.assigns["csp_nonce"]
+      )
+
     {[IO.iodata_to_binary(data)] ++ output, context}
   end
 end
