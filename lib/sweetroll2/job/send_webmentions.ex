@@ -82,6 +82,14 @@ defmodule Sweetroll2.Job.SendWebmentions do
     end
   end
 
+  def perform(url: :all, our_home_url: our_home_url) do
+    Timber.add_context(que: %{job_id: Logger.metadata()[:job_id]})
+
+    for url <- Post.urls_local_public() do
+      Que.add(__MODULE__, url: url, our_home_url: our_home_url)
+    end
+  end
+
   def perform(url: url, our_home_url: our_home_url) do
     Timber.add_context(que: %{job_id: Logger.metadata()[:job_id]})
 
@@ -107,5 +115,9 @@ defmodule Sweetroll2.Job.SendWebmentions do
         event: %{webmention_no_post: %{url: url, our_home_url: our_home_url}}
       )
     end
+  end
+
+  def enqueue_all do
+    Que.add(__MODULE__, url: :all, our_home_url: Sweetroll2.canonical_home_url())
   end
 end

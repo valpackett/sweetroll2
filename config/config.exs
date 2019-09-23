@@ -38,6 +38,7 @@ config :sweetroll2, Sweetroll2.Application.Scheduler,
         do: [
           {"@reboot", {Sweetroll2.Job.Generate, :enqueue_all, []}},
           {"1 */2 * * *", {Sweetroll2.Job.Backup, :enqueue, []}},
+          {"30 0 */2 * *", {Sweetroll2.Job.SendWebmentions, :enqueue_all, []}},
           {"0 */6 * * *", {Sweetroll2.Job.Generate, :enqueue_all, []}}
         ],
         else: []
