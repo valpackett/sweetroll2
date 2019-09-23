@@ -5,12 +5,17 @@ defmodule Sweetroll2.Post.Generative.Pagination do
   Mainly intended for use by other feeds, but if you wanted to paginate a manually curated feed, you could.
   """
 
+  require Logger
   alias Sweetroll2.{Convert, Post, Post.Generative}
 
   @behaviour Generative
 
   def page_url(url, 0), do: url
   def page_url(url, page), do: String.replace_leading("#{url}/page#{page}", "//", "/")
+
+  def per_page(%Post{props: props}) do
+    Convert.as_one(props["pagination-settings"])["per-page"] || 10
+  end
 
   @impl true
   def apply_args(
@@ -19,29 +24,26 @@ defmodule Sweetroll2.Post.Generative.Pagination do
         _,
         _
       ) do
+    pp = per_page(post)
+
     %{
       post
       | url: page_url(url, page),
         type: "feed",
-        children: Enum.slice(children, page * 10, 10),
+        children: Enum.slice(children, page * pp, pp),
         props:
           props
           |> Map.put("x-feed-base-url", url)
           |> Map.put("x-cur-page", page)
-          |> Map.put("x-page-count", feed_page_count(children))
+          |> Map.put("x-page-count", ceil(Enum.count(children) / per_page(post)))
     }
   end
 
   @impl true
   def child_urls(%Post{type: "x-paginated-feed", url: url, children: children} = post, _, _) do
-    cnt = feed_page_count(children)
+    cnt = ceil(Enum.count(children) / per_page(post))
 
     if cnt < 2, do: %{}, else: Map.new(1..(cnt - 1), &{page_url(url, &1), %{page: &1}})
-  end
-
-  def feed_page_count(entries) do
-    # TODO get per_page from feed settings
-    ceil(Enum.count(entries) / Application.get_env(:sweetroll2, :entries_per_page, 10))
   end
 
   @impl true
