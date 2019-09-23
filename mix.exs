@@ -25,7 +25,7 @@ defmodule Sweetroll2.MixProject do
       {:date_time_parser,
        git: "https://github.com/myfreeweb/date_time_parser", branch: "long-microsec"},
       {:jason, "~> 1.1"},
-      {:earmark, "~> 1.3"},
+      {:earmark, git: "https://github.com/pragdave/earmark", override: true},
       {:phoenix_html, "~> 2.13"},
       {:taggart, "~> 0.1.5"},
       {:floki, git: "https://github.com/philss/floki", override: true},

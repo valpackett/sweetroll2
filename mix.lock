@@ -14,7 +14,7 @@
   "db_connection": {:hex, :db_connection, "2.0.6", "bde2f85d047969c5b5800cb8f4b3ed6316c8cb11487afedac4aa5f93fd39abfa", [:mix], [{:connection, "~> 1.0.2", [hex: :connection, repo: "hexpm", optional: false]}], "hexpm"},
   "debounce": {:hex, :debounce, "0.1.1", "51e76a43b375d925dcdb7f0a1e74536551f5c2f6f5a33041c9443fc17999a760", [:mix], [], "hexpm"},
   "decimal": {:hex, :decimal, "1.7.0", "30d6b52c88541f9a66637359ddf85016df9eb266170d53105f02e4a67e00c5aa", [:mix], [], "hexpm"},
-  "earmark": {:hex, :earmark, "1.4.0", "397e750b879df18198afc66505ca87ecf6a96645545585899f6185178433cc09", [:mix], [], "hexpm"},
+  "earmark": {:git, "https://github.com/pragdave/earmark", "7ff8f736db0270f7b6dc29b5648825c1b08cfbcb", []},
   "elixir_make": {:hex, :elixir_make, "0.6.0", "38349f3e29aff4864352084fc736fa7fa0f2995a819a737554f7ebd28b85aaab", [:mix], [], "hexpm"},
   "event_bus": {:hex, :event_bus, "1.6.1", "07331328b67ccc76d14a12872013464106390abaa47ea0d6a7755e3524899964", [:mix], [], "hexpm"},
   "ex_early_ret": {:hex, :ex_early_ret, "0.1.1", "074df99d21f98ff4fa8c8da27135aae6df2e97ce2aa025a68702392bc301432a", [:mix], [], "hexpm"},
