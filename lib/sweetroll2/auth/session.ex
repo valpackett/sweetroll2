@@ -118,8 +118,11 @@ defmodule Sweetroll2.Auth.Session do
             conn
           end)
           |> Conn.put_req_header("authorization", "Bearer " <> token)
-
           # header for micropub middleware (will be reverified there, boo inefficiency)
+          |> Conn.put_resp_header("X-Frame-Options", "deny")
+          |> Conn.put_resp_header("Content-Security-Policy", "frame-ancestors 'none'")
+
+          # CSP combines with the one in the page
         else
           drop_cookie(conn)
           |> Conn.put_private(:plug_session, %{})

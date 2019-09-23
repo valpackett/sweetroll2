@@ -108,8 +108,9 @@ defmodule Sweetroll2.Serve do
         "Feature-Policy",
         "unsized-media 'none'; sync-xhr 'none'; document-write 'none'"
       )
-      |> put_resp_header("Referrer-Policy", "no-referrer-when-downgrade")
+      |> put_resp_header("Referrer-Policy", "strict-origin")
       |> put_resp_header("X-XSS-Protection", "1; mode=block")
+      |> put_resp_header("X-Content-Type-Options", "nosniff")
 
     url = conn.request_path
     logged_in = !is_nil(Auth.Session.current_token(conn))
