@@ -60,6 +60,7 @@ defmodule Sweetroll2.MixProject do
       {:remote_ip, "~> 0.1.0"},
       {:sse, "~> 0.4"},
       {:event_bus, ">= 1.6.0"},
+      {:observer_cli, "~> 1.5"},
       {:credo, "~> 1.1", only: [:dev], runtime: false}
     ]
   end
