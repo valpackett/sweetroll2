@@ -284,6 +284,24 @@ defmodule Sweetroll2.Application do
         }
       })
 
+      Memento.Query.write(%Sweetroll2.Post{
+        url: "/inbox",
+        status: :private,
+        type: "x-inbox-feed",
+        props: %{
+          "name" => "Inbox",
+          "feed-settings" => [
+            %{"order-in-nav" => 30, "show-in-nav" => true, "show-in-post" => true}
+          ],
+          "filter" => [
+            %{}
+          ],
+          "unfilter" => [
+            %{}
+          ]
+        }
+      })
+
       now = DateTime.utc_now()
 
       Memento.Query.write(%Sweetroll2.Post{

@@ -16,6 +16,9 @@ defmodule Sweetroll2.Post.Generative do
   def apply_args(%Post{type: "x-dynamic-feed"} = post, args, posts, local_urls),
     do: Post.Generative.Feed.apply_args(post, args, posts, local_urls)
 
+  def apply_args(%Post{type: "x-inbox-feed"} = post, args, posts, local_urls),
+    do: Post.Generative.Inbox.apply_args(post, args, posts, local_urls)
+
   def apply_args(%Post{type: "x-paginated-feed"} = post, args, posts, local_urls),
     do: Post.Generative.Pagination.apply_args(post, args, posts, local_urls)
 
@@ -27,6 +30,9 @@ defmodule Sweetroll2.Post.Generative do
   def child_urls(%Post{type: "x-dynamic-feed"} = post, posts, local_urls),
     do: Post.Generative.Feed.child_urls(post, posts, local_urls)
 
+  def child_urls(%Post{type: "x-inbox-feed"} = post, posts, local_urls),
+    do: Post.Generative.Inbox.child_urls(post, posts, local_urls)
+
   def child_urls(%Post{type: "x-paginated-feed"} = post, posts, local_urls),
     do: Post.Generative.Pagination.child_urls(post, posts, local_urls)
 
@@ -37,6 +43,9 @@ defmodule Sweetroll2.Post.Generative do
 
   def parse_url_segment(%Post{type: "x-dynamic-feed"} = post, seg),
     do: Post.Generative.Feed.parse_url_segment(post, seg)
+
+  def parse_url_segment(%Post{type: "x-inbox-feed"} = post, seg),
+    do: Post.Generative.Inbox.parse_url_segment(post, seg)
 
   def parse_url_segment(%Post{type: "x-paginated-feed"} = post, seg),
     do: Post.Generative.Pagination.parse_url_segment(post, seg)
@@ -134,11 +143,11 @@ defmodule Sweetroll2.Post.Generative do
   end
 
   defp lookup_rec(%Post{type: type} = post, "", _, _)
-       when type != "x-dynamic-feed" and type != "x-dynamic-tag-feed",
+       when type != "x-dynamic-feed" and type != "x-inbox-feed" and type != "x-dynamic-tag-feed",
        do: post
 
   defp lookup_rec(%Post{type: type}, _, _, _)
-       when type != "x-dynamic-feed" and type != "x-dynamic-tag-feed",
+       when type != "x-dynamic-feed" and type != "x-inbox-feed" and type != "x-dynamic-tag-feed",
        do: nil
 
   defp lookup_rec(%Post{} = generator, url_suffix, posts, local_urls) do
