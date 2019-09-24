@@ -41,7 +41,7 @@ defmodule Sweetroll2.Post.Generative.Inbox do
     |> Stream.flat_map(&Convert.as_many(posts[&1].props["comment"]))
     |> Stream.uniq()
     |> Stream.filter(
-      &(posts[&1] && !(posts[&1].deleted || false) && Feed.in_feed?(posts[&1], feed))
+      &(posts[&1] && posts[&1].published && !(posts[&1].deleted || false) && Feed.in_feed?(posts[&1], feed))
     )
   end
 
