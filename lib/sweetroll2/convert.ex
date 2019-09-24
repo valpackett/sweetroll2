@@ -37,5 +37,10 @@ defmodule Sweetroll2.Convert do
     end) || List.first(items)
   end
 
-  def resp2log(x), do: Map.from_struct(x) |> Map.delete(:__client__)
+  def resp2log(%{status: status, headers: headers, body: body}),
+    do: %{
+      status: status,
+      headers: Enum.map(headers, fn {k, v} -> "#{k}: #{v}" end),
+      body: to_string(body)
+    }
 end
