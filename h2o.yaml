@@ -15,6 +15,10 @@ hosts:
         min-version: TLSv1.2
     compress: ON
     file.send-compressed: ON
+    file.mime.addtypes:
+      "application/javascript; charset=utf-8": .js
+      "text/css; charset=utf-8": .css
+      "text/html; charset=utf-8": .html
     file.dirlisting: OFF
     paths:
       "/":
