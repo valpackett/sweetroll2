@@ -203,11 +203,26 @@ defmodule Sweetroll2.Micropub do
     end
   end
 
-  # TODO
+  def s3_bucket, do: System.get_env("SR2_S3_BUCKET")
+  def s3_region, do: System.get_env("SR2_S3_REGION")
+
+  def upload_file(file) do
+    ExAws.S3.Upload.stream_file(file.path)
+    |> ExAws.S3.upload(s3_bucket(), file.filename,
+      content_disposition: "inline",
+      content_type: file.content_type,
+      acl: :public_read,
+      meta: ["imgroll-cb": Process.get(:our_home_url) <> "/__imgroll_callback__/TODO"]
+    )
+    |> ExAws.request!(region: s3_region())
+
+    "https://#{s3_bucket()}.s3.dualstack.#{s3_region()}.amazonaws.com/#{file.filename}"
+  end
+
   @impl true
   def handle_media(file, token) do
     if Bearer.is_allowed?(token, :media) do
-      {:error, :insufficient_scope, :not_implemented}
+      {:ok, upload_file(file)}
     else
       {:error, :insufficient_scope, :unauthorized}
     end

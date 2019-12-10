@@ -169,7 +169,8 @@ defmodule Sweetroll2.Serve do
   defp skip_csrf_anon(conn, _opts) do
     # we don't have anonymous sessions, so we can't exactly store the CSRF token in a session
     # when logged out (this enables the login form to work)
-    if is_nil(Auth.Session.current_token(conn)) do
+    # also allow media
+    if is_nil(Auth.Session.current_token(conn)) or conn.request_path == "/__micropub__/media" do
       put_private(conn, :plug_skip_csrf_protection, true)
     else
       conn
