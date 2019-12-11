@@ -251,13 +251,18 @@ defmodule Sweetroll2.Render do
 
     is_resp = is_integer(media["width"]) && is_integer(media["height"])
 
+    # This supports 2 formats:
+    # - legacy sweetroll-mu: {DarkMuted:{color:"#4c4138",population:34514}}
+    # - new imgroll: [{b:5,g:6,r:6}] (sorted)
     col =
       case as_one(
-             Enum.sort_by(media["palette"] || [], fn {_, v} ->
-               if is_map(v), do: v["population"], else: 0
+             Enum.sort_by(media["palette"] || [], fn
+               {_, v} -> if is_map(v), do: v["population"], else: 0
+               _ -> nil
              end)
            ) do
         {_, %{"color" => c}} -> c
+        %{"r" => r, "g" => g, "b" => b} -> "rgb(#{r},#{g},#{b})"
         _ -> nil
       end
 
@@ -301,6 +306,37 @@ defmodule Sweetroll2.Render do
     end
   end
 
+  def src_of_srcset(src) do
+    cond do
+      is_binary(src["src"]) ->
+        src["src"]
+
+      is_list(src["srcset"]) ->
+        s = List.first(src["srcset"])
+        if is_map(s), do: s["src"], else: "ERROR"
+    end
+  end
+
+  def format_srcset(src) do
+    cond do
+      is_binary(src["srcset"]) ->
+        src["srcset"]
+
+      is_list(src["srcset"]) ->
+        Enum.map(src["srcset"], fn
+          s when is_map(s) -> "#{s["src"]} #{s["width"]}w"
+          _ -> "ERROR"
+        end)
+        |> Enum.join(", ")
+
+      is_binary(src["src"]) ->
+        src["src"]
+
+      true ->
+        "ERROR"
+    end
+  end
+
   def photo_rendered(photo) do
     use Taggart.HTML
 
@@ -325,14 +361,23 @@ defmodule Sweetroll2.Render do
                 |> Stream.filter(fn src -> src != default && !src["original"] end)
                 |> Enum.map(fn src ->
                   source(
-                    srcset: src["srcset"] || src["src"],
+                    srcset: format_srcset(src),
                     media: src["media"],
                     sizes: src["sizes"],
                     type: src["type"]
                   )
                 end)
 
-                img(class: "u-photo", src: default["src"], alt: photo["alt"] || "")
+                img(
+                  class: "u-photo",
+                  src: src_of_srcset(default),
+                  srcset:
+                    if(is_list(default["srcset"]) and length(default["srcset"]) > 1,
+                      do: format_srcset(default),
+                      else: nil
+                    ),
+                  alt: photo["alt"] || ""
+                )
               end
             end
 
