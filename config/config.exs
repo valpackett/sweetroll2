@@ -28,6 +28,10 @@ config :event_bus, topics: [:url_updated], id_generator: EventBus.Util.Base62
 config :hammer,
   backend: {Hammer.Backend.ETS, [expiry_ms: 60_000 * 60 * 4, cleanup_interval_ms: 60_000 * 10]}
 
+config :ex_aws,
+  json_codec: Jason,
+  region: {:system, "SR2_S3_REGION"}
+
 config :sweetroll2, Sweetroll2.Application.Scheduler,
   jobs:
     [

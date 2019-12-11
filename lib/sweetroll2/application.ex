@@ -61,6 +61,7 @@ defmodule Sweetroll2.Application do
     Memento.start()
     Que.Persistence.Mnesia.setup!()
     Memento.Table.create!(Sweetroll2.Post, disc_copies: nodes)
+    Memento.Table.create!(Sweetroll2.MediaUpload, disc_copies: nodes)
     Memento.Table.create!(Sweetroll2.Auth.Session, disc_copies: nodes)
     Memento.Table.create!(Sweetroll2.Auth.TempCode, disc_copies: nodes)
     Memento.Table.create!(Sweetroll2.Auth.AccessToken, disc_copies: nodes)
@@ -68,6 +69,7 @@ defmodule Sweetroll2.Application do
 
   def drop! do
     Memento.Table.delete(Sweetroll2.Post)
+    Memento.Table.delete(Sweetroll2.MediaUpload)
     Memento.Table.delete(Sweetroll2.Auth.Session)
     Memento.Table.delete(Sweetroll2.Auth.TempCode)
     Memento.Table.delete(Sweetroll2.Auth.AccessToken)

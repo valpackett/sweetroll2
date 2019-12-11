@@ -1,7 +1,7 @@
 defmodule Sweetroll2.Serve do
   @parsers [:urlencoded, {:multipart, length: 20_000_000}, :json]
 
-  alias Sweetroll2.{Auth, Post, Render, Job}
+  alias Sweetroll2.{Auth, Post, MediaUpload, Render, Job}
 
   use Plug.Router
 
@@ -45,6 +45,11 @@ defmodule Sweetroll2.Serve do
       handler: Sweetroll2.Micropub,
       json_encoder: Jason
     ]
+
+  post "/__imgroll_callback__/:token" do
+    MediaUpload.fill(token, conn.body_params)
+    send_resp(conn, :ok, "ok")
+  end
 
   post "/__webmention__" do
     sourceu = URI.parse(conn.body_params["source"])

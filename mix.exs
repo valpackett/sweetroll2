@@ -56,6 +56,7 @@ defmodule Sweetroll2.MixProject do
       {:exceptional, "~> 2.1"},
       {:ex_aws, "~> 2.1"},
       {:ex_aws_s3, "~> 2.0"},
+      {:ex_aws_sts, "~> 2.0"},
       {:sweet_xml, "~> 0.6"},
       {:plug_cowboy, "~> 2.0"},
       {:remote_ip, "~> 0.2"},
