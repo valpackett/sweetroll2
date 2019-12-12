@@ -210,7 +210,7 @@ defmodule Sweetroll2.Micropub do
 
   def upload_file(file) do
     # key slugified esp. to avoid https://stackoverflow.com/q/44779042
-    key = Slugger.slugify(file.filename)
+    key = Slugger.slugify(Path.rootname(file.filename)) <> Path.extname(file.filename)
     url = "https://#{s3_bucket()}.s3.dualstack.#{s3_region()}.amazonaws.com/#{key}"
     token = MediaUpload.create(url)
 
