@@ -105,6 +105,16 @@ defmodule Sweetroll2.Serve do
     SSE.stream(conn, {[:url_updated], %SSE.Chunk{data: ""}})
   end
 
+  get "/__media_firehose__" do
+    logged_in = !is_nil(Auth.Session.current_token(conn))
+
+    if logged_in do
+      SSE.stream(conn, {[:upload_processed], %SSE.Chunk{data: ""}})
+    else
+      send_resp(conn, :unauthorized, "hello :)")
+    end
+  end
+
   get _ do
     conn =
       conn

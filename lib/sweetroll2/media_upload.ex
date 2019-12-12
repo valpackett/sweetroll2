@@ -7,6 +7,8 @@ defmodule Sweetroll2.MediaUpload do
 
   alias Sweetroll2.{Post, Events}
 
+  use EventBus.EventSource
+
   use Memento.Table,
     attributes: [:token, :date, :url, :object]
 
@@ -33,6 +35,10 @@ defmodule Sweetroll2.MediaUpload do
 
       Logger.info("filling media upload for '#{upload.url}'",
         event: %{filling_upload: %{token: token, upload: upload.url, object: obj}}
+      )
+
+      EventSource.notify(%{topic: :upload_processed},
+        do: %SSE.Chunk{data: Jason.encode!(%{url: upload.url, object: obj})}
       )
 
       Memento.Query.write(%{upload | object: obj})

@@ -23,7 +23,7 @@ config :liquid,
     feedpreview: {Sweetroll2.Render.LiquidTags.FeedPreview, Liquid.Tag}
   }
 
-config :event_bus, topics: [:url_updated], id_generator: EventBus.Util.Base62
+config :event_bus, topics: [:url_updated, :upload_processed], id_generator: EventBus.Util.Base62
 
 config :hammer,
   backend: {Hammer.Backend.ETS, [expiry_ms: 60_000 * 60 * 4, cleanup_interval_ms: 60_000 * 10]}
