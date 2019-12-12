@@ -242,4 +242,11 @@ defmodule Sweetroll2.Post do
   def valid_status("draft"), do: :draft
   def valid_status("private"), do: :private
   def valid_status(_), do: nil
+
+  def replace_in_props(props, replacer) do
+    Enum.map(props, fn {k, v} ->
+      {k, as_many(v) |> Enum.map(replacer)}
+    end)
+    |> Enum.into(%{})
+  end
 end

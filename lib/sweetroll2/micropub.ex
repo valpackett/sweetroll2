@@ -21,7 +21,9 @@ defmodule Sweetroll2.Micropub do
 
       clid = AccessToken.get_client_id(token)
 
-      properties = if !is_nil(clid), do: Map.put(properties, "client-id", clid), else: properties
+      properties =
+        if(!is_nil(clid), do: Map.put(properties, "client-id", clid), else: properties)
+        |> MediaUpload.replace_all()
 
       params = %{type: type, properties: properties, url: url}
 
@@ -115,7 +117,7 @@ defmodule Sweetroll2.Micropub do
 
           Memento.Query.write(%{
             post
-            | props: props |> Map.delete("status"),
+            | props: props |> Map.delete("status") |> MediaUpload.replace_all(),
               updated: DateTime.utc_now(),
               status: Post.valid_status(props["status"])
           })

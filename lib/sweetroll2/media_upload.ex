@@ -5,7 +5,7 @@ defmodule Sweetroll2.MediaUpload do
 
   require Logger
 
-  alias Sweetroll2.{Post, Convert, Events}
+  alias Sweetroll2.{Post, Events}
 
   use Memento.Table,
     attributes: [:token, :date, :url, :object]
@@ -43,13 +43,11 @@ defmodule Sweetroll2.MediaUpload do
             event: %{inserting_upload: %{upload: upload.url, post: post.url}}
           )
 
-          props =
-            Enum.map(post.props, fn {k, v} ->
-              {k, Convert.as_many(v) |> Enum.map(&if(&1 == upload.url, do: obj, else: &1))}
-            end)
-            |> Enum.into(%{})
+          Memento.Query.write(%{
+            post
+            | props: Post.replace_in_props(post.props, &if(&1 == upload.url, do: obj, else: &1))
+          })
 
-          Memento.Query.write(%{post | props: props})
           post.url
         else
           nil
@@ -58,5 +56,17 @@ defmodule Sweetroll2.MediaUpload do
     end)
     |> Enum.reject(&is_nil/1)
     |> Events.notify_urls_updated()
+  end
+
+  def replace_all(props) do
+    replacements =
+      Memento.transaction!(fn ->
+        Memento.Query.all(__MODULE__)
+      end)
+      |> Stream.filter(&(!is_nil(&1.object)))
+      |> Stream.map(&{&1.url, &1.object})
+      |> Enum.into(%{})
+
+    Post.replace_in_props(props, &Map.get(replacements, &1, &1))
   end
 end
