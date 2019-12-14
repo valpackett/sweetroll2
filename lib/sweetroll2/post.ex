@@ -217,7 +217,9 @@ defmodule Sweetroll2.Post do
     (as_many(props["in-reply-to"]) ++
        as_many(props["like-of"]) ++
        as_many(props["repost-of"]) ++
-       as_many(props["quotation-of"]) ++ as_many(props["bookmark-of"]))
+       as_many(props["quotation-of"]) ++
+       as_many(props["bookmark-of"]) ++
+       as_many(props["syndication"]))
     |> Enum.map(&as_url/1)
     |> MapSet.new()
   end
