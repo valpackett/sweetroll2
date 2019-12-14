@@ -78,7 +78,7 @@ sub {
 
 /*! sweetroll 2 | UNLICENSE | unrelenting.technology */
 html {
-	font: 15px/22px "Inter", system-ui, sans-serif, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+	font: 14px/22px "Inter", system-ui, sans-serif, "Noto Color Emoji", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 	font-weight: 400;
 	background: #33414C;
 	color: #fefefe;
@@ -91,17 +91,17 @@ html {
 	* { font-synthesis: none; }
 }
 :root {
-	--fntsz: 15px;
+	--fntsz: 14px;
 	--lineh: calc(var(--fntsz) * 1.5);
 	--hspac: calc(var(--lineh) * 0.889);
 	font-size: var(--fntsz);
 	line-height: var(--lineh);
 }
-@media (min-width: 600px) and (max-width: 1200px) {
-	:root { --fntsz: calc(15px + (17 - 15) * ((100vw - 600px) / (1200 - 600))); }
+@media (min-width: 600px) and (max-width: 1300px) {
+	:root { --fntsz: calc(14px + (16 - 14) * ((100vw - 600px) / (1300 - 600))); }
 }
-@media (min-width: 1200px) {
-	:root { --fntsz: 17px; }
+@media (min-width: 1300px) {
+	:root { --fntsz: 16px; }
 }
 code { word-wrap: normal; }
 pre, code { white-space: pre-wrap; }
@@ -221,8 +221,6 @@ article > figure { margin: 0; }
 	body {
 		display: grid;
 		grid-template-rows: min-content auto min-content;
-		grid-template-columns: 90%;
-		grid-template-areas: "main" "side";
 		grid-gap: 0 var(--lineh);
 		justify-content: center;
 		grid-template-columns: auto calc(var(--lineh) * 2.25) calc(80% - 5vw) calc(var(--lineh) * 2.25) auto;
@@ -237,8 +235,20 @@ article > figure { margin: 0; }
 	#site-footer { grid-area: footer; }
 }
 
-@media screen and (min-width:69rem) {
+@media screen and (min-width:75rem) {
+	body { grid-template-columns: auto calc(var(--lineh) * 2.25) calc(80% - 10vw) calc(var(--lineh) * 2.25) auto; }
+}
+
+@media screen and (min-width:85rem) {
+	body { grid-template-columns: auto calc(var(--lineh) * 2.25) calc(80% - 15vw) calc(var(--lineh) * 2.25) auto; }
+}
+
+@media screen and (min-width:95rem) {
 	body { grid-template-columns: auto calc(var(--lineh) * 2.25) calc(80% - 20vw) calc(var(--lineh) * 2.25) auto; }
+}
+
+@media screen and (min-width:105rem) {
+	body { grid-template-columns: auto calc(var(--lineh) * 2.25) calc(80% - 25vw) calc(var(--lineh) * 2.25) auto; }
 }
 
 /*body {position: relative;}
