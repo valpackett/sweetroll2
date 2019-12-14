@@ -243,7 +243,11 @@ defmodule Sweetroll2.Render do
   end
 
   def post_title(post) do
-    post.props["name"] || DateTime.to_iso8601(post.published)
+    name = as_one(post.props["name"])
+
+    if is_binary(name) and String.length(name) > 0,
+      do: name,
+      else: DateTime.to_iso8601(post.published)
   end
 
   def responsive_container(media, do: body) when is_map(media) do
@@ -616,7 +620,7 @@ defmodule Sweetroll2.Render.LiquidTags.Head do
   def render(output, tag, context) do
     {:safe, data} =
       Render.head(
-        title: tag.markup,
+        title: Render.home(context.assigns.posts).props["site-name"],
         cur_url: context.assigns.page.url,
         csp_nonce: context.assigns["csp_nonce"]
       )
