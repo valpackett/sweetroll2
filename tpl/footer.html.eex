@@ -11,9 +11,9 @@
 <%= content_tag :script, [defer: true, nonce: @csp_nonce, src: asset("sr2.js")], do: "" %>
 <%= if @logged_in do %>
 	<style>
-		:root { --micro-panel-accent: #97d55b; --micro-panel-light-accent: #6dbc24bb; }
+		:root { --micro-panel-accent: #275171; --micro-panel-light-accent: #28587bba; }
 		micro-panel { position: absolute; top: 0; bottom: 0; left: 0; right: 0; }
-		micro-panel-toolbar { position: fixed; top: 0; width: 100%; }
+		micro-panel-toolbar { position: absolute; top: 0; width: 100%; }
 		body { padding-top: calc(var(--lineh) * 3); }
 	</style>
 	<%= content_tag :"micro-panel-editor", hidden: true, micropub: "/__micropub__", media: "/__micropub__/media", mediafirehose: "/__media_firehose__", defaultctype: "markdown", csrfheader: "x-csrf-token", csrftoken: Plug.CSRFProtection.get_csrf_token() do end %>
