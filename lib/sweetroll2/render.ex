@@ -393,73 +393,43 @@ defmodule Sweetroll2.Render do
         end
       end
 
-      t1if is_map(photo) && photo["meta"] do
-        meta = photo["meta"]
-        make = meta["Exif.Image.Make"]
-
-        model =
-          if meta["Exif.Image.Model"],
-            do: meta["Exif.Image.Model"] |> String.replace(make, "") |> String.trim(),
-            else: nil
-
-        lens = meta["Exif.Canon.LensModel"] || meta["Exif.Photo.LensModel"]
-        lens_make = meta["Exif.Canon.LensMake"] || meta["Exif.Photo.LensMake"]
-
-        lens_model =
-          if lens && lens_make,
-            do: lens |> String.replace(lens_make, "") |> String.trim(),
-            else: lens
-
-        aperture = meta["Exif.Image.FNumber"] || meta["Exif.Photo.FNumber"]
-        shutter = meta["Exif.Image.ExposureTime"] || meta["Exif.Photo.ExposureTime"]
-        iso = meta["Exif.Photo.ISOSpeedRatings"] || meta["Exif.Photo.ISOSpeed"]
-        software = meta["Exif.Image.Software"]
+      t1if is_map(photo) do
         original = as_many(photo["source"]) |> Enum.find(& &1["original"])
+        aperture = photo["aperture"]
+        focal_length = photo["focal_length"]
+        iso = photo["iso"]
+        shutter = photo["shutter_speed"]
 
-        t1if make || model || lens || aperture || shutter || iso || software || original do
+        t1if original || aperture || focal_length || iso || shutter do
           figcaption class: "entry-photo-meta" do
-            tif make || model do
-              icon(name: "device-camera", title: "Camera")
-              t1if(make, do: span(class: "camera-make", do: make))
-              t1if(model, do: span(class: "camera-model", do: model))
-            end
-
-            tif lens_model do
-              icon(name: "telescope", title: "Lens")
-              t1if(lens_make, do: span(class: "lens-make", do: lens_make))
-              t1if(lens_model, do: span(class: "lens-model", do: lens_model))
-            end
-
-            tif aperture || shutter || iso do
+            tif aperture || focal_length || iso || shutter do
               icon(name: "eye", title: "Photo parameters")
 
-              t1if shutter do
-                [x, y] = parse_ratio(shutter)
+              t1if focal_length do
+                span(class: "camera-focal-length", do: "#{focal_length} mm ")
+              end
+
+              t1if iso do
+                span(class: "camera-iso", do: "ISO #{iso} ")
+              end
+
+              t1if is_list(shutter) and length(shutter) > 1 do
+                [x, y] = shutter
 
                 span(
                   class: "camera-shutter",
-                  do: if(x / y >= 0.3, do: "#{Float.round(x / y, 2)}s", else: shutter)
+                  do: if(x / y >= 0.3, do: "#{Float.round(x / y, 2)}s ", else: "#{x}/#{y} ")
                 )
               end
 
               t1if aperture do
-                [x, y] = parse_ratio(aperture)
-                span(class: "camera-aperture", do: "ƒ/#{Float.round(x / y, 2)}")
+                span(class: "camera-aperture", do: "ƒ/#{aperture} ")
               end
-
-              t1if iso do
-                span(class: "camera-iso", do: "ISO #{iso}")
-              end
-            end
-
-            tif software do
-              icon(name: "paintcan", title: "Editing software")
-              span(class: "camera-software", do: software)
             end
 
             tif original do
               icon(name: "desktop-download")
-              a(class: "camera-original", href: original["src"], do: "Download original")
+              a(class: "camera-original", href: src_of_srcset(original), do: "Download original")
             end
           end
         end
