@@ -30,9 +30,9 @@
 	<%= cite cite: to_cite(bko, posts: @posts), posts: @posts, prop: "bookmark-of" %>
 <% end %>
 
-<%= if @entry.props["name"] do %>
+<%= if is_binary(as_one(@entry.props["name"])) do %>
 	<h1 class="p-name entry-txt">
-		<%= content_tag :a, [href: @entry.url, class: "u-url"], do: @entry.props["name"] %>
+		<%= content_tag :a, [href: @entry.url, class: "u-url"], do: as_one(@entry.props["name"]) %>
 	</h1>
 <% end %>
 
