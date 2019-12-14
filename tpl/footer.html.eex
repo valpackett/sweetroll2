@@ -16,7 +16,7 @@
 		micro-panel-toolbar { position: fixed; top: 0; width: 100%; }
 		body { padding-top: calc(var(--lineh) * 3); }
 	</style>
-	<%= content_tag :"micro-panel-editor", hidden: true, micropub: "/__micropub__", media: "/__micropub__/media", defaultctype: "markdown", csrfheader: "x-csrf-token", csrftoken: Plug.CSRFProtection.get_csrf_token() do end %>
+	<%= content_tag :"micro-panel-editor", hidden: true, micropub: "/__micropub__", media: "/__micropub__/media", mediafirehose: "/__media_firehose__", defaultctype: "markdown", csrfheader: "x-csrf-token", csrftoken: Plug.CSRFProtection.get_csrf_token() do end %>
 	<micro-panel-toolbar></micro-panel-toolbar>
 	<%= content_tag :script, [defer: true, nonce: @csp_nonce, src: asset("micro-panel-all.bundle.min.js")], do: "" %>
 <% end %>
