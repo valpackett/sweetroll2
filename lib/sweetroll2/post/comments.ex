@@ -72,7 +72,7 @@ defmodule Sweetroll2.Post.Comments do
 
   defp get_url(s) when is_bitstring(s), do: s
 
-  defp get_url(m) when is_map(m), do: lookup_property(m, "url")
+  defp get_url(m) when is_map(m), do: lookup_property(m, "url") |> as_one
 
   defp get_url(x) do
     Logger.warn("cannot get_url", event: %{get_url_unknown_type: %{thing: inspect(x)}})
