@@ -3,7 +3,6 @@ defmodule Sweetroll2.Job.SendWebmentions do
   require Logger
   use Que.Worker, concurrency: 4
 
-  defp parse_http_links(nil), do: []
   defp parse_http_links([]), do: []
   defp parse_http_links(""), do: []
 
@@ -14,7 +13,7 @@ defmodule Sweetroll2.Job.SendWebmentions do
       {:ok, links} ->
         links
 
-      {:error, err} ->
+      {:error, err, _, _, _} ->
         Logger.warn("could not parse Link header",
           event: %{failed_link_header_parse: %{header: s, error: inspect(err)}}
         )

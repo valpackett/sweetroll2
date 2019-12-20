@@ -63,7 +63,8 @@ defmodule Sweetroll2.MixProject do
       {:sse, "~> 0.4"},
       {:event_bus, ">= 1.6.0"},
       {:observer_cli, "~> 1.5"},
-      {:credo, "~> 1.1", only: [:dev], runtime: false}
+      {:credo, "~> 1.1", only: [:dev], runtime: false},
+      {:dialyxir, "~> 1.0.0-rc.7", only: [:dev], runtime: false}
     ]
   end
 end

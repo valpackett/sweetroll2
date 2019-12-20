@@ -38,7 +38,8 @@ defmodule Sweetroll2.Post do
     ])
   end
 
-  def import_json_lines(text, local_domains \\ ["http://localhost", "https://localhost"]) do
+  def import_json_lines(text, local_domains \\ ["http://localhost", "https://localhost"])
+      when is_binary(text) and is_list(local_domains) do
     Memento.transaction!(fn ->
       text
       |> String.splitter("\n")
@@ -67,7 +68,7 @@ defmodule Sweetroll2.Post do
   Should be strings inside properties though
   (we don't touch it here and the rest of the system expects strings).
   """
-  def from_map(map) do
+  def from_map(map) when is_map(map) do
     url = map_prop(map, "url", :url)
 
     published =
@@ -195,7 +196,7 @@ defmodule Sweetroll2.Post do
 
   def to_full_map(x) when is_map(x), do: x
 
-  defp add_dates(props, published: published, updated: updated) do
+  defp add_dates(props, published: published, updated: updated) when is_map(props) do
     props
     |> (fn x ->
           if published, do: Map.put(x, "published", DateTime.to_iso8601(published)), else: x
@@ -203,14 +204,15 @@ defmodule Sweetroll2.Post do
     |> (fn x -> if updated, do: Map.put(x, "updated", DateTime.to_iso8601(updated)), else: x end).()
   end
 
-  defp map_prop(map, prop_str, prop_atom) do
+  defp map_prop(map, prop_str, prop_atom)
+       when is_map(map) and is_binary(prop_str) and is_atom(prop_atom) do
     as_one(
       map[prop_str] || map[prop_atom] ||
         map["properties"][prop_str] || map[:properties][prop_atom]
     )
   end
 
-  def as_url(s) when is_bitstring(s), do: s
+  def as_url(s) when is_binary(s), do: s
   def as_url(m) when is_map(m), do: map_prop(m, "url", :url)
 
   def contexts_for(props) do
@@ -245,7 +247,7 @@ defmodule Sweetroll2.Post do
   def valid_status("private"), do: :private
   def valid_status(_), do: nil
 
-  def replace_in_props(props, replacer) do
+  def replace_in_props(props, replacer) when is_map(props) do
     Enum.map(props, fn {k, v} ->
       {k, as_many(v) |> Enum.map(replacer)}
     end)

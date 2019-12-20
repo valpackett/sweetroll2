@@ -42,7 +42,11 @@ defmodule Sweetroll2.Auth.Serve do
   end
 
   post "/logout" do
-    Session.revoke(Session.current_token(conn))
+    token = Session.current_token(conn)
+
+    if token do
+      Session.revoke(token)
+    end
 
     conn
     |> Session.drop_cookie()

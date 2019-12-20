@@ -10,7 +10,9 @@ defmodule Sweetroll2.Auth.TempCode do
   use Memento.Table,
     attributes: [:code, :used_session, :grant_date, :client_id, :redirect_uri, :scopes, :used]
 
-  def create(session: session, client_id: client_id, redirect_uri: redirect_uri, scopes: scopes) do
+  def create(session: session, client_id: client_id, redirect_uri: redirect_uri, scopes: scopes)
+      when is_binary(session) and is_binary(client_id) and is_binary(redirect_uri) and
+             is_list(scopes) do
     code = Nanoid.Secure.generate()
 
     Memento.transaction!(fn ->
@@ -30,14 +32,14 @@ defmodule Sweetroll2.Auth.TempCode do
     code
   end
 
-  def use(code) do
+  def use(code) when is_binary(code) do
     Memento.transaction!(fn ->
       tempcode = Memento.Query.read(__MODULE__, code)
       Memento.Query.write(%{tempcode | used: true})
     end)
   end
 
-  def get_if_valid(code) do
+  def get_if_valid(code) when is_binary(code) do
     Memento.transaction!(fn ->
       tempcode = Memento.Query.read(__MODULE__, code)
 

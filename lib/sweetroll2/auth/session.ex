@@ -40,7 +40,7 @@ defmodule Sweetroll2.Auth.Session do
     token
   end
 
-  def revoke(token) do
+  def revoke(token) when is_binary(token) do
     Memento.transaction!(fn ->
       session = Memento.Query.read(__MODULE__, token)
 
@@ -50,7 +50,7 @@ defmodule Sweetroll2.Auth.Session do
     end)
   end
 
-  def get_if_valid(token) do
+  def get_if_valid(token) when is_binary(token) do
     Memento.transaction!(fn ->
       session = Memento.Query.read(__MODULE__, token)
 
@@ -81,7 +81,7 @@ defmodule Sweetroll2.Auth.Session do
   def cookie_key(%{scheme: :https}), do: "__Host-wheeeee"
   def cookie_key(_), do: "wheeeee"
 
-  def set_cookie(conn, token) do
+  def set_cookie(conn, token) when is_binary(token) do
     Conn.put_resp_cookie(conn, cookie_key(conn), token, @cookie_opts)
   end
 
@@ -95,7 +95,7 @@ defmodule Sweetroll2.Auth.Session do
   end
 
   @impl true
-  def init(opts), do: %{}
+  def init(_opts), do: %{}
 
   @impl true
   def call(conn, _) do

@@ -188,7 +188,7 @@ defmodule Sweetroll2.Micropub do
     # TODO: filter properties
     # XXX: duplication of Serve/get_ logic
     url = read_url(url)
-    urls_local = Post.urls_local()
+    # urls_local = Post.urls_local()
     posts = %Post.DbAsMap{}
 
     ret_if posts[url].deleted, do: {:error, :insufficient_scope, :deleted}
@@ -199,7 +199,7 @@ defmodule Sweetroll2.Micropub do
   @impl true
   def handle_syndicate_to_query(token) do
     if Bearer.is_allowed?(token) do
-      {:ok, []}
+      {:ok, %{}}
     else
       {:error, :insufficient_scope, :unauthorized}
     end
@@ -245,12 +245,12 @@ defmodule Sweetroll2.Micropub do
   defp slug_for(properties) do
     custom = as_one(properties["mp-slug"] || properties["slug"])
 
-    if is_bitstring(custom) && String.length(custom) > 5 do
+    if is_binary(custom) && String.length(custom) > 5 do
       custom
     else
       name = as_one(properties["name"])
 
-      if is_bitstring(name) && String.length(name) > 5 do
+      if is_binary(name) && String.length(name) > 5 do
         Slugger.slugify(name)
       else
         Timex.format!(DateTime.utc_now(), "{ISOdate}-{h24}-{m}-{s}")

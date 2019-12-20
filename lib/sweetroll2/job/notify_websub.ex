@@ -24,7 +24,7 @@ defmodule Sweetroll2.Job.NotifyWebsub do
       {"alternate", "application/activity+json", granary_url(home <> url, "as2")}
     ]
 
-  def perform(home: home, url: url) do
+  def perform(home: home, url: url) when is_binary(home) and is_binary(url) do
     perform(url: home <> url)
 
     for {_, _, gurl} <- granary_urls(home: home, url: url) do
@@ -32,7 +32,7 @@ defmodule Sweetroll2.Job.NotifyWebsub do
     end
   end
 
-  def perform(url: url) do
+  def perform(url: url) when is_binary(url) do
     Timber.add_context(que: %{job_id: Logger.metadata()[:job_id]})
 
     resp = HttpClient.post!(hub(), %{"hub.mode": "publish", "hub.url": url})

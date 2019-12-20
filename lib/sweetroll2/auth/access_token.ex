@@ -10,7 +10,7 @@ defmodule Sweetroll2.Auth.AccessToken do
   use Memento.Table,
     attributes: [:token, :used_tempcode, :grant_date, :client_id, :scopes, :revoked]
 
-  def create(tempcode) do
+  def create(%Sweetroll2.Auth.TempCode{code: tempcode, client_id: client_id, scopes: scopes}) do
     token = "T-" <> Nanoid.Secure.generate()
 
     Memento.transaction!(fn ->
@@ -18,10 +18,10 @@ defmodule Sweetroll2.Auth.AccessToken do
 
       Memento.Query.write(%__MODULE__{
         token: token,
-        used_tempcode: tempcode.code,
+        used_tempcode: tempcode,
         grant_date: now,
-        client_id: tempcode.client_id,
-        scopes: tempcode.scopes,
+        client_id: client_id,
+        scopes: scopes,
         revoked: false
       })
     end)
@@ -29,14 +29,14 @@ defmodule Sweetroll2.Auth.AccessToken do
     token
   end
 
-  def revoke(token) do
+  def revoke(token) when is_binary(token) do
     Memento.transaction!(fn ->
       accesstoken = Memento.Query.read(__MODULE__, token)
       Memento.Query.write(%{accesstoken | revoked: true})
     end)
   end
 
-  def get_if_valid(token) do
+  def get_if_valid(token) when is_binary(token) do
     Memento.transaction!(fn ->
       accesstoken = Memento.Query.read(__MODULE__, token)
 
@@ -59,7 +59,7 @@ defmodule Sweetroll2.Auth.AccessToken do
       nil
   end
 
-  def get_client_id(token) do
+  def get_client_id(token) when is_binary(token) do
     Memento.transaction!(fn ->
       accesstoken = Memento.Query.read(__MODULE__, token)
 

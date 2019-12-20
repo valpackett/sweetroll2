@@ -12,7 +12,7 @@ defmodule Sweetroll2.MediaUpload do
   use Memento.Table,
     attributes: [:token, :date, :url, :object]
 
-  def create(url) do
+  def create(url) when is_binary(url) do
     token = "U-" <> Nanoid.Secure.generate()
 
     Memento.transaction!(fn ->
@@ -29,7 +29,7 @@ defmodule Sweetroll2.MediaUpload do
     token
   end
 
-  def fill(token, obj) do
+  def fill(token, obj) when is_binary(token) do
     Memento.transaction!(fn ->
       upload = Memento.Query.read(__MODULE__, token)
 

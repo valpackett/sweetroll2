@@ -7,7 +7,7 @@ defmodule Sweetroll2.Job.ClearJobs do
   alias Que.Persistence.Mnesia.DB.Jobs
   use Que.Worker
 
-  def perform(keep: n) do
+  def perform(keep: n) when is_integer(n) do
     Timber.add_context(que: %{job_id: Logger.metadata()[:job_id]})
 
     js = Jobs.completed_jobs()
@@ -24,7 +24,7 @@ defmodule Sweetroll2.Job.ClearJobs do
     end
   end
 
-  def enqueue(n \\ 69) do
+  def enqueue(n \\ 69) when is_integer(n) do
     Que.add(__MODULE__, keep: n)
   end
 end

@@ -43,7 +43,7 @@ defmodule Sweetroll2.Post.Comments do
       props["comment"]
       |> as_many()
       |> Enum.map(fn
-        u when is_bitstring(u) ->
+        u when is_binary(u) ->
           Logger.debug("inlining", event: %{inlining_comment: %{comment: u, into: url}})
           posts[u]
 
@@ -54,7 +54,7 @@ defmodule Sweetroll2.Post.Comments do
     Map.put(post, :props, Map.put(props, "comment", comments))
   end
 
-  def inline_comments(post_url, posts) when is_bitstring(post_url) do
+  def inline_comments(post_url, posts) when is_binary(post_url) do
     res = posts[post_url]
     if res != post_url, do: inline_comments(res, posts), else: res
   end
@@ -70,7 +70,7 @@ defmodule Sweetroll2.Post.Comments do
 
   defp lookup_property(_, _), do: false
 
-  defp get_url(s) when is_bitstring(s), do: s
+  defp get_url(s) when is_binary(s), do: s
 
   defp get_url(m) when is_map(m), do: lookup_property(m, "url") |> as_one
 
@@ -79,12 +79,12 @@ defmodule Sweetroll2.Post.Comments do
     nil
   end
 
-  defp compare_property(x, prop, url) when is_bitstring(prop) and is_bitstring(url) do
+  defp compare_property(x, prop, url) when is_binary(prop) and is_binary(url) do
     lookup_property(x, prop)
     |> as_many()
     |> Stream.map(&get_url/1)
     |> Enum.any?(fn val ->
-      url && val &&
+      val &&
         (val == url || URI.parse(val).path == URI.parse(url).path)
     end)
 

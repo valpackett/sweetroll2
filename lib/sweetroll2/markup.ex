@@ -43,6 +43,7 @@ defmodule Sweetroll2.Markup do
   def content_to_tree(%{"text" => t}), do: t |> text_to_tree
   def content_to_tree(%{text: t}), do: t |> text_to_tree
   def content_to_tree(x), do: x |> to_string |> text_to_tree
+  # NOTE: mf2 parser generates :html atom
 
   @doc """
   Sanitize untrusted HTML trees (fetched posts in contexts).
@@ -119,7 +120,7 @@ defmodule Sweetroll2.Markup do
   using provided templates (renderers).
   """
   def inline_media_into_content({tag, attrs, content}, renderers, props)
-      when is_bitstring(tag) and is_list(attrs) do
+      when is_binary(tag) and is_list(attrs) do
     if String.ends_with?(tag, "-here") do
       media_type = String.trim_trailing(tag, "-here")
 
@@ -169,7 +170,7 @@ defmodule Sweetroll2.Markup do
       end)
 
     Enum.filter(media_items, fn i ->
-      is_bitstring(i) or not Enum.member?(used_ids, i["id"])
+      is_binary(i) or not Enum.member?(used_ids, i["id"])
     end)
   end
 
@@ -194,6 +195,6 @@ defmodule Sweetroll2.Markup do
   end
 
   defp src_text({_tag, _attrs, content}), do: src_text(content)
-  defp src_text(s) when is_bitstring(s), do: s
+  defp src_text(s) when is_binary(s), do: s
   defp src_text(l) when is_list(l), do: Stream.map(l, &src_text/1) |> Enum.join("")
 end

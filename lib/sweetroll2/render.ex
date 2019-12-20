@@ -181,11 +181,11 @@ defmodule Sweetroll2.Render do
     end
   end
 
-  def time_permalink_cite(%{} = cite) do
+  def time_permalink_cite(cite) when is_map(cite) do
     use Taggart.HTML
 
     dt =
-      if is_bitstring(cite["published"]) do
+      if is_binary(cite["published"]) do
         DateTimeParser.parse_datetime(cite["published"], assume_utc: true)
       else
         {:error, "weird non-string date"}
@@ -210,7 +210,7 @@ defmodule Sweetroll2.Render do
     end
   end
 
-  def trim_url_stuff(url) do
+  def trim_url_stuff(url) when is_binary(url) do
     url
     |> String.replace_leading("http://", "")
     |> String.replace_leading("https://", "")
@@ -229,25 +229,32 @@ defmodule Sweetroll2.Render do
 
   def syndication_name(url) do
     cond do
-      String.contains?(url, "indieweb.xyz") -> "Indieweb.xyz"
-      String.contains?(url, "news.indieweb.org") -> "IndieNews"
-      String.contains?(url, "lobste.rs") -> "lobste.rs"
-      String.contains?(url, "news.ycombinator.com") -> "HN"
-      String.contains?(url, "twitter.com") -> "Twitter"
-      String.contains?(url, "tumblr.com") -> "Tumblr"
-      String.contains?(url, "facebook.com") -> "Facebook"
-      String.contains?(url, "instagram.com") -> "Instagram"
-      String.contains?(url, "swarmapp.com") -> "Swarm"
-      true -> trim_url_stuff(url)
+      String.contains?(url, "indieweb.xyz") ->
+        trim_url_stuff(url) |> String.replace_leading("indieweb.xyz", "")
+
+      String.contains?(url, "news.indieweb.org") ->
+        "IndieNews"
+
+      String.contains?(url, "lobste.rs") ->
+        "lobste.rs"
+
+      String.contains?(url, "news.ycombinator.com") ->
+        "HN"
+
+      String.contains?(url, "twitter.com") ->
+        "Twitter"
+
+      true ->
+        trim_url_stuff(url)
     end
   end
 
-  def post_title(post) do
-    name = as_one(post.props["name"])
+  def post_title(%Post{props: props, published: published}) do
+    name = as_one(props["name"])
 
     if is_binary(name) and String.length(name) > 0,
       do: name,
-      else: DateTime.to_iso8601(post.published)
+      else: DateTime.to_iso8601(published)
   end
 
   def responsive_container(media, do: body) when is_map(media) do
@@ -291,25 +298,6 @@ defmodule Sweetroll2.Render do
 
   def responsive_container(_, do: body), do: content_tag(:"responsive-container", [], do: body)
 
-  defp parse_ratio(s) when is_bitstring(s) do
-    case String.split(s, "/") do
-      [x, y] ->
-        case {Integer.parse(x), Integer.parse(y)} do
-          {{x, _}, {y, _}} ->
-            [x, y]
-
-          _ ->
-            Logger.warn("could not parse ratio '#{s}'", event: %{ratio_parse_failed: %{string: s}})
-
-            [0, 1]
-        end
-
-      _ ->
-        Logger.warn("could not parse ratio '#{s}'", event: %{ratio_parse_failed: %{string: s}})
-        [0, 1]
-    end
-  end
-
   def src_of_srcset(src) do
     cond do
       is_binary(src["src"]) ->
@@ -347,7 +335,7 @@ defmodule Sweetroll2.Render do
     figure class: "entry-photo" do
       responsive_container(photo) do
         cond do
-          is_bitstring(photo) ->
+          is_binary(photo) ->
             img(class: "u-photo", src: photo, alt: "")
 
           is_map(photo) && photo["source"] ->
@@ -385,7 +373,7 @@ defmodule Sweetroll2.Render do
               end
             end
 
-          is_map(photo) && is_bitstring(photo["value"]) ->
+          is_map(photo) && is_binary(photo["value"]) ->
             img(class: "u-photo", src: photo["value"], alt: photo["alt"] || "")
 
           true ->
@@ -443,7 +431,7 @@ defmodule Sweetroll2.Render do
     figure class: "entry-video" do
       responsive_container(video) do
         cond do
-          is_bitstring(video) ->
+          is_binary(video) ->
             video(class: "u-video", src: video)
 
           is_map(video) && video["source"] ->
@@ -474,7 +462,7 @@ defmodule Sweetroll2.Render do
               end
             end
 
-          is_map(video) && is_bitstring(video["value"]) ->
+          is_map(video) && is_binary(video["value"]) ->
             video(class: "u-video", src: video["value"])
 
           true ->
@@ -520,7 +508,7 @@ defmodule Sweetroll2.Render do
     )
   end
 
-  def to_cite(url, posts: posts) when is_bitstring(url) do
+  def to_cite(url, posts: posts) when is_binary(url) do
     if posts[url] do
       posts[url] |> Post.to_map() |> simplify
     else
@@ -541,7 +529,7 @@ defmodule Sweetroll2.Render do
     end
   end
 
-  def author(author, posts: posts) when is_bitstring(author) do
+  def author(author, posts: posts) when is_binary(author) do
     if posts[author] do
       posts[author] |> Post.to_map() |> simplify |> author(posts: posts)
     else
@@ -587,7 +575,7 @@ defmodule Sweetroll2.Render.LiquidTags.Head do
     {tag, context}
   end
 
-  def render(output, tag, context) do
+  def render(output, _tag, context) do
     {:safe, data} =
       Render.head(
         title: Render.home(context.assigns.posts).props["site-name"],
