@@ -25,30 +25,42 @@ defmodule Sweetroll2.Job.Generate do
     Timber.add_context(sr2_generator: %{url: url})
 
     path_dir = Path.join(dir(), url)
-
-    {:safe, data} =
-      Render.render_post(
-        post: Post.Generative.lookup(url, posts, local_urls),
-        posts: posts,
-        # all URLs is fine
-        local_urls: local_urls,
-        logged_in: false
-      )
-
     File.mkdir_p!(path_dir)
     path = Path.join(path_dir, "index.html")
+    del_flag_path = Path.join(path_dir, "gone")
 
-    # have to convert to compare with existing
-    data = IO.iodata_to_binary(data)
+    post = Post.Generative.lookup(url, posts, local_urls)
 
     status =
-      if File.read(path) != {:ok, data} do
+      if post.deleted do
         File.rm("#{path}.gz")
         File.rm("#{path}.br")
-        File.write!(path, data)
-        :updated
+        File.write!(path, "Gone")
+        File.write!(del_flag_path, "+")
+        :gone
       else
-        :same
+        File.rm(del_flag_path)
+
+        {:safe, data} =
+          Render.render_post(
+            post: post,
+            posts: posts,
+            # all URLs is fine
+            local_urls: local_urls,
+            logged_in: false
+          )
+
+        # have to convert to compare with existing
+        data = IO.iodata_to_binary(data)
+
+        if File.read(path) != {:ok, data} do
+          File.rm("#{path}.gz")
+          File.rm("#{path}.br")
+          File.write!(path, data)
+          :updated
+        else
+          :same
+        end
       end
 
     Logger.info("generated #{url} -> #{path}",
@@ -95,6 +107,7 @@ defmodule Sweetroll2.Job.Generate do
     File.rm(Path.join(path_dir, "index.html"))
     File.rm(Path.join(path_dir, "index.html.gz"))
     File.rm(Path.join(path_dir, "index.html.br"))
+    File.rm(Path.join(path_dir, "gone"))
   end
 
   def enqueue_all(next_jobs \\ []) do
