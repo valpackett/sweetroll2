@@ -1,4 +1,4 @@
-# Sweetroll2
+# Sweetroll2 (is abandoned, sorry)
 
 A powerful micro/blogging engine with [IndieWeb] features.
 
